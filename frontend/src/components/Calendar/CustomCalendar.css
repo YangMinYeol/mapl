@@ -1,0 +1,23 @@
+.custom-calendar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.calendar-dates {
+  flex: 1 1 auto; /* 나머지 공간을 차지 */
+  display: flex;
+  flex-direction: column;
+}
+
+.week {
+  flex: 1 1 auto; /* 높이를 균등하게 분배 */
+  display: flex;
+}
+
+.date {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+}
