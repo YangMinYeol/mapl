@@ -3,9 +3,7 @@
 @tailwind utilities;
 
 body {
-  margin: 0;
-  font-family: BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif; 
   font-weight: normal;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
@@ -13,6 +11,5 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: 'source-code-pro', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
 }
