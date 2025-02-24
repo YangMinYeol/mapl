@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Program",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/backend/server.js",
+      "env": {
+        "PGUSER": "postgres",
+        "PGPASSWORD": "root",
+        "PGHOST": "localhost",
+        "PGPORT": "5432",
+        "PGDATABASE": "postgres"
+      },
+      "envFile": "${workspaceFolder}/backend/.env" // .env 파일 경로 추가
+    }
+  ]
+}
