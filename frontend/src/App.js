@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { UserContext } from "./context/UserContext";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MainPage from "./pages/MainPage";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
+import { useState } from "react";
 
 function AppContent() {
   const location = useLocation();
@@ -27,9 +29,13 @@ function AppContent() {
 }
 
 export default function App() {
+  const [user, setUser] = useState(null);
+
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <UserContext.Provider value={{ user, setUser }}>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </UserContext.Provider>
   );
 }
