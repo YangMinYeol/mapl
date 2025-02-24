@@ -1,5 +1,5 @@
-import CustomCalendar from "../components/Calendar/CustomCalendar";
-import MemoAndTodoList from "../components/MemoAndTodoList/MemoAndTodoList";
+import CustomCalendar from "../components/calendar/CustomCalendar";
+import Dashboard from "../components/dashboard/Dashboard";
 
 export default function MainPage() {
   return (
@@ -9,7 +9,7 @@ export default function MainPage() {
           <CustomCalendar />
         </div>
         <div className="w-full h-full detail-container md:w-[30%]">
-          <MemoAndTodoList />
+          <Dashboard />
         </div>
       </div>
     </div>
