@@ -5,20 +5,21 @@ export default function PeriodSelector() {
   const [selectedPeriod, setSelectedPeriod] = useState(periods[0]);
 
   const handlePeriodClick = (period) => {
+    if(selectedPeriod)
     setSelectedPeriod(period);
   };
 
   return (
-    <div className="bg-gray-100 border-y">
+    <div className="h-10 font-semibold border-y-2">
       <nav>
-        <ul className="flex justify-center period-nav-list">
+        <ul className="flex justify-center py-2 period-nav-list">
           {periods.map((period) => (
             <li
               key={period}
               className={`${
                 period === selectedPeriod &&
-                "bg-gray-400 text-white hover:bg-gray-400"
-              } flex items-center justify-center w-full py-2 cursor-pointer nav-item hover:bg-gray-200`}
+                " text-green-900 underline decoration-green-900"
+              } flex items-center justify-center w-full cursor-pointer nav-item hover:text-green-900 hover:underline hover:decoration-green-900`}
               onClick={() => handlePeriodClick(period)}
             >
               <span>{period}</span>
