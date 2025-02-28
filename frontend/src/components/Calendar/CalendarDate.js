@@ -10,7 +10,7 @@ import {
   getDay,
 } from "date-fns";
 
-export default function CustomCalendarDate({ currentDate }) {
+export default function CalendarDate({ currentDate }) {
   const startMonth = startOfMonth(currentDate);
   const endMonth = endOfMonth(currentDate);
   const startDate = startOfWeek(startMonth);
