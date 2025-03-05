@@ -53,31 +53,31 @@ export default function DropdownCalendar({
   return isOpen ? (
     <div
       ref={dropdownRef}
-      className="absolute bg-white border rounded shadow-md h-44 w-60"
+      className="absolute bg-white border border-gray-300 rounded shadow-md h-44 w-60"
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left - 64}px`,
       }}
     >
       {/* Year */}
-      <div className="flex justify-between px-2 py-1 font-medium border-b-2 text-deep-green">
+      <div className="flex justify-between px-2 py-1 font-medium border-b-2 text-deep-green border-mapl-slate">
         <div className="flex items-center justify-between w-24">
           <button
-            className="w-5 rounded-lg hover:bg-gray-200"
+            className="w-5 rounded-lg cursor-pointer hover:bg-gray-200"
             onClick={() => handleChangeYear(-1)}
           >
             <FontAwesomeIcon icon={faAngleLeft} />
           </button>
           <span>{dropdownYear}</span>
           <button
-            className="w-5 rounded-lg hover:bg-gray-200"
+            className="w-5 rounded-lg cursor-pointer hover:bg-gray-200"
             onClick={() => handleChangeYear(1)}
           >
             <FontAwesomeIcon icon={faAngleRight} />
           </button>
         </div>
         <button
-          className="w-12 text-center rounded-lg hover:bg-gray-200"
+          className="w-12 text-center rounded-lg cursor-pointer hover:bg-gray-200"
           onClick={handleTodayClick}
         >
           Today
@@ -95,7 +95,7 @@ export default function DropdownCalendar({
                 dropdownYear === calendarYear && dropdownMonth == calendarMonth
                   ? "bg-deep-green text-white"
                   : "hover:bg-gray-200"
-              } flex items-center justify-center w-full h-full px-1 py-1 text-center rounded-lg `}
+              } flex items-center justify-center w-full h-full px-1 py-1 text-center rounded-lg cursor-pointer`}
               onClick={() => {
                 onSelectYearMonth(dropdownYear, dropdownMonth);
                 onClose();

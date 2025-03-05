@@ -100,7 +100,7 @@ export default function DashboardContent() {
   ];
   return (
     <div className="h-full">
-      <div className="px-2 overflow-y-scroll border-b dashboard-content h-3/5">
+      <div className="px-2 overflow-y-scroll border-b border-mapl-slate dashboard-content h-3/5">
         <ul>
           {content.map((item, index) => {
             return <li key={index}>{item}</li>;

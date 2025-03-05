@@ -45,15 +45,14 @@ export default function CalendarHeader({
   }
 
   return (
-    <div className="relative flex items-center justify-between h-10 py-2 border-y-2">
-      
+    <div className="relative flex items-center justify-between h-10 py-2 border-y-1 border-mapl-slate">
       {/* Left */}
       <div className="calendar-header-left">
         <div className="flex pl-1 space-x-1">
           {tabs.map((tab) => (
             <button
               key={tab}
-              className={`px-1 border rounded-md ${
+              className={`px-1 border border-mapl-slate cursor-pointer rounded-md ${
                 activeTab === tab ? "bg-deep-green text-white" : "bg-white"
               } hover:bg-deep-green hover:text-white`}
               onClick={() => handleTab(tab)}
@@ -67,20 +66,20 @@ export default function CalendarHeader({
       {/* Center */}
       <div className="flex items-center justify-center w-40 calendar-header-center">
         <button
-          className="flex items-center justify-center w-6 h-6 rounded hover:bg-mapl-slate"
+          className="flex items-center justify-center w-6 h-6 rounded cursor-pointer hover:bg-mapl-slate"
           onClick={() => handleChangeMonth(-1)}
         >
           <FontAwesomeIcon icon={faAngleLeft} />
         </button>
         <button
-          className="inline-block px-3 font-medium rounded dropdown-btn hover:bg-mapl-slate w-28"
+          className="inline-block px-3 font-medium rounded cursor-pointer dropdown-btn hover:bg-mapl-slate w-28"
           onClick={toggleCalendarDropdown}
           ref={dropdownButtonRef}
         >
           {yearMonth}
         </button>
         <button
-          className="flex items-center justify-center w-6 h-6 rounded hover:bg-mapl-slate"
+          className="flex items-center justify-center w-6 h-6 rounded cursor-pointer hover:bg-mapl-slate"
           onClick={() => handleChangeMonth(+1)}
         >
           <FontAwesomeIcon icon={faAngleRight} />
@@ -100,7 +99,7 @@ export default function CalendarHeader({
 
       {/* Right */}
       <div className="pr-2">
-        <button className="group" onClick={goToToday}>
+        <button className="cursor-pointer group" onClick={goToToday}>
           <FontAwesomeIcon
             icon={faCalendar}
             className="group-hover:text-green-900"
