@@ -2,10 +2,10 @@ import CalendarHeader from "./CalendarHeader";
 import CalendarDays from "./CalendarDays";
 import CalendarDate from "./CalendarDate";
 import { useState, useMemo } from "react";
-import "./Calendar.css";
+// import "./Calendar.css";
 import { addMonths, setMonth, setYear } from "date-fns";
 
-export default function Calendar() {
+export default function Calendar({ selectedDate, setSelectedDate }) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const today = useMemo(() => new Date(), []);
@@ -27,6 +27,7 @@ export default function Calendar() {
   // Today로 이동
   function goToToday() {
     setCurrentDate(today);
+    setSelectedDate(today);
   }
 
   return (
@@ -38,7 +39,11 @@ export default function Calendar() {
         goToToday={goToToday}
       />
       <CalendarDays />
-      <CalendarDate currentDate={currentDate} />
+      <CalendarDate
+        currentDate={currentDate}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+      />
     </div>
   );
 }

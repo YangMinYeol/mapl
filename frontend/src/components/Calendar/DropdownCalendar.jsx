@@ -60,7 +60,7 @@ export default function DropdownCalendar({
       }}
     >
       {/* Year */}
-      <div className="flex justify-between px-2 py-1 font-semibold border-b-2 text-deep-green">
+      <div className="flex justify-between px-2 py-1 font-medium border-b-2 text-deep-green">
         <div className="flex items-center justify-between w-24">
           <button
             className="w-5 rounded-lg hover:bg-gray-200"

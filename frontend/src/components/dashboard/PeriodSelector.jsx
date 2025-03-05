@@ -1,16 +1,10 @@
-import { useState } from "react";
-
-export default function PeriodSelector() {
-  const periods = ["Day", "Week", "Month", "Year", "Bucket"];
-  const [selectedPeriod, setSelectedPeriod] = useState(periods[0]);
-
-  const handlePeriodClick = (period) => {
-    if(selectedPeriod)
-    setSelectedPeriod(period);
-  };
-
+export default function PeriodSelector({
+  periods,
+  selectedPeriod,
+  setSelectedPeriod,
+}) {
   return (
-    <div className="h-10 font-semibold border-y-2">
+    <div className="h-10 font-medium border-y-2">
       <nav>
         <ul className="flex justify-center py-2 period-nav-list">
           {periods.map((period) => (
@@ -20,7 +14,7 @@ export default function PeriodSelector() {
                 period === selectedPeriod &&
                 " text-green-900 underline decoration-green-900"
               } flex items-center justify-center w-full cursor-pointer nav-item hover:text-green-900 hover:underline hover:decoration-green-900`}
-              onClick={() => handlePeriodClick(period)}
+              onClick={() => setSelectedPeriod(period)}
             >
               <span>{period}</span>
             </li>

@@ -73,7 +73,7 @@ export default function CalendarHeader({
           <FontAwesomeIcon icon={faAngleLeft} />
         </button>
         <button
-          className="inline-block px-3 font-semibold rounded dropdown-btn hover:bg-mapl-slate w-28"
+          className="inline-block px-3 font-medium rounded dropdown-btn hover:bg-mapl-slate w-28"
           onClick={toggleCalendarDropdown}
           ref={dropdownButtonRef}
         >
