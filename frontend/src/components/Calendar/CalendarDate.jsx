@@ -5,12 +5,17 @@ import {
   startOfWeek,
   addDays,
   isSameMonth,
+  isSameDay,
   endOfWeek,
   isToday,
   getDay,
 } from "date-fns";
 
-export default function CalendarDate({ currentDate }) {
+export default function CalendarDate({
+  currentDate,
+  selectedDate,
+  setSelectedDate,
+}) {
   const startMonth = startOfMonth(currentDate);
   const endMonth = endOfMonth(currentDate);
   const startDate = startOfWeek(startMonth);
@@ -28,19 +33,18 @@ export default function CalendarDate({ currentDate }) {
     weeks.push(dates.slice(i, i + 7));
   }
 
+  // 날짜 텍스트 색상
   const getDateTextColor = (date) => {
     const day = getDay(date);
+    // Sun
     if (day === 0) {
-      if (!isSameMonth(date, currentDate)) {
-        return "text-red-200";
-      }
-      return "text-red-500";
+      return !isSameMonth(date, currentDate) ? "text-red-200" : "text-red-500";
     }
+    // Sat
     if (day === 6) {
-      if (!isSameMonth(date, currentDate)) {
-        return "text-blue-200";
-      }
-      return "text-blue-500";
+      return !isSameMonth(date, currentDate)
+        ? "text-blue-200"
+        : "text-blue-500";
     }
     return isSameMonth(date, currentDate) ? "text-black" : "text-slate-400";
   };
@@ -54,7 +58,12 @@ export default function CalendarDate({ currentDate }) {
           {week.map((date, dateIndex) => (
             <div
               key={dateIndex}
-              className={`date-cell flex flex-col p-[2px] bg-white hover:bg-slate-50`}
+              className={`date-cell flex flex-col p-[2px]  ${
+                isSameDay(date, selectedDate)
+                  ? "bg-gray-100"
+                  : "hover:bg-gray-50 bg-white"
+              }`}
+              onClick={() => setSelectedDate(date)}
             >
               <div
                 className={`flex items-center justify-center rounded-full w-[24px] h-[24px] date-label hover:cursor-default ${getDateTextColor(
