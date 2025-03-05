@@ -31,7 +31,7 @@ export default function Calendar({ selectedDate, setSelectedDate }) {
   }
 
   return (
-    <div className="flex flex-col w-full h-full border-x">
+    <div className="flex flex-col w-full h-full border-x border-mapl-slate">
       <CalendarHeader
         currentDate={currentDate}
         handleChangeMonth={handleChangeMonth}

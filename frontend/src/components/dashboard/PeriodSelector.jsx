@@ -4,7 +4,7 @@ export default function PeriodSelector({
   setSelectedPeriod,
 }) {
   return (
-    <div className="h-10 font-medium border-y-2">
+    <div className="h-10 font-medium border-y-1 border-mapl-slate">
       <nav>
         <ul className="flex justify-center py-2 period-nav-list">
           {periods.map((period) => (

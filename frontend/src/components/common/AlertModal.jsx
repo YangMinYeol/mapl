@@ -28,7 +28,7 @@ export default function AlertModal({ isOpen, message, onClose }) {
       <div>
         <button
           onClick={onClose}
-          className="w-full p-3 font-semibold text-center border text-deep-green"
+          className="w-full p-3 font-semibold text-center border-t cursor-pointer border-mapl-slate text-deep-green"
         >
           확인
         </button>
