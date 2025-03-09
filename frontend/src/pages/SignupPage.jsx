@@ -2,8 +2,9 @@ import { useDaumPostcodePopup } from "react-daum-postcode";
 import Logo from "../components/common/Logo";
 import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Button from "../components/common/Button";
-import { useReducer, useRef, useState } from "react";
+import { useReducer, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useModal } from "../context/ModalContext";
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
@@ -49,8 +50,9 @@ function reducer(state, action) {
   }
 }
 
-export default function SignupPage({ setModalOpen, setModalMessage }) {
+export default function SignupPage() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { setModalOpen, setModalMessage } = useModal();
   const inputRefs = useRef({});
   const open = useDaumPostcodePopup();
   const navigate = useNavigate();

@@ -4,13 +4,15 @@ import Logo from "../components/common/Logo";
 import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Button from "../components/common/Button";
 import { UserContext } from "../context/UserContext";
+import { useModal } from "../context/ModalContext";
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
-export default function LoginPage({ setModalOpen, setModalMessage }) {
+export default function LoginPage() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState("");
+  const { setModalOpen, setModalMessage } = useModal();
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
 
