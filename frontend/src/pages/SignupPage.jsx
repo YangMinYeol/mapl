@@ -4,7 +4,6 @@ import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Button from "../components/common/Button";
 import { useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AlertModal from "../components/common/AlertModal";
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
@@ -50,10 +49,8 @@ function reducer(state, action) {
   }
 }
 
-export default function SignupPage() {
+export default function SignupPage({ setModalOpen, setModalMessage }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
   const inputRefs = useRef({});
   const open = useDaumPostcodePopup();
   const navigate = useNavigate();
@@ -287,11 +284,6 @@ export default function SignupPage() {
           }
         })}
         <Button text="회원가입" onClick={handleSubmit} />
-        <AlertModal
-          isOpen={modalOpen}
-          message={modalMessage}
-          onClose={() => setModalOpen(false)}
-        />
       </section>
     </div>
   );

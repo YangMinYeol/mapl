@@ -6,8 +6,9 @@ import MainPage from "./pages/MainPage";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import { useState } from "react";
+import AlertModal from "./components/common/AlertModal";
 
-function AppContent() {
+function AppContent({ modalProps }) {
   const location = useLocation();
 
   const hideHeaderFooterRoutes = ["/login", "/signup"];
@@ -18,9 +19,9 @@ function AppContent() {
       {!hideHeaderFooter && <Header />}
       <div className="flex-1 content">
         <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/" element={<MainPage {...modalProps} />} />
+          <Route path="/login" element={<LoginPage {...modalProps} />} />
+          <Route path="/signup" element={<SignupPage {...modalProps} />} />
         </Routes>
       </div>
       {!hideHeaderFooter && <Footer />}
@@ -30,11 +31,24 @@ function AppContent() {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
+  // 모달 관련 props를 묶어 전달
+  const modalProps = {
+    setModalOpen,
+    setModalMessage,
+  };
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
-        <AppContent />
+        <AppContent modalProps={modalProps} />
+        <AlertModal
+          isOpen={modalOpen}
+          message={modalMessage}
+          onClose={() => setModalOpen(false)}
+        />
       </BrowserRouter>
     </UserContext.Provider>
   );

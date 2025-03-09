@@ -3,16 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/common/Logo";
 import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Button from "../components/common/Button";
-import AlertModal from "../components/common/AlertModal";
 import { UserContext } from "../context/UserContext";
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
-export default function LoginPage() {
+export default function LoginPage({ setModalOpen, setModalMessage }) {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
   const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState("");
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
@@ -136,11 +133,6 @@ export default function LoginPage() {
           <Button text="로그인" onClick={handleLogin} />
           <Button text="회원가입" onClick={handleSignup} isOutline={true} />
         </div>
-        <AlertModal
-          isOpen={modalOpen}
-          message={modalMessage}
-          onClose={handleCloseModal}
-        />
       </section>
     </div>
   );
