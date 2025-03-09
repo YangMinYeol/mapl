@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState("");
-  const { setModalOpen, setModalMessage } = useModal();
+  const { openModal } = useModal();
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
 
@@ -22,20 +22,11 @@ export default function LoginPage() {
     if (token) {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       if (storedUser) {
-        setModalMessage("이미 로그인 상태입니다.");
-        setModalOpen(true);
+        openModal("이미 로그인 상태입니다.");
         setIsAlreadyLoggedIn(true); // 로그인 상태일 때만 true
       }
     }
   }, []);
-
-  // 모달 닫을 때 홈으로 이동할지 여부 결정
-  function handleCloseModal() {
-    setModalOpen(false);
-    if (isAlreadyLoggedIn) {
-      navigate("/");
-    }
-  }
 
   // 유효성 검사 함수
   const validateInputs = (userId, password) => {
@@ -49,14 +40,12 @@ export default function LoginPage() {
   // 로그인
   async function handleLogin() {
     if (!userId || !password) {
-      setModalMessage("아이디와 비밀번호를 입력해 주세요.");
-      setModalOpen(true);
+      openModal("아이디와 비밀번호를 입력해 주세요.");
       return;
     }
 
     if (!validateInputs(userId, password)) {
-      setModalMessage("아이디 또는 비밀번호를 다시 한번 확인해 주세요.");
-      setModalOpen(true);
+      openModal("아이디 또는 비밀번호를 다시 한번 확인해 주세요.");
       return;
     }
 
@@ -71,8 +60,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!data.success) {
-        setModalMessage("아이디 또는 비밀번호를 다시 한번 확인해 주세요.");
-        setModalOpen(true);
+        openModal("아이디 또는 비밀번호를 다시 한번 확인해 주세요.");
         return;
       }
 
@@ -85,8 +73,7 @@ export default function LoginPage() {
       navigate("/");
     } catch (error) {
       console.error("로그인 요청 중 에러 발생", error);
-      setModalMessage("로그인 요청 중 문제가 발생하였습니다.");
-      setModalOpen(true);
+      openModal("로그인 요청 중 문제가 발생하였습니다.");
       return false;
     }
   }
