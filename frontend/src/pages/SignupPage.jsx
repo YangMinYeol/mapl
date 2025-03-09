@@ -52,7 +52,7 @@ function reducer(state, action) {
 
 export default function SignupPage() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { setModalOpen, setModalMessage } = useModal();
+  const { openModal } = useModal();
   const inputRefs = useRef({});
   const open = useDaumPostcodePopup();
   const navigate = useNavigate();
@@ -130,8 +130,7 @@ export default function SignupPage() {
       }
     }
     if (message !== "") {
-      setModalMessage(message);
-      setModalOpen(true);
+      openModal(message);
       return;
     }
 
@@ -139,8 +138,7 @@ export default function SignupPage() {
     const { isDuplicate: isUserIdDuplicate, error: userIdError } =
       await checkDuplicate("userId", state.userId);
     if (isUserIdDuplicate) {
-      setModalMessage(userIdError || "이미 사용 중인 아이디입니다.");
-      setModalOpen(true);
+      openModal(userIdError || "이미 사용 중인 아이디입니다.");
       inputRefs.current.userId.focus();
       return;
     }
@@ -149,16 +147,14 @@ export default function SignupPage() {
     const { isDuplicate: isEmailDuplicate, error: emailError } =
       await checkDuplicate("email", state.email);
     if (isEmailDuplicate) {
-      setModalMessage(emailError || "이미 사용 중인 이메일입니다.");
-      setModalOpen(true);
+      openModal(emailError || "이미 사용 중인 이메일입니다.");
       inputRefs.current.email.focus();
       return;
     }
 
     // 아이디 중복확인 도중 에러 처리
     if (emailError || userIdError) {
-      setModalMessage("아이디와 이메일 중복 확인 중 문제가 발생하였습니다.");
-      setModalOpen(true);
+      openModal("아이디와 이메일 중복 확인 중 문제가 발생하였습니다.");
       return;
     }
 
@@ -213,16 +209,13 @@ export default function SignupPage() {
         const errorData = await response.json();
         throw new Error(errorData.message || "회원가입 실패");
       }
-
-      setModalMessage("회원가입이 완료되었습니다!");
-      setModalOpen(true);
+      openModal("회원가입이 완료되었습니다!");
       setTimeout(() => {
         navigate("/login");
       }, 1000);
     } catch (error) {
       console.error("회원가입 오류:", error);
-      setModalMessage("회원가입 도중 문제가 발생하였습니다.");
-      setModalOpen(true);
+      openModal("회원가입 도중 문제가 발생하였습니다.");
     }
   }
 
