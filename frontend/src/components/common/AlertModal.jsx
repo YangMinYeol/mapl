@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useModal } from "../../context/ModalContext";
 
 export default function AlertModal() {
-  const { modalOpen, modalMessage, setModalOpen } = useModal();
+  const { modalOpen, modalMessage, closeModal } = useModal();
 
   useEffect(() => {
     Modal.setAppElement("#root");
@@ -25,17 +25,13 @@ export default function AlertModal() {
   };
 
   return (
-    <Modal
-      isOpen={modalOpen}
-      onRequestClose={() => setModalOpen(false)}
-      style={customStyle}
-    >
+    <Modal isOpen={modalOpen} onRequestClose={closeModal} style={customStyle}>
       <div className="p-6 text-base font-semibold text-mapl-black">
         <span>{modalMessage}</span>
       </div>
       <div>
         <button
-          onClick={() => setModalOpen(false)}
+          onClick={closeModal}
           className="w-full p-3 font-semibold text-center border-t cursor-pointer border-mapl-slate text-deep-green"
         >
           확인
