@@ -6,7 +6,7 @@ import { useReducer, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
 
-const baseUrl = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 const fieldLabels = {
   name: { label: "이름", hasButton: false, required: true },
@@ -164,7 +164,7 @@ export default function SignupPage() {
 
   async function checkDuplicate(field, value) {
     try {
-      const response = await fetch(`${baseUrl}/api/user/check-duplicate`, {
+      const response = await fetch(`${API_URL}/api/user/check-duplicate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -190,7 +190,7 @@ export default function SignupPage() {
   // 회원가입 요청
   async function sendSignupData() {
     try {
-      const response = await fetch(`${baseUrl}/api/user/signup`, {
+      const response = await fetch(`${API_URL}/api/user/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

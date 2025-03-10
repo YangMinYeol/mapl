@@ -6,12 +6,11 @@ import Button from "../components/common/Button";
 import { UserContext } from "../context/UserContext";
 import { useModal } from "../context/ModalContext";
 
-const baseUrl = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function LoginPage() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
-  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState("");
   const { openModal } = useModal();
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
@@ -22,8 +21,7 @@ export default function LoginPage() {
     if (token) {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       if (storedUser) {
-        openModal("이미 로그인 상태입니다.");
-        setIsAlreadyLoggedIn(true); // 로그인 상태일 때만 true
+        openModal("이미 로그인 상태입니다.", () => navigate("/"));
       }
     }
   }, []);
@@ -50,7 +48,7 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await fetch(`${baseUrl}/api/user/login`, {
+      const response = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
