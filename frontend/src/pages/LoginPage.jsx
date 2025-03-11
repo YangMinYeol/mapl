@@ -18,13 +18,14 @@ export default function LoginPage() {
   // 로그인 상태 확인
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      if (storedUser) {
-        openModal("이미 로그인 상태입니다.", () => navigate("/"));
-      }
+    const storedUser = localStorage.getItem("user");
+
+    if (token && storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      openModal("이미 로그인 상태입니다.", () => navigate("/"));
     }
-  }, []);
+  }, [setUser, navigate]);
 
   // 유효성 검사 함수
   const validateInputs = (userId, password) => {
@@ -35,7 +36,7 @@ export default function LoginPage() {
     return regId && regPw;
   };
 
-  // 로그인
+  // 로그인 처리 함수
   async function handleLogin() {
     if (!userId || !password) {
       openModal("아이디와 비밀번호를 입력해 주세요.");
@@ -62,28 +63,26 @@ export default function LoginPage() {
         return;
       }
 
-      // 유저 정보를 UserContext에 저장
+      // 로그인 성공 시 UserContext와 localStorage에 저장
       setUser(data.user);
-
-      // accessToken을 세션에 저장
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user));
+
       navigate("/");
     } catch (error) {
       console.error("로그인 요청 중 에러 발생", error);
       openModal("로그인 요청 중 문제가 발생하였습니다.");
-      return false;
     }
   }
 
-  // Enter키를 이용해 로그인
+  // Enter 키 이벤트 처리
   function handleEnterKey(e) {
     if (e.keyCode === 13) {
       handleLogin();
     }
   }
 
-  // 회원가입
+  // 회원가입 이동
   function handleSignup() {
     navigate("/signup");
   }
@@ -100,7 +99,7 @@ export default function LoginPage() {
           text="아이디"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          onKeyUp={(e) => handleEnterKey(e)}
+          onKeyUp={handleEnterKey}
         />
         <FloatingLabelInput
           id="password"
@@ -109,7 +108,7 @@ export default function LoginPage() {
           value={password}
           isPassword={true}
           onChange={(e) => setPassword(e.target.value)}
-          onKeyUp={(e) => handleEnterKey(e)}
+          onKeyUp={handleEnterKey}
         />
         <div className="flex justify-end my-3">
           <Link to="/test">아이디 찾기</Link>
