@@ -7,7 +7,7 @@ import MainPage from "./pages/MainPage";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import AlertModal from "./components/common/AlertModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function AppContent() {
   const location = useLocation();
@@ -31,7 +31,25 @@ function AppContent() {
 }
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
