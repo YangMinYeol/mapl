@@ -2,7 +2,6 @@ import CalendarHeader from "./CalendarHeader";
 import CalendarDays from "./CalendarDays";
 import CalendarDate from "./CalendarDate";
 import { useState, useMemo } from "react";
-// import "./Calendar.css";
 import { addMonths, setMonth, setYear } from "date-fns";
 
 export default function Calendar({ selectedDate, setSelectedDate }) {

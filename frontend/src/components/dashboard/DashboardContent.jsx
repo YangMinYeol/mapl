@@ -1,113 +1,146 @@
-export default function DashboardContent() {
-  // 더미 데이터
-  const content = [
-    "우측화면 청소",
-    "청소",
-    "설거지",
-    "빨래",
-    "다이소",
-    "책상 정리",
-    "에어프라이어 청소",
-    "낮잠",
-    "순살 감자탕 구매",
-    "닭갈비 구매",
-    "바지락 칼국수 구매",
-    "닭다리살 요리",
-    "부엌 정리",
-    "화장실 청소",
-    "빨래 널기",
-    "홈카페 용품 구매",
-    "책상 청소",
-    "침대 정리",
-    "에어컨 필터 청소",
-    "커튼 빨래",
-    "냉장고 청소",
-    "포스트잇 정리",
-    "양말 세탁",
-    "소파 청소",
-    "점심 도시락 준비",
-    "차 청소",
-    "아이스크림 사기",
-    "사이드 디시 준비",
-    "주방용품 구매",
-    "주차장 청소",
-    "서랍 정리",
-    "휴대폰 케이스 청소",
-    "양치컵 세척",
-    "책 정리",
-    "카페 창업 준비",
-    "수영장 청소",
-    "기타 소모품 구매",
-    "반려동물 산책",
-    "꽃병 세척",
-    "조리기기 청소",
-    "식탁 청소",
-    "냉장고 정리",
-    "음식물 쓰레기 버리기",
-    "책상 서랍 정리",
-    "냉동고 청소",
-    "욕실 물건 정리",
-    "집에서 하루 종일 청소하기: 부엌, 거실, 욕실까지 모두 손봐야 한다. 매일 쌓이는 먼지와 오염을 없애자.",
-    "매주 금요일에는 세탁기 청소와 건조기 청소를 하여 매일 사용해도 쾌적한 상태를 유지할 수 있도록 하자.",
-    "이번 주에는 전자레인지와 오븐 청소를 하기로 했다. 음식물이 튀어서 기름때가 끼어 있는 부분을 깨끗하게 세척해야 한다.",
-    "냉장고를 정리하면서 유통기한이 지난 식품들을 버리고, 식재료를 재정리하여 보다 효율적인 저장 공간을 만들자.",
-    "커튼과 침구류를 빨아서 집안의 공기와 환경을 청결하게 유지하자. 특히 계절이 바뀔 때는 꼭 빨래를 해야 한다.",
-  ];
-  const content2 = [
-    "메모 DB 설계",
-    "상세 페이지 설계",
-    "제습제 구매",
-    "주말 데이트 계획",
-    "프론트엔드 구조 설계",
-    "백엔드 API 설계",
-    "회원가입 페이지 개발",
-    "게시판 기능 구현",
-    "CSS 리팩토링",
-    "JavaScript 학습",
-    "테스트 케이스 작성",
-    "디자인 패턴 공부",
-    "카카오 로그인 구현",
-    "구글 지도 API 사용",
-    "로그인 UI 개선",
-    "새로운 API 개발",
-    "배포 자동화 설정",
-    "프로젝트 회고",
-    "테스트 코드 작성",
-    "에러 핸들링 방법 연구",
-    "사용자 피드백 분석",
-    "데이터베이스 최적화",
-    "기능 추가 개발",
-    "시스템 성능 개선",
-    "팀 프로젝트 회의",
-    "API 응답 속도 개선",
-    "CSS 애니메이션 효과 적용",
-    "서버 로그 분석",
-    "UI/UX 개선",
-    "세션 관리 방법 개선",
-    "프론트엔드 테스트 도구 설정",
-    "하드웨어 성능 테스트",
-    "크로스 브라우징 테스트",
-    "버그 수정",
-    "새로운 기능 추가 기획",
-    "데이터 분석",
-    "페이지 로딩 최적화",
-    "주간 회의 준비: 팀 프로젝트에 대한 진행 상황을 보고하고, 앞으로의 계획을 논의하는 회의를 준비하자.",
-    "주말 동안 새로운 프론트엔드 기술인 Vue.js나 Angular를 학습할 계획. 이를 통해 더 다양한 프레임워크를 경험해보자.",
-    "개인적인 웹사이트를 만들기 위한 기획서를 작성 중. 사용자 맞춤형 대시보드, 메모 관리 기능 등을 포함할 예정이다.",
-    "프로젝트 관리 도구 Jira를 사용하여 각 작업의 진척 상황을 체크하고, 각 팀원의 작업을 효과적으로 분배해보자.",
-    "내부 API의 요청 응답 속도를 개선하는 작업을 할 예정. 응답 시간이 500ms 이하로 유지되도록 최적화를 진행할 것이다.",
-    "주말에 진행할 개인 프로젝트를 기획. 웹 앱을 통한 데이터 분석 시스템을 개발해보기로 했다. 이를 통해 새로운 기술을 배울 것이다.",
-  ];
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import MemoItem from "./MemoItem";
+import { faCirclePlus, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
+import { faCircleCheck as faCircleCheckRegular } from "@fortawesome/free-regular-svg-icons";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useModal } from "../../context/ModalContext";
+import { UserContext } from "../../context/UserContext";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export default function DashboardContent({ selectedDate }) {
+  const [memoText, setMemoText] = useState("");
+  const [isHovered, setIsHovered] = useState(false);
+  const [memos, setMemos] = useState([]);
+  const { openModal } = useModal();
+  const memoInputRef = useRef(null);
+  const deepGreen = { color: "#173836" };
+  const { user } = useContext(UserContext);
+
+  // 선택된 날짜에 대한 목록 불러오기
+  useEffect(() => {
+    if (user && selectedDate) {
+      getMemo();
+    }
+  }, [selectedDate, user]);
+
+  // 메모 목록 불러오기
+  async function getMemo() {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/memo/get?userId=${user.id}&startDate=${selectedDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("메모 목록을 불러오는데 실패하였습니다.");
+      }
+
+      const data = await response.json();
+      setMemos(data);
+    } catch (error) {
+      console.error("메모 목록 불러오기 오류:", error);
+      openModal("메모 목록을 불러오는데 실패하였습니다.");
+    }
+  }
+
+  // 메모 추가
+  function handleAddMemo() {
+    // 로딩 시작
+    if (memoText.trim()) {
+      addMemo();
+    } else {
+    }
+    // 로딩 끝
+  }
+
+  // 메모 추가
+  async function addMemo() {
+    try {
+      // 1. 메모 추가
+      const response = await fetch(`${API_URL}/api/memo/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          content: memoText,
+          startDate: selectedDate,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("메모 추가에 실패하였습니다.");
+      }
+      // 2. 메모 목록 불러오기
+      await getMemo();
+
+      // 3. 입력란 초기화
+      setMemoText("");
+    } catch (error) {
+      console.error("메모 추가 오류:", error);
+      openModal("메모 추가에 실패하였습니다.");
+    }
+  }
+
+  // Enter키 눌렀을때 메모 추가
+  function handleKeyUp(e) {
+    if (e.key === "Enter" && memoInputRef.current === document.activeElement) {
+      handleAddMemo();
+    }
+  }
+
+  // 입력값 변경 시 상태 업데이트
+  const handleMemoChange = useCallback((e) => {
+    setMemoText(e.target.value); // 상태 업데이트
+  }, []);
+
+  // 마우스가 버튼 위에 있을 때 아이콘 변경
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
+  // 아이콘 상태에 따른 동적 변경
+  const getIcon = () => {
+    if (memoText.trim() && isHovered) {
+      return faCircleCheck;
+    }
+    return memoText.trim() ? faCircleCheckRegular : faCirclePlus;
+  };
+
   return (
     <div className="h-full">
-      <div className="px-2 overflow-y-scroll border-b border-mapl-slate dashboard-content h-3/5">
-        <ul>
-          {content.map((item, index) => {
-            return <li key={index}>{item}</li>;
-          })}
-        </ul>
+      <div className="border-b border-mapl-slate h-3/5">
+        <div className="overflow-auto h-11/12 dashboard-content">
+          <ul>
+            {memos.map((memo) => (
+              <MemoItem key={memo.id} text={memo.content} />
+            ))}
+          </ul>
+        </div>
+        <div className="flex items-center p-2 h-1/12 dashboard-content-add">
+          <input
+            className="px-1 border rounded outline-none border-mapl-black w-15/16"
+            ref={memoInputRef}
+            value={memoText}
+            onChange={handleMemoChange}
+            onKeyUp={handleKeyUp}
+          />
+          <button
+            className="cursor-pointer w-1/16"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onClick={handleAddMemo}
+          >
+            <FontAwesomeIcon style={deepGreen} icon={getIcon()} size="xl" />
+          </button>
+        </div>
       </div>
-      <div className="px-2 dashboard-source h-1/5"></div>
+      <div className="dashboard-source h-1/5"></div>
     </div>
   );
 }
