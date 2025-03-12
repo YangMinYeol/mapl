@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const userRoute = require("./route/userRoute");
+const memoRoute = require("./route/memoRoute");
 
 const app = express();
 const port = 5000;
@@ -10,6 +11,7 @@ app.use(express.json());
 
 // 라우트 설정
 app.use("/api/user", userRoute);
+app.use("/api/memo", memoRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
