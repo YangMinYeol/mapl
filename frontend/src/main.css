@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@plugin 'tailwind-scrollbar';
 @theme {
   --color-deep-green: #173836;
   --color-mapl-black: #333;
@@ -18,3 +18,13 @@ code {
   font-family: "source-code-pro", "Menlo", "Monaco", "Consolas", "Courier New",
     monospace;
 }
+
+.dashboard-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background-color: #173836;
+  border-radius: 10px;
+}
+
