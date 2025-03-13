@@ -49,4 +49,10 @@ async function getNewSortOrder(userId, startDate) {
   return result.rows[0].new_sort_order;
 }
 
-module.exports = { getMemo, addMemo };
+// 메모 삭제
+async function deleteMemo(memoId) {
+  const query = `DELETE FROM memo WHERE id = $1`;
+  return db.query(query, [memoId]);
+}
+
+module.exports = { getMemo, addMemo, deleteMemo };

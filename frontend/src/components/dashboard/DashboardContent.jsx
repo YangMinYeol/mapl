@@ -26,6 +26,7 @@ export default function DashboardContent({ selectedDate }) {
 
   // 메모 목록 불러오기
   async function getMemo() {
+    const message = "메모 목록을 불러오는데 실패하였습니다.";
     try {
       const response = await fetch(
         `${API_URL}/api/memo/get?userId=${user.id}&startDate=${selectedDate}`,
@@ -38,29 +39,28 @@ export default function DashboardContent({ selectedDate }) {
       );
 
       if (!response.ok) {
-        throw new Error("메모 목록을 불러오는데 실패하였습니다.");
+        throw new Error(message);
       }
 
       const data = await response.json();
       setMemos(data);
     } catch (error) {
       console.error("메모 목록 불러오기 오류:", error);
-      openModal("메모 목록을 불러오는데 실패하였습니다.");
+      openModal(message);
     }
   }
 
   // 메모 추가
   function handleAddMemo() {
-    // 로딩 시작
     if (memoText.trim()) {
       addMemo();
     } else {
     }
-    // 로딩 끝
   }
 
   // 메모 추가
   async function addMemo() {
+    const message = "메모 추가에 실패하였습니다.";
     try {
       // 1. 메모 추가
       const response = await fetch(`${API_URL}/api/memo/add`, {
@@ -75,7 +75,7 @@ export default function DashboardContent({ selectedDate }) {
         }),
       });
       if (!response.ok) {
-        throw new Error("메모 추가에 실패하였습니다.");
+        throw new Error(message);
       }
       // 2. 메모 목록 불러오기
       await getMemo();
@@ -84,7 +84,32 @@ export default function DashboardContent({ selectedDate }) {
       setMemoText("");
     } catch (error) {
       console.error("메모 추가 오류:", error);
-      openModal("메모 추가에 실패하였습니다.");
+      openModal(message);
+    }
+  }
+
+  // 메모 삭제
+  async function handleDeleteMemo(memoId) {
+    const message = "메모 삭제에 실패하였습니다.";
+    try {
+      // 1. 메모 삭제
+      const response = await fetch(`${API_URL}/api/memo/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          memoId,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(message);
+      }
+      // 2. 메모 목록 불러오기
+      await getMemo();
+    } catch (error) {
+      console.error("메모 삭제 오류:", error);
+      openModal(message);
     }
   }
 
@@ -118,7 +143,9 @@ export default function DashboardContent({ selectedDate }) {
         <div className="overflow-auto h-11/12 dashboard-content">
           <ul>
             {memos.map((memo) => (
-              <MemoItem key={memo.id} text={memo.content} />
+              <li key={memo.id}>
+                <MemoItem memo={memo} onDelete={handleDeleteMemo} />
+              </li>
             ))}
           </ul>
         </div>

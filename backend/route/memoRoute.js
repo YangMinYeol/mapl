@@ -8,4 +8,7 @@ router.get("/get", memoController.getMemo);
 // 메모 추가
 router.post("/add", memoController.addMemo);
 
+// 메모 삭제
+router.delete("/delete", memoController.deleteMemo);
+
 module.exports = router;
