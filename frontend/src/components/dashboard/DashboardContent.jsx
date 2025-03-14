@@ -30,7 +30,7 @@ export default function DashboardContent({ selectedDate }) {
     const message = "메모 목록을 불러오는데 실패하였습니다.";
     try {
       const response = await fetch(
-        `${API_URL}/api/memo/get?userId=${user.id}&startDate=${selectedDate}`,
+        `${API_URL}/api/memo/?userId=${user.id}&startDate=${selectedDate}`,
         {
           method: "GET",
           headers: {
@@ -68,7 +68,7 @@ export default function DashboardContent({ selectedDate }) {
     const message = "메모 추가에 실패하였습니다.";
     try {
       // 1. 메모 추가
-      const response = await fetch(`${API_URL}/api/memo/add`, {
+      const response = await fetch(`${API_URL}/api/memo/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +98,7 @@ export default function DashboardContent({ selectedDate }) {
     const message = "메모 삭제에 실패하였습니다.";
     try {
       // 1. 메모 삭제
-      const response = await fetch(`${API_URL}/api/memo/delete`, {
+      const response = await fetch(`${API_URL}/api/memo/`, {
         method: "DELETE",
         headers: {
           "Content-type": "application/json",
