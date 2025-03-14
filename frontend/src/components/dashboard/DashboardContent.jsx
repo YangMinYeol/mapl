@@ -5,6 +5,7 @@ import { faCircleCheck as faCircleCheckRegular } from "@fortawesome/free-regular
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
+import { convertArraySnakeToCamel } from "../../util/caseConverter";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -43,7 +44,11 @@ export default function DashboardContent({ selectedDate }) {
       }
 
       const data = await response.json();
-      setMemos(data);
+      const convertedData = convertArraySnakeToCamel(data);
+      const sortedData = convertedData.sort(
+        (a, b) => a.sortOrder - b.sortOrder
+      );
+      setMemos(sortedData);
     } catch (error) {
       console.error("메모 목록 불러오기 오류:", error);
       openModal(message);
