@@ -11,4 +11,7 @@ router.post("/add", memoController.addMemo);
 // 메모 삭제
 router.delete("/delete", memoController.deleteMemo);
 
+// 메모 완료 상태 변경
+router.post("/complete", memoController.toggleMemoCompletion);
+
 module.exports = router;
