@@ -9,7 +9,7 @@ import { convertArraySnakeToCamel } from "../../util/caseConverter";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function DashboardContent({ selectedDate }) {
+export default function DashboardContent({ selectedDate, onMemoCounteUpdate }) {
   const [memoText, setMemoText] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const [memos, setMemos] = useState([]);
@@ -49,6 +49,11 @@ export default function DashboardContent({ selectedDate }) {
         (a, b) => a.sortOrder - b.sortOrder
       );
       setMemos(sortedData);
+
+      // completed/total 업데이트
+      const total = data.length;
+      const completed = data.filter((memo) => memo.completed).length;
+      onMemoCounteUpdate(total, completed);
     } catch (error) {
       console.error("메모 목록 불러오기 오류:", error);
       openModal(message);

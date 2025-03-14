@@ -1,6 +1,10 @@
 import { format } from "date-fns";
 
-export default function DashboardHeader({ selectedDate }) {
+export default function DashboardHeader({
+  selectedDate,
+  totalMemos,
+  completedMemos,
+}) {
   const date = format(selectedDate, "yyyy년 MM월 dd일");
 
   return (
@@ -8,7 +12,9 @@ export default function DashboardHeader({ selectedDate }) {
       <div className="dashboard-header-left">
         <span>{date}</span>
       </div>
-      <div className="dashboard-header-right">count/total</div>
+      <div className="dashboard-header-right">
+        {completedMemos}/{totalMemos}
+      </div>
     </div>
   );
 }
