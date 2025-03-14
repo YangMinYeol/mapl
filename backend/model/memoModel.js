@@ -55,4 +55,10 @@ async function deleteMemo(memoId) {
   return db.query(query, [memoId]);
 }
 
-module.exports = { getMemo, addMemo, deleteMemo };
+// 메모 상태 변경
+async function toggleMemoCompletion(memoId) {
+  const query = `UPDATE memo SET completed = NOT completed WHERE id = $1`;
+  return db.query(query, [memoId]);
+}
+
+module.exports = { getMemo, addMemo, deleteMemo, toggleMemoCompletion };

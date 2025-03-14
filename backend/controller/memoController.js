@@ -50,4 +50,18 @@ async function deleteMemo(req, res) {
   }
 }
 
-module.exports = { getMemo, addMemo, deleteMemo };
+// 메모 완료 상태 변경
+async function toggleMemoCompletion(req, res) {
+  const { memoId } = req.body;
+  try {
+    await memoModel.toggleMemoCompletion(memoId);
+    return res.status(200).json({ message: "메모 상태가 변경되었습니다." });
+  } catch (error) {
+    console.error("메모 상태 변경 오류", error);
+    return res
+      .status(500)
+      .json({ message: "메모 상태 변경 중 서버에서 문제가 발생하였습니다." });
+  }
+}
+
+module.exports = { getMemo, addMemo, deleteMemo, toggleMemoCompletion };

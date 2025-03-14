@@ -21,12 +21,12 @@ export default function DashboardContent({ selectedDate }) {
   // 선택된 날짜에 대한 목록 불러오기
   useEffect(() => {
     if (user && selectedDate) {
-      getMemo();
+      fetchMemos();
     }
   }, [selectedDate, user]);
 
   // 메모 목록 불러오기
-  async function getMemo() {
+  async function fetchMemos() {
     const message = "메모 목록을 불러오는데 실패하였습니다.";
     try {
       const response = await fetch(
@@ -83,7 +83,7 @@ export default function DashboardContent({ selectedDate }) {
         throw new Error(message);
       }
       // 2. 메모 목록 불러오기
-      await getMemo();
+      await fetchMemos();
 
       // 3. 입력란 초기화
       setMemoText("");
@@ -111,15 +111,40 @@ export default function DashboardContent({ selectedDate }) {
         throw new Error(message);
       }
       // 2. 메모 목록 불러오기
-      await getMemo();
+      await fetchMemos();
     } catch (error) {
       console.error("메모 삭제 오류:", error);
       openModal(message);
     }
   }
 
+  // 메모 완료 상태 변경
+  async function toggleMemoCompletion(memoId) {
+    const message = "메모 상태 변경에 실패하였습니다.";
+    try {
+      // 1. 메모 상태 변경
+      const response = await fetch(`${API_URL}/api/memo/complete`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          memoId,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(message);
+      }
+      // 2. 메모 목록 불러오기
+      await fetchMemos();
+    } catch (error) {
+      console.error("메모 상태 변경 오류:", error);
+      openModal(message);
+    }
+  }
+
   // Enter키 눌렀을때 메모 추가
-  function handleKeyUp(e) {
+  function handleKeyPress(e) {
     if (e.key === "Enter" && memoInputRef.current === document.activeElement) {
       handleAddMemo();
     }
@@ -149,7 +174,11 @@ export default function DashboardContent({ selectedDate }) {
           <ul>
             {memos.map((memo) => (
               <li key={memo.id}>
-                <MemoItem memo={memo} onDelete={handleDeleteMemo} />
+                <MemoItem
+                  memo={memo}
+                  onComplete={toggleMemoCompletion}
+                  onDelete={handleDeleteMemo}
+                />
               </li>
             ))}
           </ul>
@@ -160,7 +189,7 @@ export default function DashboardContent({ selectedDate }) {
             ref={memoInputRef}
             value={memoText}
             onChange={handleMemoChange}
-            onKeyUp={handleKeyUp}
+            onKeyUp={handleKeyPress}
           />
           <button
             className="cursor-pointer w-1/16"
