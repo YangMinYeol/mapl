@@ -2,9 +2,9 @@ const memoModel = require("../model/memoModel");
 
 // 메모 목록 불러오기
 async function getMemo(req, res) {
-  const { userId, startDate } = req.query;
+  const { userId, selectedDate } = req.query;
   try {
-    const result = await memoModel.getMemo(userId, startDate);
+    const result = await memoModel.getMemo(userId, selectedDate);
 
     return res.status(200).json(result.rows);
   } catch (error) {
@@ -17,13 +17,15 @@ async function getMemo(req, res) {
 
 // 메모 추가
 async function addMemo(req, res) {
-  const { userId, content, startDate } = req.body;
+  const { userId, content, startDate, endDate, periodId } = req.body;
 
   try {
     await memoModel.addMemo({
       userId,
       content,
       startDate,
+      endDate,
+      periodId,
     });
 
     return res.status(200).json({ message: "메모가 추가되었습니다." });
