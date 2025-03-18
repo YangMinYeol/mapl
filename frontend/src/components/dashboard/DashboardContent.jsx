@@ -2,209 +2,31 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MemoItem from "./MemoItem";
 import { faCirclePlus, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCircleCheck as faCircleCheckRegular } from "@fortawesome/free-regular-svg-icons";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useModal } from "../../context/ModalContext";
-import { UserContext } from "../../context/UserContext";
-import { convertArraySnakeToCamel } from "../../util/caseConverter";
-import {
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
-} from "date-fns";
-import { formatDateYYYYMMDD } from "../../util/dateUtil";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useCallback, useRef, useState } from "react";
 
 export default function DashboardContent({
-  selectedDate,
-  onMemoCounteUpdate,
-  selectedPeriod,
+  memos,
+  memoText,
+  setMemoText,
+  handleAddMemo,
+  handleDeleteMemo,
+  handleToggleMemoCompletion,
 }) {
-  const [memoText, setMemoText] = useState("");
   const [isHovered, setIsHovered] = useState(false);
-  const [memos, setMemos] = useState([]);
-  const { openModal } = useModal();
   const memoInputRef = useRef(null);
   const deepGreen = { color: "#173836" };
-  const { user } = useContext(UserContext);
-
-  // 선택된 날짜에 대한 목록 불러오기
-  useEffect(() => {
-    if (user && selectedDate) {
-      fetchMemos();
-    }
-  }, [selectedDate, user]);
-
-  // 메모 목록 불러오기
-  async function fetchMemos() {
-    const message = "메모 목록을 불러오는데 실패하였습니다.";
-    try {
-      const response = await fetch(
-        `${API_URL}/api/memo/?userId=${user.id}&selectedDate=${selectedDate}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(message);
-      }
-
-      const data = await response.json();
-      const convertedData = convertArraySnakeToCamel(data);
-      const sortedData = convertedData.sort(
-        (a, b) => a.sortOrder - b.sortOrder
-      );
-      setMemos(sortedData);
-
-      // completed/total 업데이트
-      const total = data.length;
-      const completed = data.filter((memo) => memo.completed).length;
-      onMemoCounteUpdate(total, completed);
-    } catch (error) {
-      console.error("메모 목록 불러오기 오류:", error);
-      openModal(message);
-    }
-  }
-
-  // 메모 추가
-  function handleAddMemo() {
-    if (memoText.trim()) {
-      addMemo();
-    } else {
-    }
-  }
-
-  // 메모 추가
-  async function addMemo() {
-    const message = "메모 추가에 실패하였습니다.";
-    try {
-      // 1. 선택 기한에 따른 데이터 설정
-      const { startDate, endDate } = setDateByPeriod(selectedPeriod);
-
-      // 2. 메모 추가
-      const response = await fetch(`${API_URL}/api/memo/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          content: memoText,
-          startDate,
-          endDate,
-          periodId: selectedPeriod.id,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(message);
-      }
-      // 3. 메모 목록 불러오기
-      await fetchMemos();
-
-      // 4. 입력란 초기화
-      setMemoText("");
-    } catch (error) {
-      console.error("메모 추가 오류:", error);
-      openModal(message);
-    }
-  }
-
-  // 기한에 따른 날짜 설정
-  function setDateByPeriod(period) {
-    let startDate = null;
-    let endDate = null;
-    if (period.name === "Bucket List") {
-      return { startDate, endDate };
-    }
-    switch (period.name) {
-      case "Day":
-        startDate = selectedDate;
-        endDate = selectedDate;
-        break;
-      case "Week":
-        startDate = startOfWeek(selectedDate, { weekStartsOn: 0 });
-        endDate = endOfWeek(selectedDate, { weekStartsOn: 0 });
-        break;
-      case "Month":
-        startDate = startOfMonth(selectedDate);
-        endDate = endOfMonth(selectedDate);
-        break;
-      case "Year":
-        startDate = startOfYear(selectedDate);
-        endDate = endOfYear(selectedDate);
-        break;
-    }
-    return { startDate: formatDateYYYYMMDD(startDate), endDate };
-  }
-
-  // 메모 삭제
-  async function handleDeleteMemo(memoId) {
-    const message = "메모 삭제에 실패하였습니다.";
-    try {
-      // 1. 메모 삭제
-      const response = await fetch(`${API_URL}/api/memo/`, {
-        method: "DELETE",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          memoId,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(message);
-      }
-      // 2. 메모 목록 불러오기
-      await fetchMemos();
-    } catch (error) {
-      console.error("메모 삭제 오류:", error);
-      openModal(message);
-    }
-  }
-
-  // 메모 완료 상태 변경
-  async function toggleMemoCompletion(memoId) {
-    const message = "메모 상태 변경에 실패하였습니다.";
-    try {
-      // 1. 메모 상태 변경
-      const response = await fetch(`${API_URL}/api/memo/complete`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          memoId,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(message);
-      }
-      // 2. 메모 목록 불러오기
-      await fetchMemos();
-    } catch (error) {
-      console.error("메모 상태 변경 오류:", error);
-      openModal(message);
-    }
-  }
 
   // Enter키 눌렀을때 메모 추가
   function handleKeyPress(e) {
-    if (e.key === "Enter" && memoInputRef.current === document.activeElement) {
+    if (e.key === "Enter") {
       handleAddMemo();
     }
   }
 
   // 입력값 변경 시 상태 업데이트
-  const handleMemoChange = useCallback((e) => {
-    setMemoText(e.target.value); // 상태 업데이트
-  }, []);
+  function handleMemoChange(e) {
+    setMemoText(e.target.value);
+  }
 
   // 마우스가 버튼 위에 있을 때 아이콘 변경
   const handleMouseEnter = () => setIsHovered(true);
@@ -212,10 +34,12 @@ export default function DashboardContent({
 
   // 아이콘 상태에 따른 동적 변경
   const getIcon = () => {
-    if (memoText.trim() && isHovered) {
-      return faCircleCheck;
-    }
-    return memoText.trim() ? faCircleCheckRegular : faCirclePlus;
+    const isFilled = memoText.trim().length > 0;
+    return isFilled
+      ? isHovered
+        ? faCircleCheck
+        : faCircleCheckRegular
+      : faCirclePlus;
   };
 
   return (
@@ -227,7 +51,7 @@ export default function DashboardContent({
               <li key={memo.id}>
                 <MemoItem
                   memo={memo}
-                  onComplete={toggleMemoCompletion}
+                  onComplete={handleToggleMemoCompletion}
                   onDelete={handleDeleteMemo}
                 />
               </li>
