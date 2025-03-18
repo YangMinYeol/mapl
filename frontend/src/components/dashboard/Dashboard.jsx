@@ -30,12 +30,18 @@ export default function Dashboard({ selectedDate }) {
     fetchPeriodType();
   }, []);
 
-  // 선택된 날짜에 대한 목록 불러오기
+  // 선택된 날짜와 기간에 맞는 메모 목록 불러오기
   useEffect(() => {
     if (user && selectedDate) {
-      fetchMemoList();
+      loadMemoList();
     }
   }, [selectedDate, user]);
+
+  useEffect(() => {
+    if (selectedPeriod.id) {
+      updateCount(memos);
+    }
+  }, [selectedPeriod, memos]);
 
   // 기한 목록 불러오기
   async function fetchPeriodType() {
@@ -60,21 +66,21 @@ export default function Dashboard({ selectedDate }) {
   }
 
   // 메모 목록 불러오기
-  async function fetchMemoList() {
+  async function loadMemoList() {
     const message = "메모 목록을 불러오는데 실패하였습니다.";
     try {
-      const data = await fetchMemos(user.id, selectedDate);
-      const convertedData = convertArraySnakeToCamel(data);
-      const sortedData = convertedData.sort(
+      const memoData = await fetchMemos(user.id, selectedDate);
+      const convertedMemos = convertArraySnakeToCamel(memoData);
+      // 1. 메모 목록 정렬
+      const sortedMemos = convertedMemos.sort(
         (a, b) => a.sortOrder - b.sortOrder
       );
-      setMemos(sortedData);
 
-      // completed/total 업데이트
-      const total = data.length;
-      const completed = data.filter((memo) => memo.completed).length;
-      setTotalMemos(total);
-      setCompletedMemos(completed);
+      // 2. 메모 목록 업데이트
+      setMemos(sortedMemos);
+
+      // 3. 카운트 업데이트
+      updateCount(convertedMemos);
     } catch (error) {
       console.error("메모 목록 불러오기 오류:", error);
       openModal(message);
@@ -88,6 +94,7 @@ export default function Dashboard({ selectedDate }) {
     }
   }
 
+  // 메모 추가
   async function addNewMemo() {
     const message = "메모 추가에 실패하였습니다.";
     try {
@@ -102,7 +109,7 @@ export default function Dashboard({ selectedDate }) {
         endDate,
         periodId: selectedPeriod.id,
       });
-      await fetchMemoList();
+      await loadMemoList();
       setMemoText("");
     } catch (error) {
       console.error("메모 추가 오류:", error);
@@ -115,7 +122,7 @@ export default function Dashboard({ selectedDate }) {
     const message = "메모 삭제에 실패하였습니다.";
     try {
       await deleteMemo(memoId);
-      await fetchMemoList();
+      await loadMemoList();
     } catch (error) {
       console.error("메모 삭제 오류:", error);
       openModal(message);
@@ -127,11 +134,26 @@ export default function Dashboard({ selectedDate }) {
     const message = "메모 상태 변경에 실패하였습니다.";
     try {
       await toggleMemoCompletion(memoId);
-      await fetchMemoList();
+      await loadMemoList();
     } catch (error) {
       console.error("메모 상태 변경 오류:", error);
       openModal(message);
     }
+  }
+
+  // 카운트 업데이트
+  function updateCount(memoList) {
+    const filteredMemos = memoList.filter(
+      (memo) => memo.periodId === selectedPeriod.id
+    );
+
+    setTotalMemos(filteredMemos.length);
+    setCompletedMemos(filteredMemos.filter((memo) => memo.completed).length);
+  }
+
+  // 기한 선택
+  function handleSelectedPeriod(period) {
+    setSelectedPeriod(period);
   }
 
   return (
@@ -139,7 +161,7 @@ export default function Dashboard({ selectedDate }) {
       <PeriodSelector
         periods={periods}
         selectedPeriod={selectedPeriod}
-        setSelectedPeriod={setSelectedPeriod}
+        handleSelectedPeriod={handleSelectedPeriod}
       />
       <DashboardHeader
         selectedDate={selectedDate}

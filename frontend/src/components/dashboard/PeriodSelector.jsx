@@ -1,12 +1,8 @@
 export default function PeriodSelector({
   periods,
   selectedPeriod,
-  setSelectedPeriod,
+  handleSelectedPeriod,
 }) {
-  function handleSelectedPeriod(period) {
-    setSelectedPeriod(period);
-  }
-
   return (
     <div className="h-10 font-medium border-y-1 border-mapl-slate">
       <nav>
