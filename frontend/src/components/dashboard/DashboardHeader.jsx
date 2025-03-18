@@ -1,11 +1,32 @@
-import { format } from "date-fns";
+import { format, getWeekOfMonth } from "date-fns";
 
 export default function DashboardHeader({
   selectedDate,
+  selectedPeriod,
   totalMemos,
   completedMemos,
 }) {
-  const date = format(selectedDate, "yyyy년 MM월 dd일");
+  let formattedDate = "yyyy년 MM월 dd일";
+
+  switch (selectedPeriod.name) {
+    case "Day":
+      formattedDate = "yyyy년 MM월 dd일";
+      break;
+    case "Week":
+      formattedDate = `yyyy년 MM월 ${getWeekOfMonth(selectedDate)}주차`;
+      break;
+    case "Month":
+      formattedDate = "yyyy년 MM월";
+      break;
+    case "Year":
+      formattedDate = "yyyy년";
+      break;
+    case "Bucket List":
+      formattedDate =
+        "꿈을 기록하는 것이 목표가 되고, 목표를 쪼개면 계획이 되며, 계획을 실행하면 꿈은 현실이 된다.";
+      break;
+  }
+  const date = format(selectedDate, formattedDate);
 
   return (
     <div className="flex justify-between px-2 py-2 font-medium border-b border-mapl-slate">

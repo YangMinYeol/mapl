@@ -6,10 +6,23 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { convertArraySnakeToCamel } from "../../util/caseConverter";
+import {
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from "date-fns";
+import { formatDateYYYYMMDD } from "../../util/dateUtil";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function DashboardContent({ selectedDate, onMemoCounteUpdate }) {
+export default function DashboardContent({
+  selectedDate,
+  onMemoCounteUpdate,
+  selectedPeriod,
+}) {
   const [memoText, setMemoText] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const [memos, setMemos] = useState([]);
@@ -30,7 +43,7 @@ export default function DashboardContent({ selectedDate, onMemoCounteUpdate }) {
     const message = "메모 목록을 불러오는데 실패하였습니다.";
     try {
       const response = await fetch(
-        `${API_URL}/api/memo/?userId=${user.id}&startDate=${selectedDate}`,
+        `${API_URL}/api/memo/?userId=${user.id}&selectedDate=${selectedDate}`,
         {
           method: "GET",
           headers: {
@@ -72,7 +85,10 @@ export default function DashboardContent({ selectedDate, onMemoCounteUpdate }) {
   async function addMemo() {
     const message = "메모 추가에 실패하였습니다.";
     try {
-      // 1. 메모 추가
+      // 1. 선택 기한에 따른 데이터 설정
+      const { startDate, endDate } = setDateByPeriod(selectedPeriod);
+
+      // 2. 메모 추가
       const response = await fetch(`${API_URL}/api/memo/`, {
         method: "POST",
         headers: {
@@ -81,21 +97,51 @@ export default function DashboardContent({ selectedDate, onMemoCounteUpdate }) {
         body: JSON.stringify({
           userId: user.id,
           content: memoText,
-          startDate: selectedDate,
+          startDate,
+          endDate,
+          periodId: selectedPeriod.id,
         }),
       });
       if (!response.ok) {
         throw new Error(message);
       }
-      // 2. 메모 목록 불러오기
+      // 3. 메모 목록 불러오기
       await fetchMemos();
 
-      // 3. 입력란 초기화
+      // 4. 입력란 초기화
       setMemoText("");
     } catch (error) {
       console.error("메모 추가 오류:", error);
       openModal(message);
     }
+  }
+
+  // 기한에 따른 날짜 설정
+  function setDateByPeriod(period) {
+    let startDate = null;
+    let endDate = null;
+    if (period.name === "Bucket List") {
+      return { startDate, endDate };
+    }
+    switch (period.name) {
+      case "Day":
+        startDate = selectedDate;
+        endDate = selectedDate;
+        break;
+      case "Week":
+        startDate = startOfWeek(selectedDate, { weekStartsOn: 0 });
+        endDate = endOfWeek(selectedDate, { weekStartsOn: 0 });
+        break;
+      case "Month":
+        startDate = startOfMonth(selectedDate);
+        endDate = endOfMonth(selectedDate);
+        break;
+      case "Year":
+        startDate = startOfYear(selectedDate);
+        endDate = endOfYear(selectedDate);
+        break;
+    }
+    return { startDate: formatDateYYYYMMDD(startDate), endDate };
   }
 
   // 메모 삭제
