@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MemoItem from "./MemoItem";
 import { faCirclePlus, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCircleCheck as faCircleCheckRegular } from "@fortawesome/free-regular-svg-icons";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export default function DashboardContent({
   memos,
@@ -11,6 +11,7 @@ export default function DashboardContent({
   handleAddMemo,
   handleDeleteMemo,
   handleToggleMemoCompletion,
+  selectedPeriod,
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const memoInputRef = useRef(null);
@@ -47,15 +48,20 @@ export default function DashboardContent({
       <div className="border-b border-mapl-slate h-3/5">
         <div className="overflow-auto h-11/12 dashboard-content">
           <ul>
-            {memos.map((memo) => (
-              <li key={memo.id}>
-                <MemoItem
-                  memo={memo}
-                  onComplete={handleToggleMemoCompletion}
-                  onDelete={handleDeleteMemo}
-                />
-              </li>
-            ))}
+            {memos.map((memo) => {
+              if (memo.periodId === selectedPeriod.id) {
+                return (
+                  <li key={memo.id}>
+                    <MemoItem
+                      memo={memo}
+                      onComplete={handleToggleMemoCompletion}
+                      onDelete={handleDeleteMemo}
+                    />
+                  </li>
+                );
+              }
+              return null;
+            })}
           </ul>
         </div>
         <div className="flex items-center p-2 h-1/12 dashboard-content-add">

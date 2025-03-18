@@ -154,6 +154,7 @@ export default function Dashboard({ selectedDate }) {
         handleAddMemo={handleAddMemo}
         handleDeleteMemo={handleDeleteMemo}
         handleToggleMemoCompletion={handleToggleMemoCompletion}
+        selectedPeriod={selectedPeriod}
       />
     </div>
   );
