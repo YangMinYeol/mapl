@@ -4,6 +4,7 @@ import DashboardContent from "./DashboardContent";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { setDateByPeriod } from "../../util/dateUtil";
 import { convertArraySnakeToCamel } from "../../util/caseConverter";
 import {
@@ -24,6 +25,7 @@ export default function Dashboard({ selectedDate }) {
   const [completedMemos, setCompletedMemos] = useState(0);
   const { openModal } = useModal();
   const { user } = useContext(UserContext);
+  const navigate = useNavigate();
 
   // 기한 목록 불러오기
   useEffect(() => {
@@ -89,6 +91,10 @@ export default function Dashboard({ selectedDate }) {
 
   // 메모 추가
   function handleAddMemo() {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     if (memoText.trim()) {
       addNewMemo();
     }
