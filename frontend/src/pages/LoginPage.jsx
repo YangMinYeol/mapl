@@ -56,14 +56,13 @@ export default function LoginPage() {
         },
         body: JSON.stringify({ userId, password }),
       });
-      const data = await response.json();
-
-      if (!data.success) {
+      if (!response.ok) {
         openModal("아이디 또는 비밀번호를 다시 한번 확인해 주세요.");
         return;
       }
 
       // 로그인 성공 시 UserContext와 localStorage에 저장
+      const data = await response.json();
       setUser(data.user);
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user));
