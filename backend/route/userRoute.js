@@ -11,4 +11,7 @@ router.post("/signup", userController.signup);
 // 아이디 중복 검사
 router.post("/check-duplicate", userController.checkUserIdOrEmail);
 
+// 리프레시 토큰 갱신
+router.post("/refresh", userController.refreshToken);
+
 module.exports = router;

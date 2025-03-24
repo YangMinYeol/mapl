@@ -5,7 +5,7 @@ const userModel = require("../model/userModel");
 // 상수화
 const SALT_ROUNDS = 10;
 const TOKEN_EXPIRATION = "1h";
-const REFRESH_TOKEN_EXPIRATION = "7d";
+const REFRESH_TOKEN_EXPIRATION = "1d";
 const LOGIN_FAIL_MESSAGE = "아이디 또는 비밀번호가 일치하지 않습니다.";
 const LOGIN_ERROR_MESSAGE = "로그인 중 문제가 발생하였습니다.";
 const INTERNAL_ERROR = "서버 내부 오류가 발생하였습니다.";
@@ -42,9 +42,9 @@ async function login(req, res) {
     );
 
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "Strict",
+      httpOnly: true, // 클라이언트 측에서 쿠키를 읽을 수 없도록
+      secure: true, // HTTPS 환경에서만 쿠키 전송
+      sameSite: "None", // Cross-site 요청에 대해 쿠키를 전송
       path: "/",
     });
 
@@ -102,4 +102,35 @@ async function signup(req, res) {
   }
 }
 
-module.exports = { login, checkUserIdOrEmail, signup };
+// 리프레시 토큰으로 액세스 토큰 재발급
+async function refreshToken(req, res) {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    console.log("리프레시 토큰이 없습니다.");
+    return res.status(401).json({ message: "리프레시 토큰이 없습니다." });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+    const newAccessToken = jwt.sign(
+      { userId: decoded.userId },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: TOKEN_EXPIRATION }
+    );
+
+    return res.status(200).json({ accessToken: newAccessToken });
+  } catch (error) {
+    const isTokenExpired = error.name === "TokenExpiredError";
+    const statusCode = isTokenExpired ? 401 : 403;
+    const errorMessage = isTokenExpired
+      ? "리프레시 토큰이 만료되었습니다."
+      : "리프레시 토큰이 유효하지 않습니다.";
+
+    console.error(errorMessage, error);
+    return res.status(statusCode).json({ message: errorMessage });
+  }
+}
+
+module.exports = { login, checkUserIdOrEmail, signup, refreshToken };
