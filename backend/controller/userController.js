@@ -18,18 +18,14 @@ async function login(req, res) {
     const result = await userModel.getUserInfo(userId);
 
     if (result.rows.length === 0) {
-      return res
-        .status(401)
-        .json({ success: false, message: LOGIN_FAIL_MESSAGE });
+      return res.status(401).json({ message: LOGIN_FAIL_MESSAGE });
     }
 
     const user = result.rows[0];
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({ success: false, message: LOGIN_FAIL_MESSAGE });
+      return res.status(401).json({ message: LOGIN_FAIL_MESSAGE });
     }
 
     const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -49,14 +45,10 @@ async function login(req, res) {
     });
 
     const { password: userPassword, ...userWithoutPassword } = user;
-    return res
-      .status(200)
-      .json({ success: true, user: userWithoutPassword, accessToken });
+    return res.status(200).json({ user: userWithoutPassword, accessToken });
   } catch (error) {
     console.error("로그인 오류:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: LOGIN_ERROR_MESSAGE });
+    return res.status(500).json({ message: LOGIN_ERROR_MESSAGE });
   }
 }
 
@@ -71,7 +63,7 @@ async function checkUserIdOrEmail(req, res) {
     return res.status(200).json({ isDuplicate: count > 0 });
   } catch (error) {
     console.error("아이디 중복 확인 오류:", error);
-    return res.status(500).json({ success: false, message: INTERNAL_ERROR });
+    return res.status(500).json({ message: INTERNAL_ERROR });
   }
 }
 
@@ -93,12 +85,10 @@ async function signup(req, res) {
       detailAddress,
     });
 
-    return res
-      .status(200)
-      .json({ success: true, message: "회원가입이 완료되었습니다." });
+    return res.status(200).json({ message: "회원가입이 완료되었습니다." });
   } catch (error) {
     console.error("회원가입 오류:", error);
-    return res.status(500).json({ success: false, message: INTERNAL_ERROR });
+    return res.status(500).json({ message: INTERNAL_ERROR });
   }
 }
 
