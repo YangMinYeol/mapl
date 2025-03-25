@@ -13,6 +13,8 @@ import {
   deleteMemo,
   toggleMemoCompletion,
 } from "../../api/memo";
+import { LoginExpiredError } from "../../util/error";
+import { useLoginExpiredHandler } from "../../hooks/useLoginExpiredHandler";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -25,6 +27,7 @@ export default function Dashboard({ selectedDate }) {
   const [completedMemos, setCompletedMemos] = useState(0);
   const { openModal } = useModal();
   const { user } = useContext(UserContext);
+  const handleLoginExpired = useLoginExpiredHandler();
   const navigate = useNavigate();
 
   // 기한 목록 불러오기
@@ -47,7 +50,6 @@ export default function Dashboard({ selectedDate }) {
 
   // 기한 목록 불러오기
   async function fetchPeriodType() {
-    const message = "기한 목록을 불러오는데 실패하였습니다.";
     try {
       const response = await fetch(`${API_URL}/api/period`, {
         method: "GET",
@@ -55,21 +57,20 @@ export default function Dashboard({ selectedDate }) {
           "Content-Type": "application/json",
         },
       });
-      if (!response.ok) {
-        throw new Error(message);
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
       setPeriods(data);
       setSelectedPeriod(data[0]);
     } catch (error) {
       console.error("기한 목록 불러오기 오류:", error);
-      openModal(message);
+      openModal(error.message);
     }
   }
 
   // 메모 목록 불러오기
   async function loadMemoList() {
-    const message = "메모 목록을 불러오는데 실패하였습니다.";
     try {
       const memoData = await fetchMemos(user.id, selectedDate);
       const convertedMemos = convertArraySnakeToCamel(memoData);
@@ -84,8 +85,12 @@ export default function Dashboard({ selectedDate }) {
       // 3. 카운트 업데이트
       updateCount(convertedMemos);
     } catch (error) {
-      console.error("메모 목록 불러오기 오류:", error);
-      openModal(message);
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 목록 불러오기 오류:", error);
+        openModal(error.message);
+      }
     }
   }
 
@@ -102,7 +107,6 @@ export default function Dashboard({ selectedDate }) {
 
   // 메모 추가
   async function addNewMemo() {
-    const message = "메모 추가에 실패하였습니다.";
     try {
       const { startDate, endDate } = setDateByPeriod(
         selectedPeriod,
@@ -118,32 +122,42 @@ export default function Dashboard({ selectedDate }) {
       await loadMemoList();
       setMemoText("");
     } catch (error) {
-      console.error("메모 추가 오류:", error);
-      openModal(message);
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 추가 오류:", error);
+        openModal(error.message);
+      }
     }
   }
 
   // 메모 삭제
   async function handleDeleteMemo(memoId) {
-    const message = "메모 삭제에 실패하였습니다.";
     try {
       await deleteMemo(memoId);
       await loadMemoList();
     } catch (error) {
-      console.error("메모 삭제 오류:", error);
-      openModal(message);
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 삭제 오류:", error);
+        openModal(error.message);
+      }
     }
   }
 
   // 메모 완료 상태 변경
   async function handleToggleMemoCompletion(memoId) {
-    const message = "메모 상태 변경에 실패하였습니다.";
     try {
       await toggleMemoCompletion(memoId);
       await loadMemoList();
     } catch (error) {
-      console.error("메모 상태 변경 오류:", error);
-      openModal(message);
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 상태 변경 오류:", error);
+        openModal(error.message);
+      }
     }
   }
 

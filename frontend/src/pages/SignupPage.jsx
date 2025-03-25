@@ -118,50 +118,50 @@ export default function SignupPage() {
 
   // 회원가입
   async function handleSubmit() {
-    let message = "";
     for (const key of Object.keys(fieldLabels)) {
       if (key === "errors") continue;
       const value = state[key];
       const error = state.errors[key];
+
       if ((!value || error) && key !== "detailAddress") {
-        message = `${fieldLabels[key].label}을(를) 다시 입력해주세요.`;
+        openModal(`${fieldLabels[key].label}을(를) 다시 입력해주세요.`);
         inputRefs.current[key].focus();
-        break;
+        return;
       }
     }
-    if (message !== "") {
-      openModal(message);
-      return;
-    }
 
-    // 아이디 중복 검사
-    const { isDuplicate: isUserIdDuplicate, error: userIdError } =
-      await checkDuplicate("userId", state.userId);
+    // 아이디와 이메일 중복 검사 동시 실행
+    const [
+      { isDuplicate: isUserIdDuplicate, error: userIdError },
+      { isDuplicate: isEmailDuplicate, error: emailError },
+    ] = await Promise.all([
+      checkDuplicate("userId", state.userId),
+      checkDuplicate("email", state.email),
+    ]);
+
+    // 중복된 경우 에러 메시지 표시 및 포커스 이동
     if (isUserIdDuplicate) {
-      openModal(userIdError || "이미 사용 중인 아이디입니다.");
+      openModal("이미 사용 중인 아이디입니다.");
       inputRefs.current.userId.focus();
       return;
     }
-
-    // 이메일 중복 검사
-    const { isDuplicate: isEmailDuplicate, error: emailError } =
-      await checkDuplicate("email", state.email);
     if (isEmailDuplicate) {
-      openModal(emailError || "이미 사용 중인 이메일입니다.");
+      openModal("이미 사용 중인 이메일입니다.");
       inputRefs.current.email.focus();
       return;
     }
 
-    // 아이디 중복확인 도중 에러 처리
-    if (emailError || userIdError) {
-      openModal("아이디와 이메일 중복 확인 중 문제가 발생하였습니다.");
+    // 중복 확인 중 에러 발생 시 처리
+    if (userIdError || emailError) {
+      openModal(userIdError || emailError);
       return;
     }
 
-    // 회원가입
+    // 회원가입 요청
     sendSignupData();
   }
 
+  // 아이디/이메일 중복 확인
   async function checkDuplicate(field, value) {
     try {
       const response = await fetch(`${API_URL}/api/user/check-duplicate`, {
@@ -172,17 +172,16 @@ export default function SignupPage() {
         body: JSON.stringify({ field, value }),
       });
 
-      if (!response.ok) {
-        throw new Error(`${field} 확인 도중 에러 발생`);
-      }
-
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
       return { isDuplicate: data.isDuplicate, error: null };
     } catch (error) {
       console.error(`${field} 중복 확인 에러: `, error);
       return {
         isDuplicate: null,
-        error: `${field} 중복 확인 중 문제가 발생하였습니다.`,
+        error: error.message,
       };
     }
   }
@@ -207,7 +206,7 @@ export default function SignupPage() {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "회원가입 실패");
+        throw new Error(errorData.message);
       }
       openModal("회원가입이 완료되었습니다!");
       setTimeout(() => {
@@ -215,7 +214,7 @@ export default function SignupPage() {
       }, 1000);
     } catch (error) {
       console.error("회원가입 오류:", error);
-      openModal("회원가입 도중 문제가 발생하였습니다.");
+      openModal(error.message);
     }
   }
 
