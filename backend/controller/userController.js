@@ -6,9 +6,7 @@ const userModel = require("../model/userModel");
 const SALT_ROUNDS = 10;
 const TOKEN_EXPIRATION = "1h";
 const REFRESH_TOKEN_EXPIRATION = "1d";
-const LOGIN_FAIL_MESSAGE = "아이디 또는 비밀번호가 일치하지 않습니다.";
-const LOGIN_ERROR_MESSAGE = "로그인 중 문제가 발생하였습니다.";
-const INTERNAL_ERROR = "서버 내부 오류가 발생하였습니다.";
+const LOGIN_FAIL_MESSAGE = "아이디 또는 비밀번호를 다시 한번 확인해 주세요.";
 
 // 로그인
 async function login(req, res) {
@@ -48,7 +46,9 @@ async function login(req, res) {
     return res.status(200).json({ user: userWithoutPassword, accessToken });
   } catch (error) {
     console.error("로그인 오류:", error);
-    return res.status(500).json({ message: LOGIN_ERROR_MESSAGE });
+    return res
+      .status(500)
+      .json({ message: "로그인 중 문제가 발생하였습니다." });
   }
 }
 
@@ -62,8 +62,10 @@ async function checkUserIdOrEmail(req, res) {
     const count = parseInt(result.rows[0].count, 10);
     return res.status(200).json({ isDuplicate: count > 0 });
   } catch (error) {
-    console.error("아이디 중복 확인 오류:", error);
-    return res.status(500).json({ message: INTERNAL_ERROR });
+    console.error("아이디/이메일 중복 확인 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "아이디/이메일 중복 확인중 문제가 발생하였습니다." });
   }
 }
 
@@ -88,7 +90,9 @@ async function signup(req, res) {
     return res.status(200).json({ message: "회원가입이 완료되었습니다." });
   } catch (error) {
     console.error("회원가입 오류:", error);
-    return res.status(500).json({ message: INTERNAL_ERROR });
+    return res
+      .status(500)
+      .json({ message: "회원가입중 오류가 발생하였습니다." });
   }
 }
 
