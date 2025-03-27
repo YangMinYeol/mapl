@@ -1,18 +1,11 @@
 import PeriodSelector from "./PeriodSelector";
-import DashboardHeader from "./DashboardHeader";
-import DashboardContent from "./DashboardContent";
+import DashboardMain from "./main/DashboardMain";
+import DashboardSub from "./sub/DashboardSub";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { setDateByPeriod } from "../../util/dateUtil";
 import { convertArraySnakeToCamel } from "../../util/caseConverter";
-import {
-  fetchMemos,
-  addMemo,
-  deleteMemo,
-  toggleMemoCompletion,
-} from "../../api/memo";
+import { fetchMemos } from "../../api/memo";
 import { LoginExpiredError } from "../../util/error";
 import { useLoginExpiredHandler } from "../../hooks/useLoginExpiredHandler";
 
@@ -23,12 +16,10 @@ export default function Dashboard({ selectedDate }) {
   const [selectedPeriod, setSelectedPeriod] = useState({});
   const [totalMemos, setTotalMemos] = useState(0);
   const [memos, setMemos] = useState([]);
-  const [memoText, setMemoText] = useState("");
   const [completedMemos, setCompletedMemos] = useState(0);
   const { openModal } = useModal();
   const { user } = useContext(UserContext);
   const handleLoginExpired = useLoginExpiredHandler();
-  const navigate = useNavigate();
 
   // 기한 목록 불러오기
   useEffect(() => {
@@ -38,7 +29,7 @@ export default function Dashboard({ selectedDate }) {
   // 선택된 날짜와 기간에 맞는 메모 목록 불러오기
   useEffect(() => {
     if (user && selectedDate) {
-      loadMemoList();
+      refreshMemoList();
     }
   }, [selectedDate, user]);
 
@@ -69,8 +60,8 @@ export default function Dashboard({ selectedDate }) {
     }
   }
 
-  // 메모 목록 불러오기
-  async function loadMemoList() {
+  // 메모 목록 새로고침
+  async function refreshMemoList() {
     try {
       const memoData = await fetchMemos(user.id, selectedDate);
       const convertedMemos = convertArraySnakeToCamel(memoData);
@@ -94,73 +85,6 @@ export default function Dashboard({ selectedDate }) {
     }
   }
 
-  // 메모 추가
-  function handleAddMemo() {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (memoText.trim()) {
-      addNewMemo();
-    }
-  }
-
-  // 메모 추가
-  async function addNewMemo() {
-    try {
-      const { startDate, endDate } = setDateByPeriod(
-        selectedPeriod,
-        selectedDate
-      );
-      await addMemo({
-        userId: user.id,
-        content: memoText,
-        startDate,
-        endDate,
-        periodId: selectedPeriod.id,
-      });
-      await loadMemoList();
-      setMemoText("");
-    } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 추가 오류:", error);
-        openModal(error.message);
-      }
-    }
-  }
-
-  // 메모 삭제
-  async function handleDeleteMemo(memoId) {
-    try {
-      await deleteMemo(memoId);
-      await loadMemoList();
-    } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 삭제 오류:", error);
-        openModal(error.message);
-      }
-    }
-  }
-
-  // 메모 완료 상태 변경
-  async function handleToggleMemoCompletion(memoId) {
-    try {
-      await toggleMemoCompletion(memoId);
-      await loadMemoList();
-    } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 상태 변경 오류:", error);
-        openModal(error.message);
-      }
-    }
-  }
-
   // 카운트 업데이트
   function updateCount(memoList) {
     const filteredMemos = memoList.filter(
@@ -177,25 +101,24 @@ export default function Dashboard({ selectedDate }) {
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="h-full">
       <PeriodSelector
         periods={periods}
         selectedPeriod={selectedPeriod}
         handleSelectedPeriod={handleSelectedPeriod}
       />
-      <DashboardHeader
-        selectedDate={selectedDate}
+      <DashboardMain
+        memos={memos}
+        periods={periods}
         selectedPeriod={selectedPeriod}
+        selectedDate={selectedDate}
         totalMemos={totalMemos}
         completedMemos={completedMemos}
+        refreshMemoList={refreshMemoList}
       />
-      <DashboardContent
+      <DashboardSub
         memos={memos}
-        memoText={memoText}
-        setMemoText={setMemoText}
-        handleAddMemo={handleAddMemo}
-        handleDeleteMemo={handleDeleteMemo}
-        handleToggleMemoCompletion={handleToggleMemoCompletion}
+        periods={periods}
         selectedPeriod={selectedPeriod}
       />
     </div>
