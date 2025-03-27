@@ -11,7 +11,7 @@ export default function Button({
         h-12 mb-2 font-semibold border cursor-pointer ${width}  ${
         isOutline
           ? "border-deep-green text-deep-green bg-white"
-          : "text-white bg-deep-green border"
+          : "text-white bg-deep-green"
       }`}
     >
       {text}
