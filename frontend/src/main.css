@@ -19,12 +19,13 @@ code {
     monospace;
 }
 
-.dashboard-content::-webkit-scrollbar {
+.dashboard-main-content::-webkit-scrollbar,
+.dashboard-sub-content::-webkit-scrollbar {
   width: 4px;
 }
 
-.dashboard-content::-webkit-scrollbar-thumb {
+.dashboard-main-content::-webkit-scrollbar-thumb,
+.dashboard-sub-content::-webkit-scrollbar-thumb {
   background-color: #173836;
   border-radius: 10px;
 }
-
