@@ -51,7 +51,7 @@ export default function CalendarDate({
 
   return (
     <div
-      className={`grid flex-1 grid-rows-${weeks.length} gap-[1px] bg-gray-200`}
+      className={`grid flex-1 grid-rows-${weeks.length} gap-[1px] bg-gray-200 h-[820px]`}
     >
       {weeks.map((week, weekIndex) => (
         <div key={weekIndex} className="grid grid-cols-7 gap-[1px]">

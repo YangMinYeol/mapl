@@ -45,7 +45,7 @@ export default function CalendarHeader({
   }
 
   return (
-    <div className="relative flex items-center justify-between h-10 py-2 border-y-1 border-mapl-slate">
+    <div className="relative flex items-center justify-between py-2 border-y-1 border-mapl-slate h-[40px]">
       {/* Left */}
       <div className="calendar-header-left">
         <div className="flex pl-1 space-x-1">
