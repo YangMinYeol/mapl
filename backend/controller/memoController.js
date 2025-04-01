@@ -17,16 +17,10 @@ async function getMemo(req, res) {
 
 // 메모 추가
 async function addMemo(req, res) {
-  const { userId, content, startDate, endDate, periodId } = req.body;
+  const memos = req.body;
 
   try {
-    await memoModel.addMemo({
-      userId,
-      content,
-      startDate,
-      endDate,
-      periodId,
-    });
+    await memoModel.addMemo(memos);
 
     return res.status(200).json({ message: "메모가 추가되었습니다." });
   } catch (error) {
