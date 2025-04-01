@@ -44,13 +44,13 @@ export default function DashboardMainContent({
         selectedPeriod,
         selectedDate
       );
-      await addMemo({
+      await addMemo([{
         userId: user.id,
         content: memoText,
         startDate,
         endDate,
         periodId: selectedPeriod.id,
-      });
+      }]);
       await refreshMemoList();
       setMemoText("");
     } catch (error) {

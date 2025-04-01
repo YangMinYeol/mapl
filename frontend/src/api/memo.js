@@ -24,14 +24,14 @@ export async function fetchMemos(userId, selectedDate) {
   }
 }
 
-export async function addMemo(memoData) {
+export async function addMemo(memoArray) {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/memo/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(memoData),
+      body: JSON.stringify(memoArray),
     });
 
     const data = await response.json();

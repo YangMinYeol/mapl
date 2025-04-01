@@ -12,34 +12,54 @@ async function getMemo(userId, selectedDate) {
 }
 
 // 메모 추가
-async function addMemo(memoData) {
-  const { userId, content, startDate, endDate, periodId } = memoData;
-
+async function addMemo(memos) {
   try {
     await db.query("BEGIN");
 
-    // sort_order 계산
-    const newSortOrder = await getNewSortOrder(userId, startDate, periodId);
+    const insertedMemos = [];
 
-    // 메모 추가
-    const insertQuery = `
-      INSERT INTO memo (user_id, content, start_date, end_date, sort_order, period_id, completed)
-      VALUES ($1, $2, $3, $4, $5, $6, false)
-      RETURNING *;
-    `;
-    const result = await db.query(insertQuery, [
-      userId,
-      content,
-      startDate,
-      endDate,
-      newSortOrder,
-      periodId,
-    ]);
+    for (const memoData of memos) {
+      const { userId, content, startDate, endDate, periodId, link } = memoData;
+
+      // sort_order 계산
+      const newSortOrder = await getNewSortOrder(userId, startDate, periodId);
+
+      // 메모 추가
+      const insertQuery = `
+        INSERT INTO memo (user_id, content, start_date, end_date, sort_order, period_id, link, completed)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, false)
+        RETURNING id;
+      `;
+
+      const result = await db.query(insertQuery, [
+        userId,
+        content,
+        startDate,
+        endDate,
+        newSortOrder,
+        periodId,
+        link || null,
+      ]);
+
+      const memoId = result.rows[0].id;
+
+      // link가 null이면 id 값으로 업데이트
+      const updateQuery = `
+        UPDATE memo
+        SET link = $1
+        WHERE id = $2
+        RETURNING *;
+      `;
+      const updatedMemo = await db.query(updateQuery, [memoId, memoId]);
+
+      insertedMemos.push(updatedMemo.rows[0]);
+      return res.status(200).send();
+    }
 
     await db.query("COMMIT");
-    return result.rows[0];
   } catch (error) {
     await db.query("ROLLBACK");
+    console.error("메모 추가 중 오류 발생:", error);
     throw new Error("메모 추가 실패: " + error.message);
   }
 }
