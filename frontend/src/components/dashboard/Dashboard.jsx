@@ -120,6 +120,8 @@ export default function Dashboard({ selectedDate }) {
         memos={memos}
         periods={periods}
         selectedPeriod={selectedPeriod}
+        selectedDate={selectedDate}
+        refreshMemoList={refreshMemoList}
       />
     </div>
   );
