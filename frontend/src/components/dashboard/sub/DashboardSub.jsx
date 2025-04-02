@@ -54,6 +54,9 @@ export default function DashboardSub({
 
   // Sub메모 추가
   function handleAddMemo() {
+    if (checkedIds.length === 0) {
+      return;
+    }
     openConfirm(
       "선택한 메모를 링크를 연결하여 추가하시겠습니까?",
       "링크는 서로 동기화되어 수정, 삭제, 완료 동작이 함께 적용됩니다.",
