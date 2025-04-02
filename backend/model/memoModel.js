@@ -102,4 +102,16 @@ async function toggleMemoCompletion(memoId) {
   return db.query(query, [memoId]);
 }
 
-module.exports = { getMemo, addMemo, deleteMemo, toggleMemoCompletion };
+// 메모 상태 일괄 변경
+async function toggleLinkedMemosCompletion(linkId) {
+  const query = `UPDATE memo SET completed = NOT completed WHERE link = $1`;
+  return db.query(query, [linkId]);
+}
+
+module.exports = {
+  getMemo,
+  addMemo,
+  deleteMemo,
+  toggleMemoCompletion,
+  toggleLinkedMemosCompletion,
+};

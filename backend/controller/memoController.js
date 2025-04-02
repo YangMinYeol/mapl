@@ -60,4 +60,24 @@ async function toggleMemoCompletion(req, res) {
   }
 }
 
-module.exports = { getMemo, addMemo, deleteMemo, toggleMemoCompletion };
+// 링크 연결된 메모 상태 일괄 변경
+async function toggleLinkedMemosCompletion(req, res) {
+  const { linkId } = req.body;
+  try {
+    await memoModel.toggleLinkedMemosCompletion(linkId);
+    return res.status(200).json({ message: "메모 상태가 변경되었습니다." });
+  } catch (error) {
+    console.error("메모 상태 변경 오류", error);
+    return res
+      .status(500)
+      .json({ message: "메모 상태 변경 중 서버에서 문제가 발생하였습니다." });
+  }
+}
+
+module.exports = {
+  getMemo,
+  addMemo,
+  deleteMemo,
+  toggleMemoCompletion,
+  toggleLinkedMemosCompletion,
+};

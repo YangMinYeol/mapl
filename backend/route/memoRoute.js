@@ -15,4 +15,11 @@ router.delete("/", verifyToken, memoController.deleteMemo);
 // 메모 완료 상태 변경
 router.post("/complete", verifyToken, memoController.toggleMemoCompletion);
 
+// 메모 완료 상태 일괄 변경
+router.post(
+  "/complete-linked",
+  verifyToken,
+  memoController.toggleLinkedMemosCompletion
+);
+
 module.exports = router;
