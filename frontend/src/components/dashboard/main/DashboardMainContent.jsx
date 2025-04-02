@@ -22,7 +22,7 @@ export default function DashboardMainContent({
   const deepGreen = { color: "#173836" };
   const navigate = useNavigate();
   const [memoText, setMemoText] = useState("");
-  const { openModal } = useModal();
+  const { openModal, openConfirm } = useModal();
   const { user } = useContext(UserContext);
   const handleLoginExpired = useLoginExpiredHandler();
 
@@ -44,13 +44,16 @@ export default function DashboardMainContent({
         selectedPeriod,
         selectedDate
       );
-      await addMemo([{
-        userId: user.id,
-        content: memoText,
-        startDate,
-        endDate,
-        periodId: selectedPeriod.id,
-      }]);
+      await addMemo([
+        {
+          userId: user.id,
+          content: memoText,
+          startDate,
+          endDate,
+          periodId: selectedPeriod.id,
+          isLinked: false,
+        },
+      ]);
       await refreshMemoList();
       setMemoText("");
     } catch (error) {

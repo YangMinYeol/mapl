@@ -19,15 +19,16 @@ async function addMemo(memos) {
     const insertedMemos = [];
 
     for (const memoData of memos) {
-      const { userId, content, startDate, endDate, periodId, link } = memoData;
+      const { userId, content, startDate, endDate, periodId, link, isLinked } =
+        memoData;
 
       // sort_order 계산
       const newSortOrder = await getNewSortOrder(userId, startDate, periodId);
 
       // 1. 메모를 추가하면서 link는 임시로 NULL로 설정
       const insertQuery = `
-        INSERT INTO memo (user_id, content, start_date, end_date, sort_order, period_id, completed, link)
-        VALUES ($1, $2, $3, $4, $5, $6, false, NULL)
+        INSERT INTO memo (user_id, content, start_date, end_date, sort_order, period_id, is_linked, link )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, NULL)
         RETURNING id;
       `;
 
@@ -38,13 +39,13 @@ async function addMemo(memos) {
         endDate,
         newSortOrder,
         periodId,
+        isLinked,
       ]);
 
       const memoId = result.rows[0].id;
 
-      // 2. link가 제공되면 link를 해당 값으로 업데이트
-      // link가 없다면, 자기 자신으로 link를 설정
-      const finalLink = link || memoId;
+      // 2. link를 해당 값 업데이트
+      const finalLink = isLinked ? link : memoId;
 
       const updateLinkQuery = `
         UPDATE memo

@@ -80,6 +80,7 @@ export default function DashboardSub({
           startDate,
           endDate,
           periodId,
+          isLinked: false,
         });
       }
 
@@ -114,7 +115,8 @@ export default function DashboardSub({
           startDate,
           endDate,
           periodId,
-          link: filterMemo.id,
+          link: filterMemo.link,
+          isLinked: true,
         });
       }
 

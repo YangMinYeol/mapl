@@ -4,6 +4,7 @@ import {
   faSquare,
   faSquareCheck,
 } from "@fortawesome/free-regular-svg-icons";
+import { faLink } from "@fortawesome/free-solid-svg-icons";
 import IconButton from "../../common/IconButton";
 
 export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
@@ -16,10 +17,14 @@ export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
           onClick={() => onComplete(memo.id)}
         />
       </div>
-      <div className={`w-17/20 ${memo.completed && "line-through"}`}>
+      <div className={`w-16/20 ${memo.completed && "line-through"}`}>
         {memo.content}
       </div>
-      <div className="grid grid-cols-2 opacity-0 w-2/20 group-hover:opacity-100">
+      <div className="grid grid-cols-3 opacity-0 w-3/20 group-hover:opacity-100">
+        {/* Link */}
+        <div className={!memo.isLinked && "invisible"}>
+          <IconButton icon={faLink} />
+        </div>
         {/* Edit */}
         <IconButton icon={faPenToSquare} />
         {/* Delete */}
