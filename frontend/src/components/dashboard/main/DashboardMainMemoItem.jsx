@@ -14,7 +14,7 @@ export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
         {/* Complete */}
         <IconButton
           icon={memo.completed ? faSquareCheck : faSquare}
-          onClick={() => onComplete(memo.id)}
+          onClick={() => onComplete(memo)}
         />
       </div>
       <div className={`w-16/20 ${memo.completed && "line-through"}`}>
@@ -22,7 +22,7 @@ export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
       </div>
       <div className="grid grid-cols-3 opacity-0 w-3/20 group-hover:opacity-100">
         {/* Link */}
-        <div className={!memo.isLinked && "invisible"}>
+        <div className={memo.isLinked ? "" : "invisible"}>
           <IconButton icon={faLink} />
         </div>
         {/* Edit */}

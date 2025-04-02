@@ -3,7 +3,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCircleCheck as faCircleCheckRegular } from "@fortawesome/free-regular-svg-icons";
 import { useRef, useState, useContext } from "react";
-import { addMemo, deleteMemo, toggleMemoCompletion } from "../../../api/memo";
+import {
+  addMemo,
+  deleteMemo,
+  toggleMemoCompletion,
+  toggleLinkedMemosCompletion,
+} from "../../../api/memo";
 import { LoginExpiredError } from "../../../util/error";
 import { setDateByPeriod } from "../../../util/dateUtil";
 import { useNavigate } from "react-router-dom";
@@ -82,10 +87,21 @@ export default function DashboardMainContent({
   }
 
   // 메모 완료 상태 변경
-  async function handleToggleMemoCompletion(memoId) {
+  async function handleToggleMemoCompletion(memo) {
     try {
-      await toggleMemoCompletion(memoId);
-      await refreshMemoList();
+      if (memo.isLinked) {
+        openConfirm(
+          "링크되어있는 메모입니다.",
+          "동기화되어있는 메모 모두 complete 하시겠습니까?",
+          async () => {
+            await toggleLinkedMemosCompletion(memo.link);
+            await refreshMemoList();
+          }
+        );
+      } else {
+        await toggleMemoCompletion(memo.id);
+        await refreshMemoList();
+      }
     } catch (error) {
       if (error instanceof LoginExpiredError) {
         handleLoginExpired(error.message);

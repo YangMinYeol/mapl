@@ -14,7 +14,7 @@ export default function DashboardSubMemoItem({ memo, checked, onToggle }) {
       <div className="w-16/20">{memo.content}</div>
       <div className="grid grid-cols-3 opacity-0 w-3/20 group-hover:opacity-100">
         {/* Link */}
-        <div className={!memo.isLinked && "invisible"}>
+        <div className={memo.isLinked ? "" : "invisible"}>
           <IconButton icon={faLink} />
         </div>
       </div>
