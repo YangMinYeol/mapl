@@ -8,6 +8,7 @@ import {
   deleteMemo,
   toggleMemoCompletion,
   toggleLinkedMemosCompletion,
+  deleteLinkedMemos,
 } from "../../../api/memo";
 import { LoginExpiredError } from "../../../util/error";
 import { setDateByPeriod } from "../../../util/dateUtil";
@@ -72,10 +73,21 @@ export default function DashboardMainContent({
   }
 
   // 메모 삭제
-  async function handleDeleteMemo(memoId) {
+  async function handleDeleteMemo(memo) {
     try {
-      await deleteMemo(memoId);
-      await refreshMemoList();
+      if (memo.isLinked) {
+        openConfirm(
+          "링크되어있는 메모입니다.",
+          "동기화되어있는 메모 모두 삭제하시겠습니까?",
+          async () => {
+            await deleteLinkedMemos(memo.link);
+            await refreshMemoList();
+          }
+        );
+      } else {
+        await deleteMemo(memo.id);
+        await refreshMemoList();
+      }
     } catch (error) {
       if (error instanceof LoginExpiredError) {
         handleLoginExpired(error.message);

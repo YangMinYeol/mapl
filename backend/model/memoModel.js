@@ -90,10 +90,17 @@ async function getNewSortOrder(userId, startDate, periodId) {
   const result = await db.query(query, params);
   return result.rows[0].new_sort_order;
 }
+
 // 메모 삭제
 async function deleteMemo(memoId) {
   const query = `DELETE FROM memo WHERE id = $1`;
   return db.query(query, [memoId]);
+}
+
+// 링크 메모 일괄 삭제
+async function deleteLinkedMemos(linkId) {
+  const query = `DELETE FROM memo WHERE link = $1`;
+  return db.query(query, [linkId]);
 }
 
 // 메모 상태 변경
@@ -102,7 +109,7 @@ async function toggleMemoCompletion(memoId) {
   return db.query(query, [memoId]);
 }
 
-// 메모 상태 일괄 변경
+// 링크 메모 상태 일괄 변경
 async function toggleLinkedMemosCompletion(linkId) {
   const query = `UPDATE memo SET completed = NOT completed WHERE link = $1`;
   return db.query(query, [linkId]);
@@ -112,6 +119,7 @@ module.exports = {
   getMemo,
   addMemo,
   deleteMemo,
+  deleteLinkedMemos,
   toggleMemoCompletion,
   toggleLinkedMemosCompletion,
 };

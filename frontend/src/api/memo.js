@@ -69,6 +69,26 @@ export async function deleteMemo(memoId) {
   }
 }
 
+// 링크된 메모 일괄 삭제
+export async function deleteLinkedMemos(linkId) {
+  try {
+    const response = await fetchWithAuth(
+      `${API_URL}/api/memo/linked/${linkId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 // 메모 완료 상태 변경
 export async function toggleMemoCompletion(memoId) {
   try {
