@@ -28,7 +28,7 @@ export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
         {/* Edit */}
         <IconButton icon={faPenToSquare} />
         {/* Delete */}
-        <IconButton icon={faTrashCan} onClick={() => onDelete(memo.id)} />
+        <IconButton icon={faTrashCan} onClick={() => onDelete(memo)} />
       </div>
     </div>
   );

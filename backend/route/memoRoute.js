@@ -12,10 +12,13 @@ router.post("/", verifyToken, memoController.addMemo);
 // 메모 삭제
 router.delete("/", verifyToken, memoController.deleteMemo);
 
+// 링크된 메모 일괄 삭제
+router.delete("/linked/:linkId", verifyToken, memoController.deleteLinkedMemos);
+
 // 메모 완료 상태 변경
 router.post("/complete", verifyToken, memoController.toggleMemoCompletion);
 
-// 메모 완료 상태 일괄 변경
+// 링크된 메모 완료 상태 일괄 변경
 router.post(
   "/complete-linked",
   verifyToken,
