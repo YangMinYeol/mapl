@@ -1,6 +1,7 @@
 import Modal from "react-modal";
 import { useEffect } from "react";
 import { useModal } from "../../context/ModalContext";
+import { baseModalStyle } from "../../styles/modalStyle";
 
 export default function AlertModal() {
   const {
@@ -17,24 +18,13 @@ export default function AlertModal() {
     Modal.setAppElement("#root");
   }, []);
 
-  const customStyle = {
-    overlay: {
-      backgroundColor: "rgba(0,0,0,0.4)",
-    },
-    content: {
-      padding: 0,
-      top: "50%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      transform: "translate(-50%, -50%)",
-      borderRadius: "10px",
-      minWidth: "150px",
-    },
-  };
-
   return (
-    <Modal isOpen={modalOpen} onRequestClose={closeModal} style={customStyle}>
+    <Modal
+      isOpen={modalOpen}
+      onRequestClose={closeModal}
+      style={baseModalStyle}
+      shouldCloseOnOverlayClick={false}
+    >
       <div className="p-6 text-mapl-black">
         <div className="text-base font-semibold">
           <span>{modalMessage}</span>
