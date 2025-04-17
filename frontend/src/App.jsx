@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { UserContext } from "./context/UserContext";
-import { ModalProvider } from "./context/ModalContext"; // ModalProvider 임포트
+import { ModalProvider } from "./context/ModalContext";
+import { ColorProvider } from "./context/ColorContext";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MainPage from "./pages/MainPage";
@@ -54,10 +55,12 @@ export default function App() {
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <ModalProvider>
-        <BrowserRouter>
-          <AppContent />
-          <AlertModal />
-        </BrowserRouter>
+        <ColorProvider>
+          <BrowserRouter>
+            <AppContent />
+            <AlertModal />
+          </BrowserRouter>
+        </ColorProvider>
       </ModalProvider>
     </UserContext.Provider>
   );
