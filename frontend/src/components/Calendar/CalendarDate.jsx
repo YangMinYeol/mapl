@@ -1,78 +1,74 @@
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  addDays,
-  isSameMonth,
-  isSameDay,
-  endOfWeek,
-  isToday,
-  getDay,
-} from "date-fns";
+import { format, isSameDay, isToday } from "date-fns";
+import { getDateTextColor, getWeekDates } from "../../util/calendarUtil";
 
 export default function CalendarDate({
   currentDate,
   selectedDate,
   setSelectedDate,
+  calendarMemos,
 }) {
-  const startMonth = startOfMonth(currentDate);
-  const endMonth = endOfMonth(currentDate);
-  const startDate = startOfWeek(startMonth);
-  const endDate = endOfWeek(endMonth);
-  const dates = [];
+  const weeks = getWeekDates(currentDate);
 
-  let day = startDate;
-  while (day <= endDate) {
-    dates.push(day);
-    day = addDays(day, 1);
+  // weeks.length에 따라 tagMaxCount 설정
+  let tagMaxCount = 5;
+
+  if (weeks.length === 4) {
+    tagMaxCount = 8;
+  } else if (weeks.length === 5) {
+    tagMaxCount = 6;
+  } else if (weeks.length === 6) {
+    tagMaxCount = 5;
   }
-
-  const weeks = [];
-  for (let i = 0; i < dates.length; i += 7) {
-    weeks.push(dates.slice(i, i + 7));
-  }
-
-  // 날짜 텍스트 색상
-  const getDateTextColor = (date) => {
-    const day = getDay(date);
-    // Sun
-    if (day === 0) {
-      return !isSameMonth(date, currentDate) ? "text-red-200" : "text-red-500";
-    }
-    // Sat
-    if (day === 6) {
-      return !isSameMonth(date, currentDate)
-        ? "text-blue-200"
-        : "text-blue-500";
-    }
-    return isSameMonth(date, currentDate) ? "text-black" : "text-slate-400";
-  };
 
   return (
     <div
       className={`grid flex-1 grid-rows-${weeks.length} gap-[1px] bg-gray-200 h-[820px]`}
     >
       {weeks.map((week, weekIndex) => (
-        <div key={weekIndex} className="grid grid-cols-7 gap-[1px]">
+        <div key={weekIndex} className="grid grid-cols-7 gap-[1px] ">
           {week.map((date, dateIndex) => (
             <div
               key={dateIndex}
-              className={`date-cell flex flex-col p-[2px]  ${
+              className={`date-cell flex flex-col p-[1px] h-full ${
                 isSameDay(date, selectedDate)
                   ? "bg-gray-100"
                   : "hover:bg-gray-50 bg-white"
               }`}
               onClick={() => setSelectedDate(date)}
             >
+              {/* 날짜 */}
               <div
                 className={`flex items-center justify-center rounded-full w-[24px] h-[24px] date-label hover:cursor-default ${getDateTextColor(
-                  date
+                  date,
+                  currentDate
                 )} ${isToday(date) && "text-white bg-deep-green"}`}
               >
                 {format(date, "d")}
               </div>
-              <div className="todo-list"></div>
+
+              {/* 메모 태그 */}
+              <div className="flex flex-col gap-[2px] px-1 overflow-hidden">
+                {[
+                  ...calendarMemos
+                    .filter(
+                      (memo) =>
+                        isSameDay(new Date(memo.startDate), date) &&
+                        memo.periodId === 1
+                    )
+                    .slice(0, tagMaxCount),
+                  ...Array.from({ length: tagMaxCount }).fill(null),
+                ]
+                  .slice(0, tagMaxCount)
+                  .map((memo, i) => (
+                    <div
+                      key={memo?.id ?? `placeholder-${i}`}
+                      className="rounded px-1 h-[20px] text-white"
+                      style={memo ? { backgroundColor: memo.colorHex } : {}}
+                    >
+                      {memo?.content ?? ""}
+                    </div>
+                  ))}
+              </div>
             </div>
           ))}
         </div>
