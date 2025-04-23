@@ -15,6 +15,21 @@ async function getMemo(req, res) {
   }
 }
 
+// 달력 메모 불러오기
+async function getCalendarMemo(req, res) {
+  const { userId, currentDate } = req.query;
+  try {
+    const result = await memoModel.getCalendarMemo(userId, currentDate);
+
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("달력 메모 목록 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "달력 메모 목록을 불러오던 중 문제가 발생하였습니다." });
+  }
+}
+
 // 메모 추가
 async function addMemo(req, res) {
   const memos = req.body;
@@ -90,6 +105,7 @@ async function toggleLinkedMemosCompletion(req, res) {
 
 module.exports = {
   getMemo,
+  getCalendarMemo,
   addMemo,
   deleteMemo,
   deleteLinkedMemos,

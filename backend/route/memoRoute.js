@@ -6,6 +6,9 @@ const verifyToken = require("../middleware/authMiddleware");
 // 메모 목록
 router.get("/", verifyToken, memoController.getMemo);
 
+// 달력 메모 목록
+router.get("/calendar", verifyToken, memoController.getCalendarMemo);
+
 // 메모 추가
 router.post("/", verifyToken, memoController.addMemo);
 
