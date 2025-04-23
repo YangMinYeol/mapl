@@ -1,3 +1,4 @@
+import MemoModal from "../../memo/MemoModal";
 import DashboardMainMemoItem from "./DashboardMainMemoItem";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
@@ -18,10 +19,11 @@ import { UserContext } from "../../../context/UserContext";
 import { useLoginExpiredHandler } from "../../../hooks/useLoginExpiredHandler";
 
 export default function DashboardMainContent({
-  memos,
+  dashboardMemos,
   selectedPeriod,
   selectedDate,
-  refreshMemoList,
+  loadDashboardMemos,
+  loadCalendarMemos,
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const memoInputRef = useRef(null);
@@ -31,6 +33,7 @@ export default function DashboardMainContent({
   const { openModal, openConfirm } = useModal();
   const { user } = useContext(UserContext);
   const handleLoginExpired = useLoginExpiredHandler();
+  const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
 
   // 메모 추가
   function handleAddMemo() {
@@ -40,10 +43,12 @@ export default function DashboardMainContent({
     }
     if (memoText.trim()) {
       addNewMemo();
+    } else {
+      setIsMemoModalOpen(true);
     }
   }
 
-  // 메모 추가
+  // 빠른 메모 추가
   async function addNewMemo() {
     try {
       const { startDate, endDate } = setDateByPeriod(
@@ -60,7 +65,8 @@ export default function DashboardMainContent({
           isLinked: false,
         },
       ]);
-      await refreshMemoList();
+      await loadDashboardMemos();
+      await loadCalendarMemos();
       setMemoText("");
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -81,12 +87,14 @@ export default function DashboardMainContent({
           "동기화되어있는 메모 모두 삭제하시겠습니까?",
           async () => {
             await deleteLinkedMemos(memo.link);
-            await refreshMemoList();
+            await loadDashboardMemos();
+            await loadCalendarMemos();
           }
         );
       } else {
         await deleteMemo(memo.id);
-        await refreshMemoList();
+        await loadDashboardMemos();
+        await loadCalendarMemos();
       }
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -107,12 +115,12 @@ export default function DashboardMainContent({
           "동기화되어있는 메모 모두 complete 하시겠습니까?",
           async () => {
             await toggleLinkedMemosCompletion(memo.link);
-            await refreshMemoList();
+            await loadDashboardMemos();
           }
         );
       } else {
         await toggleMemoCompletion(memo.id);
-        await refreshMemoList();
+        await loadDashboardMemos();
       }
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -154,7 +162,7 @@ export default function DashboardMainContent({
     <div className="h-[480px] border-b border-mapl-slate">
       <div className="overflow-auto h-11/12 dashboard-main-content">
         <ul>
-          {memos.map((memo) => {
+          {dashboardMemos.map((memo) => {
             if (memo.periodId === selectedPeriod.id) {
               return (
                 <li key={memo.id}>
@@ -186,6 +194,14 @@ export default function DashboardMainContent({
           <FontAwesomeIcon style={deepGreen} icon={getIcon()} size="xl" />
         </button>
       </div>
+      <MemoModal
+        isOpen={isMemoModalOpen}
+        onClose={() => setIsMemoModalOpen(false)}
+        selectedDate={selectedDate}
+        mode="create"
+        loadDashboardMemos={loadDashboardMemos}
+        loadCalendarMemos={loadCalendarMemos}
+      />
     </div>
   );
 }
