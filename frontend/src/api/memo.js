@@ -25,6 +25,24 @@ export async function fetchMemos(userId, selectedDate) {
   }
 }
 
+// 달력 표기용 메모 목록 불러오기
+export async function fetchCalendarMemos(userId, currentDate) {
+  try {
+    const response = await fetchWithAuth(
+      `${API_URL}/api/memo/calendar?userId=${userId}&currentDate=${currentDate}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 // 메모 추가
 export async function addMemo(memoArray) {
   try {

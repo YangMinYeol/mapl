@@ -1,4 +1,11 @@
 const db = require("../db");
+const {
+  subMonths,
+  addMonths,
+  startOfMonth,
+  endOfMonth,
+  format,
+} = require("date-fns");
 
 // 메모 목록 조회
 async function getMemo(userId, selectedDate) {
@@ -11,6 +18,35 @@ async function getMemo(userId, selectedDate) {
   return db.query(query, [userId, selectedDate]);
 }
 
+// 달력 메모 목록 조회
+async function getCalendarMemo(userId, currentDate) {
+  const prevMonthStart = startOfMonth(subMonths(currentDate, 1));
+  const nextMonthEnd = endOfMonth(addMonths(currentDate, 1));
+
+  const startDate = format(prevMonthStart, "yyyy-MM-dd");
+  const endDate = format(nextMonthEnd, "yyyy-MM-dd");
+  const query = `
+    SELECT 
+      memo.id,
+      memo.user_id,
+      memo.content,
+      memo.start_date,
+      memo.period_id,
+      memo.sort_order,
+      memo.completed,
+      memo.allday,
+      memo.color_id,
+      color.hex AS color_hex
+    FROM memo
+    JOIN color ON memo.color_id = color.id
+    WHERE memo.user_id = $1
+    AND memo.start_date BETWEEN $2 AND $3
+    ORDER BY memo.period_id, memo.start_date, memo.sort_order
+  `;
+
+  return db.query(query, [userId, startDate, endDate]);
+}
+
 // 메모 추가
 async function addMemo(memos) {
   try {
@@ -19,16 +55,27 @@ async function addMemo(memos) {
     const insertedMemos = [];
 
     for (const memoData of memos) {
-      const { userId, content, startDate, endDate, periodId, link, isLinked } =
-        memoData;
+      const {
+        userId,
+        content,
+        startDate,
+        endDate,
+        startTime = null,
+        endTime = null,
+        allDay = true,
+        periodId,
+        link,
+        isLinked,
+        colorId = 10,
+      } = memoData;
 
       // sort_order 계산
       const newSortOrder = await getNewSortOrder(userId, startDate, periodId);
 
       // 1. 메모를 추가하면서 link는 임시로 NULL로 설정
       const insertQuery = `
-        INSERT INTO memo (user_id, content, start_date, end_date, sort_order, period_id, is_linked, link )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, NULL)
+        INSERT INTO memo (user_id, content, start_date, end_date,start_time, end_time, allday, sort_order, period_id, color_id, is_linked, link )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NULL)
         RETURNING id;
       `;
 
@@ -37,8 +84,12 @@ async function addMemo(memos) {
         content,
         startDate,
         endDate,
+        startTime,
+        endTime,
+        allDay,
         newSortOrder,
         periodId,
+        colorId,
         isLinked,
       ]);
 
@@ -117,6 +168,7 @@ async function toggleLinkedMemosCompletion(linkId) {
 
 module.exports = {
   getMemo,
+  getCalendarMemo,
   addMemo,
   deleteMemo,
   deleteLinkedMemos,
