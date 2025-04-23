@@ -1,0 +1,67 @@
+import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  getDay,
+  isSameMonth,
+} from "date-fns";
+
+export const days = ["일", "월", "화", "수", "목", "금", "토"];
+
+// 주간 날짜를 계산하는 함수
+export function getWeekDates(currentDate) {
+  const startMonth = startOfMonth(currentDate);
+  const endMonth = endOfMonth(currentDate);
+  const startDate = startOfWeek(startMonth);
+  const endDate = endOfWeek(endMonth);
+
+  const dates = [];
+  let day = startDate;
+  while (day <= endDate) {
+    dates.push(day);
+    day = addDays(day, 1);
+  }
+
+  const weeks = [];
+  for (let i = 0; i < dates.length; i += 7) {
+    weeks.push(dates.slice(i, i + 7));
+  }
+
+  return weeks;
+}
+
+// 날짜 텍스트 색상을 결정하는 함수
+export function getDateTextColor(date, currentDate) {
+  const day = getDay(date);
+  if (day === 0) {
+    return !isSameMonth(date, currentDate) ? "text-red-200" : "text-red-500";
+  }
+  if (day === 6) {
+    return !isSameMonth(date, currentDate) ? "text-blue-200" : "text-blue-500";
+  }
+  return isSameMonth(date, currentDate) ? "text-black" : "text-slate-400";
+}
+
+// 요일별 색상을 결정하는 함수
+export function getDayTextColor(index) {
+  if (index === 0) return "text-red-500"; // 일요일
+  if (index === 6) return "text-blue-500"; // 토요일
+  return "text-black"; // 평일
+}
+
+export function createMonthNavigationButton(direction, handleChangeMonth) {
+  return (
+    <button
+      className="flex items-center justify-center w-5 h-5 rounded cursor-pointer hover:bg-mapl-slate"
+      onClick={() => handleChangeMonth(direction === "next" ? 1 : -1)}
+    >
+      <FontAwesomeIcon
+        icon={direction === "next" ? faAngleRight : faAngleLeft}
+      />
+    </button>
+  );
+}
