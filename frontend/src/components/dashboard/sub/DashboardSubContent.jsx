@@ -30,7 +30,7 @@ const bucketListMemos = [
 ];
 
 export default function DashboardSubContent({
-  memos,
+  dashboardMemos,
   selectedValue,
   selectedPeriod,
   checkedIds,
@@ -49,7 +49,7 @@ export default function DashboardSubContent({
                 />
               </li>
             ))
-          : memos
+          : dashboardMemos
               .filter(
                 (memo) => memo.periodId == selectedValue && !memo.completed
               )

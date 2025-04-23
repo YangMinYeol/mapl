@@ -1,12 +1,16 @@
 import CalendarHeader from "./CalendarHeader";
 import CalendarDays from "./CalendarDays";
 import CalendarDate from "./CalendarDate";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { addMonths, setMonth, setYear } from "date-fns";
 
-export default function Calendar({ selectedDate, setSelectedDate }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
-
+export default function Calendar({
+  calendarMemos,
+  currentDate,
+  setCurrentDate,
+  selectedDate,
+  setSelectedDate,
+}) {
   const today = useMemo(() => new Date(), []);
 
   // 한달씩 이동
@@ -42,6 +46,7 @@ export default function Calendar({ selectedDate, setSelectedDate }) {
         currentDate={currentDate}
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
+        calendarMemos={calendarMemos}
       />
     </div>
   );

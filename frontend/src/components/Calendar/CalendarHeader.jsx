@@ -1,9 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { format } from "date-fns";
-import { faAngleRight, faAngleLeft } from "@fortawesome/free-solid-svg-icons";
-import { faCalendar } from "@fortawesome/free-regular-svg-icons";
+import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
 import { useRef, useState, useEffect } from "react";
 import DropdownCalendar from "./DropdownCalendar";
+import { createMonthNavigationButton } from "../../util/calendarUtil";
 
 export default function CalendarHeader({
   currentDate,
@@ -65,12 +65,7 @@ export default function CalendarHeader({
 
       {/* Center */}
       <div className="flex items-center justify-center w-40 calendar-header-center">
-        <button
-          className="flex items-center justify-center w-6 h-6 rounded cursor-pointer hover:bg-mapl-slate"
-          onClick={() => handleChangeMonth(-1)}
-        >
-          <FontAwesomeIcon icon={faAngleLeft} />
-        </button>
+        {createMonthNavigationButton("prev", handleChangeMonth)}
         <button
           className="inline-block px-3 font-medium rounded cursor-pointer dropdown-btn hover:bg-mapl-slate w-28"
           onClick={toggleCalendarDropdown}
@@ -78,12 +73,7 @@ export default function CalendarHeader({
         >
           {yearMonth}
         </button>
-        <button
-          className="flex items-center justify-center w-6 h-6 rounded cursor-pointer hover:bg-mapl-slate"
-          onClick={() => handleChangeMonth(+1)}
-        >
-          <FontAwesomeIcon icon={faAngleRight} />
-        </button>
+        {createMonthNavigationButton("next", handleChangeMonth)}
 
         {/* 드롭다운 */}
         <DropdownCalendar
@@ -101,7 +91,7 @@ export default function CalendarHeader({
       <div className="pr-2">
         <button className="cursor-pointer group" onClick={goToToday}>
           <FontAwesomeIcon
-            icon={faCalendar}
+            icon={faCalendarCheck}
             className="group-hover:text-green-900"
           />
         </button>
