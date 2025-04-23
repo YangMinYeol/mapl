@@ -2,13 +2,14 @@ import DashboardMainHeader from "./DashboardMainHeader";
 import DashboardMainContent from "./DashboardMainContent";
 
 export default function DashboardMain({
-  memos,
+  dashboardMemos,
   periods,
   selectedPeriod,
   selectedDate,
   totalMemos,
   completedMemos,
-  refreshMemoList,
+  loadDashboardMemos,
+  loadCalendarMemos,
 }) {
   return (
     <div className="h-[520px]">
@@ -19,11 +20,12 @@ export default function DashboardMain({
         completedMemos={completedMemos}
       />
       <DashboardMainContent
-        memos={memos}
+        dashboardMemos={dashboardMemos}
         periods={periods}
         selectedPeriod={selectedPeriod}
         selectedDate={selectedDate}
-        refreshMemoList={refreshMemoList}
+        loadDashboardMemos={loadDashboardMemos}
+        loadCalendarMemos={loadCalendarMemos}
       />
     </div>
   );

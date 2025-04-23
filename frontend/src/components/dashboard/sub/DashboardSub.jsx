@@ -9,11 +9,11 @@ import { UserContext } from "../../../context/UserContext";
 import { addMemo } from "../../../api/memo";
 
 export default function DashboardSub({
-  memos,
+  dashboardMemos,
   periods,
   selectedPeriod,
   selectedDate,
-  refreshMemoList,
+  loadDashboardMemos,
 }) {
   const { openConfirm, openModal } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
@@ -88,7 +88,7 @@ export default function DashboardSub({
       }
 
       await addMemo(memoArray);
-      await refreshMemoList();
+      await loadDashboardMemos();
       setCheckedIds([]);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -124,7 +124,7 @@ export default function DashboardSub({
       }
 
       await addMemo(memoArray);
-      await refreshMemoList();
+      await loadDashboardMemos();
       setCheckedIds([]);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -138,7 +138,7 @@ export default function DashboardSub({
 
   // 체크된 메모만 필터링
   function filterCheckedMemos() {
-    return memos.filter((memo) => checkedIds.includes(memo.id));
+    return dashboardMemos.filter((memo) => checkedIds.includes(memo.id));
   }
 
   return (
@@ -150,7 +150,7 @@ export default function DashboardSub({
         handleAddMemo={handleAddMemo}
       />
       <DashboardSubContent
-        memos={memos}
+        dashboardMemos={dashboardMemos}
         selectedValue={selectedValue}
         selectedPeriod={selectedPeriod}
         selectedDate={selectedDate}
