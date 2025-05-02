@@ -74,7 +74,7 @@ export default function DateTimeInput({
         />
       )}
       {showTimeSelect && (
-        <ul className="absolute right-0 z-10 w-20 mt-1 overflow-auto bg-white border rounded max-h-32 time-selector border-mapl-black top-5">
+        <ul className="absolute right-0 z-10 w-20 mt-1 overflow-auto bg-white border rounded max-h-44 time-selector border-mapl-black top-5">
           {timeOptions.map((timeOption, index) => (
             <li
               key={index}
