@@ -26,6 +26,7 @@ async function getCalendarMemo(userId, currentDate) {
 
   const startDate = format(prevMonthStart, "yyyy-MM-dd");
   const endDate = format(nextMonthEnd, "yyyy-MM-dd");
+
   const query = `
     SELECT 
       memo.id,
@@ -44,12 +45,14 @@ async function getCalendarMemo(userId, currentDate) {
     FROM memo
     JOIN color ON memo.color_id = color.id
     WHERE memo.user_id = $1
-    AND memo.start_date BETWEEN $2 AND $3
+    AND memo.start_date <= $3
+    AND memo.end_date >= $2
     ORDER BY memo.start_date, memo.end_date DESC, memo.created_at, memo.id
   `;
 
   return db.query(query, [userId, startDate, endDate]);
 }
+
 
 // 메모 추가
 async function addMemo(memos) {
