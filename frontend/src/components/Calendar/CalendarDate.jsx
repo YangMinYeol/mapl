@@ -1,5 +1,149 @@
 import { format, isSameDay, isToday } from "date-fns";
-import { getDateTextColor, getWeekDates } from "../../util/calendarUtil";
+import {
+  getDateKey,
+  getDateTextColor,
+  getTagMaxCount,
+  getWeekDates,
+} from "../../util/calendarUtil";
+import { sortMemos, MEMO_TYPE } from "../../util/memoUtil";
+import MemoTag from "./MemoTag";
+
+// 날짜별 메모 할당
+function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount) {
+  const { map, dailyMemosMap } = buildDateMemoMap(weeks);
+  const { dailyMemos, rangeMemos } = separateDailyAndRangeMemos(calendarMemos);
+
+  for (const key in dailyMemos) {
+    if (dailyMemosMap[key]) {
+      dailyMemosMap[key] = dailyMemos[key];
+    }
+  }
+
+  placeRangeMemosInLevels(map, rangeMemos);
+  placeDailyMemosInLevels(map, dailyMemosMap);
+  return truncateMemoMap(map, tagMaxCount);
+}
+
+// 1. 날짜 메모 맵을 작성
+function buildDateMemoMap(weeks) {
+  const map = {};
+  const dailyMemosMap = {};
+  weeks.forEach((week) => {
+    week.forEach((date) => {
+      const key = getDateKey(date);
+      map[key] = [];
+      dailyMemosMap[key] = [];
+    });
+  });
+  return { map, dailyMemosMap };
+}
+
+// 2. 데일리 메모와 범위 메모 분류
+function separateDailyAndRangeMemos(calendarMemos) {
+  const dailyMemos = {};
+  const rangeMemos = [];
+
+  for (const memo of calendarMemos) {
+    if (memo.periodId !== 1) continue;
+
+    const start = new Date(memo.startDate);
+    const end = new Date(memo.endDate);
+    const key = getDateKey(start);
+    const isDaily = start.toDateString() === end.toDateString();
+
+    if (isDaily) {
+      if (!dailyMemos[key]) dailyMemos[key] = [];
+      dailyMemos[key].push(memo);
+    } else {
+      rangeMemos.push(memo);
+    }
+  }
+
+  return { dailyMemos, rangeMemos };
+}
+
+// 3. 기간 메모 Level 지정
+function placeRangeMemosInLevels(map, rangeMemos) {
+  const sortedMemos = sortMemos(rangeMemos, false);
+  const maxLevels = 100;
+  const usedLevelsMap = {};
+
+  for (const memo of sortedMemos) {
+    const start = new Date(memo.startDate);
+    const end = new Date(memo.endDate);
+    let level = 0;
+
+    levelLoop: for (; level < maxLevels; level++) {
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const key = getDateKey(d);
+        if (!usedLevelsMap[key]) usedLevelsMap[key] = new Set();
+        if (usedLevelsMap[key].has(level)) {
+          continue levelLoop;
+        }
+      }
+      break;
+    }
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = getDateKey(d);
+
+      map[key][level] = {
+        ...memo,
+        level,
+        type: MEMO_TYPE.RANGE,
+      };
+      usedLevelsMap[key].add(level);
+    }
+  }
+}
+
+// 4. 데일리 메모 Levle 지정
+function placeDailyMemosInLevels(map, dailyMemos) {
+  for (const key in dailyMemos) {
+    const sortedMemos = sortMemos(dailyMemos[key], true);
+    const current = map[key] ?? [];
+
+    for (const memo of sortedMemos) {
+      let level = 0;
+      while (current[level] !== undefined) level++;
+      current[level] = {
+        ...memo,
+        level,
+        type: MEMO_TYPE.DAILY,
+      };
+    }
+
+    map[key] = current;
+  }
+}
+
+// 5. 최종 메모 실사용하도록 요약
+function truncateMemoMap(memoMap, tagMaxCount) {
+  const truncatedMap = {};
+
+  for (const dateKey in memoMap) {
+    const allMemos = memoMap[dateKey] ?? [];
+    const truncatedMemos = [];
+
+    for (let i = 0; i < tagMaxCount; i++) {
+      truncatedMemos.push(allMemos[i] ?? null);
+    }
+
+    const visibleMemosCount = allMemos.filter(Boolean).length;
+
+    if (visibleMemosCount > tagMaxCount) {
+      truncatedMemos[tagMaxCount - 1] = {
+        id: `more-${dateKey}`,
+        content: `+${visibleMemosCount - (tagMaxCount - 1)}`,
+        colorHex: "#ffffff",
+        type: MEMO_TYPE.MORE,
+      };
+    }
+
+    truncatedMap[dateKey] = truncatedMemos;
+  }
+  return truncatedMap;
+}
 
 export default function CalendarDate({
   currentDate,
@@ -8,58 +152,24 @@ export default function CalendarDate({
   calendarMemos,
 }) {
   const weeks = getWeekDates(currentDate);
-
-  // weeks.length에 따라 tagMaxCount 설정
-  let tagMaxCount = 5;
-
-  if (weeks.length === 4) {
-    tagMaxCount = 8;
-  } else if (weeks.length === 5) {
-    tagMaxCount = 6;
-  } else if (weeks.length === 6) {
-    tagMaxCount = 5;
-  }
-
-  // 메모 태그 생성
-  function getDailyMemoTags(date, tagMaxCount) {
-    const filteredMemos = calendarMemos.filter(
-      (memo) => isSameDay(new Date(memo.startDate), date) && memo.periodId === 1
-    );
-
-    const memoCount = filteredMemos.length;
-
-    // 1. 메모 수가 tagMaxCount보다 크면 → 앞에서 (tagMaxCount - 1)개 보여주고 마지막에 +n
-    if (memoCount > tagMaxCount) {
-      const showMemos = filteredMemos.slice(0, tagMaxCount - 1);
-      const hiddenCount = memoCount - (tagMaxCount - 1);
-      return [
-        ...showMemos,
-        { id: "extra", content: `+${hiddenCount}`, colorHex: "#173836" },
-      ];
-    }
-
-    // 2. 딱 맞는 경우 → 그대로 다 보여주기
-    if (memoCount === tagMaxCount) {
-      return filteredMemos;
-    }
-
-    // 3. 부족한 경우 → 나머지를 null로 채우기
-    const nullCount = tagMaxCount - memoCount;
-    return [...filteredMemos, ...Array(nullCount).fill(null)];
-  }
+  const tagMaxCount = getTagMaxCount(weeks);
+  const memoLevelMap = buildMemoLevelMap(weeks, calendarMemos, tagMaxCount);
 
   return (
     <div
       className={`grid flex-1 grid-rows-${weeks.length} gap-[1px] bg-gray-200 h-[820px]`}
     >
       {weeks.map((week, weekIndex) => (
-        <div key={weekIndex} className="grid grid-cols-7 gap-[1px] ">
+        <div key={weekIndex} className="grid grid-cols-7">
           {week.map((date, dateIndex) => {
-            const memoTags = getDailyMemoTags(date, tagMaxCount);
+            const key = getDateKey(date);
+            const memoTags =
+              memoLevelMap[key] ?? new Array(tagMaxCount).fill(null);
+
             return (
               <div
                 key={dateIndex}
-                className={`date-cell flex flex-col p-[1px] h-full ${
+                className={`date-cell flex flex-col h-full ${
                   isSameDay(date, selectedDate)
                     ? "bg-gray-100"
                     : "hover:bg-gray-50 bg-white"
@@ -77,15 +187,13 @@ export default function CalendarDate({
                 </div>
 
                 {/* 메모 태그 */}
-                <div className="flex flex-col gap-[2px] px-1 overflow-hidden">
+                <div className="flex flex-col gap-[2px] overflow-hidden">
                   {memoTags.map((memo, i) => (
-                    <div
+                    <MemoTag
                       key={memo?.id ?? `placeholder-${i}`}
-                      className="rounded px-1 h-[20px] text-white truncate"
-                      style={memo ? { backgroundColor: memo.colorHex } : {}}
-                    >
-                      {memo?.content ?? ""}
-                    </div>
+                      memo={memo}
+                      date={date}
+                    />
                   ))}
                 </div>
               </div>
