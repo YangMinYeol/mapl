@@ -6,6 +6,9 @@ import {
   endOfMonth,
   startOfYear,
   endOfYear,
+  isAfter,
+  isBefore,
+  isEqual,
 } from "date-fns";
 
 export function formatDateYYYYMMDD(date) {
@@ -41,4 +44,12 @@ export function setDateByPeriod(period, selectedDate) {
       break;
   }
   return { startDate: formatDateYYYYMMDD(startDate), endDate };
+}
+
+// 두 날짜 사이에 포함되는지 확인
+export function isBetween(date, start, end) {
+  return (
+    (isAfter(date, start) || isEqual(date, start)) &&
+    (isBefore(date, end) || isEqual(date, end))
+  );
 }
