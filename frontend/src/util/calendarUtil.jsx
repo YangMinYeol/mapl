@@ -8,6 +8,7 @@ import {
   addDays,
   getDay,
   isSameMonth,
+  format,
 } from "date-fns";
 
 export const days = ["일", "월", "화", "수", "목", "금", "토"];
@@ -64,4 +65,16 @@ export function createMonthNavigationButton(direction, handleChangeMonth) {
       />
     </button>
   );
+}
+
+// 날짜를 key로 사용
+export function getDateKey(date) {
+  return format(date, "yyyy-MM-dd");
+}
+
+// 달력에 들어갈 날짜 최대 개수 지정
+export function getTagMaxCount(weeks) {
+  if (weeks.length === 4) return 8;
+  if (weeks.length === 5) return 6;
+  return 5;
 }
