@@ -47,13 +47,8 @@ export default function MainPage() {
     try {
       const memoData = await fetchMemos(user.id, selectedDate);
       const convertedMemos = convertArraySnakeToCamel(memoData);
-      // 1. 메모 목록 정렬
-      const sortedMemos = convertedMemos.sort(
-        (a, b) => a.sortOrder - b.sortOrder
-      );
 
-      // 2. 메모 목록 업데이트
-      setDashboardMemos(sortedMemos);
+      setDashboardMemos(convertedMemos);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
         handleLoginExpired(error.message);
