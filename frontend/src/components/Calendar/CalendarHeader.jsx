@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { format } from "date-fns";
 import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import DropdownCalendar from "./DropdownCalendar";
 import { createMonthNavigationButton } from "../../util/calendarUtil";
 
@@ -15,18 +15,8 @@ export default function CalendarHeader({
   const tabs = Object.values(TABS);
   const [activeTab, setActiveTab] = useState(TABS.MEMO);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const dropdownButtonRef = useRef(null);
   const yearMonth = format(currentDate, "yyyy년 MM월");
-
-  // 드롭다운 달력 위치 선정
-  useEffect(() => {
-    const rect = dropdownButtonRef.current.getBoundingClientRect();
-    setDropdownPosition({
-      top: 30,
-      left: rect.left,
-    });
-  }, []);
 
   // Memo, Todo, Wallet 탭 변경
   function handleTab(tabId) {
@@ -82,7 +72,6 @@ export default function CalendarHeader({
           currentDate={currentDate}
           onSelectYearMonth={handleYearMonth}
           handleTodayClick={handleDropdownTodayClick}
-          dropdownPosition={dropdownPosition}
           dropdownButtonRef={dropdownButtonRef}
         />
       </div>

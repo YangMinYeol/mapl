@@ -9,7 +9,6 @@ export default function DropdownCalendar({
   currentDate,
   onSelectYearMonth,
   handleTodayClick,
-  dropdownPosition,
   dropdownButtonRef,
 }) {
   const dropdownRef = useRef(null);
@@ -53,11 +52,7 @@ export default function DropdownCalendar({
   return isOpen ? (
     <div
       ref={dropdownRef}
-      className="absolute bg-white border border-gray-300 rounded shadow-md z-1 h-44 w-60"
-      style={{
-        top: `${dropdownPosition.top}px`,
-        left: `${dropdownPosition.left - 64}px`,
-      }}
+      className="absolute bg-white border border-gray-300 rounded shadow-md z-1 h-44 w-60 top-9"
     >
       {/* Year */}
       <div className="flex justify-between px-2 py-1 font-medium border-b-2 text-deep-green border-mapl-slate">
