@@ -19,6 +19,10 @@ export default function DashboardSub({
   const [checkedIds, setCheckedIds] = useState([]);
   const handleLoginExpired = useLoginExpiredHandler();
   const { user } = useContext(UserContext);
+  const isBucketList = useMemo(
+    () => selectedPeriod.name === "Bucket List",
+    [selectedPeriod]
+  );
 
   const periodFilterMap = {
     Day: ["Week", "Month", "Year", "Bucket List"],
@@ -148,14 +152,15 @@ export default function DashboardSub({
         selectedValue={selectedValue}
         handleChange={(e) => setSelectedValue(e.target.value)}
         handleAddMemo={handleAddMemo}
+        isBucketList={isBucketList}
       />
       <DashboardSubContent
         dashboardMemos={dashboardMemos}
         selectedValue={selectedValue}
-        selectedPeriod={selectedPeriod}
         selectedDate={selectedDate}
         checkedIds={checkedIds}
         handleToggle={handleToggle}
+        isBucketList={isBucketList}
       />
     </div>
   );
