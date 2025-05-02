@@ -53,7 +53,7 @@ export default function DropdownCalendar({
   return isOpen ? (
     <div
       ref={dropdownRef}
-      className="absolute bg-white border border-gray-300 rounded shadow-md h-44 w-60"
+      className="absolute bg-white border border-gray-300 rounded shadow-md z-1 h-44 w-60"
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left - 64}px`,
