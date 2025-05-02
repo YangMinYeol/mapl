@@ -86,7 +86,7 @@ function placeRangeMemosInLevels(map, rangeMemos) {
 
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const key = getDateKey(d);
-
+      if (!map[key]) map[key] = [];
       map[key][level] = {
         ...memo,
         level,
