@@ -7,7 +7,12 @@ import {
 import { faLink } from "@fortawesome/free-solid-svg-icons";
 import IconButton from "../../common/IconButton";
 
-export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
+export default function DashboardMainMemoItem({
+  memo,
+  onComplete,
+  onDelete,
+  onEdit,
+}) {
   return (
     <div className="flex items-center px-1 py-1 hover:bg-gray-50 group">
       <div className="flex justify-center w-1/20 ">
@@ -17,7 +22,11 @@ export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
           onClick={() => onComplete(memo)}
         />
       </div>
-      <div className={`w-16/20 ${memo.completed && "line-through"} break-words whitespace-normal`}>
+      <div
+        className={`w-16/20 ${
+          memo.completed && "line-through"
+        } break-words whitespace-normal`}
+      >
         {memo.content}
       </div>
       <div className="grid grid-cols-3 opacity-0 w-3/20 group-hover:opacity-100">
@@ -26,7 +35,7 @@ export default function DashboardMainMemoItem({ memo, onComplete, onDelete }) {
           <IconButton icon={faLink} />
         </div>
         {/* Edit */}
-        <IconButton icon={faPenToSquare} />
+        <IconButton icon={faPenToSquare} onClick={() => onEdit(memo)} />
         {/* Delete */}
         <IconButton icon={faTrashCan} onClick={() => onDelete(memo)} />
       </div>

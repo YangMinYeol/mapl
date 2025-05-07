@@ -11,16 +11,19 @@ import { LoginExpiredError } from "../../util/error";
 import { useLoginExpiredHandler } from "../../hooks/useLoginExpiredHandler";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
-import { addMemo } from "../../api/memo";
+import { addMemo, updateMemo } from "../../api/memo";
 import Loading from "../common/Loading";
+import { useColors } from "../../context/ColorContext";
 
 export default function MemoModal({
   isOpen,
   onClose,
   selectedDate,
-  mode = "create", // "edit" or "view"
+  mode,
   loadDashboardMemos,
   loadCalendarMemos,
+  memo,
+  periodId,
 }) {
   const [allDay, setAllDay] = useState(true);
   const handleLoginExpired = useLoginExpiredHandler();
@@ -32,6 +35,7 @@ export default function MemoModal({
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState(10);
   const [selectedColor, setSelectedColor] = useState("#173836");
+  const colors = useColors();
 
   // 날짜
   const [showStartDateSelect, setShowStartDateSelect] = useState(false);
@@ -59,10 +63,24 @@ export default function MemoModal({
       setEndDate(selectedDate);
       setStartTime("00:00");
       setEndTime("00:30");
+      setAllDay(true);
+      setContent("");
       setSelectedColorId(10);
       setSelectedColor("#173836");
+    } else if (mode === "edit" && memo) {
+      setStartDate(memo.startDate);
+      setEndDate(memo.endDate);
+      setStartTime((memo.startTime || "00:00").substring(0, 5));
+      setEndTime((memo.endTime || "00:30").substring(0, 5));
+      setAllDay(memo.allday);
+      setContent(memo.content);
+      setSelectedColorId(memo.colorId);
+      const selectedColor = colors.find((color) => color.id === memo.colorId);
+      if (selectedColor) {
+        setSelectedColor(selectedColor.hex);
+      }
     }
-  }, [isOpen, mode]);
+  }, [mode, isOpen]);
 
   // Palette
   function handlePalette() {
@@ -71,6 +89,10 @@ export default function MemoModal({
 
   // AllDay
   function handleAllDay() {
+    if (!allDay) {
+      setStartTime("00:00");
+      setEndTime("00:30");
+    }
     setAllDay(!allDay);
   }
 
@@ -96,7 +118,7 @@ export default function MemoModal({
           startTime,
           endTime,
           allDay,
-          periodId: 1,
+          periodId,
           isLinked: false,
           colorId: selectedColorId,
         },
@@ -110,6 +132,44 @@ export default function MemoModal({
         handleLoginExpired(error.message);
       } else {
         console.error("메모 추가 오류:", error);
+        closeModal();
+        openModal(error.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // 메모 수정
+  async function editMemo() {
+    try {
+      const isDateTimeError = validateDateTime();
+      const isContentBlank = content.trim() === "";
+
+      setDateTimeError(!isDateTimeError);
+      setContentError(isContentBlank);
+
+      if (!isDateTimeError || isContentBlank) return;
+      setIsLoading(true);
+      await updateMemo({
+        id: memo.id,
+        content,
+        startDate: formatDateYYYYMMDD(startDate),
+        endDate: formatDateYYYYMMDD(endDate),
+        startTime,
+        endTime,
+        allDay,
+        colorId: selectedColorId,
+      });
+      await loadDashboardMemos();
+      await loadCalendarMemos();
+      closeModal();
+    } catch (error) {
+      if (error instanceof LoginExpiredError) {
+        closeModal();
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 편집 오류:", error);
         closeModal();
         openModal(error.message);
       }
@@ -278,9 +338,9 @@ export default function MemoModal({
         <div className="h-[46px]  modal-footer border-mapl-slate px-3 flex items-center justify-end">
           <button
             className="h-8 px-3 font-semibold text-white border rounded cursor-pointer bg-deep-green"
-            onClick={addDetailMemo}
+            onClick={mode === "create" ? addDetailMemo : editMemo}
           >
-            추가
+            {mode === "create" ? "추가" : "수정"}
           </button>
           <button
             className="h-8 px-3 ml-2 font-semibold border rounded cursor-pointer"

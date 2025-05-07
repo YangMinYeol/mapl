@@ -39,6 +39,8 @@ export default function DashboardMainContent({
   const { user } = useContext(UserContext);
   const handleLoginExpired = useLoginExpiredHandler();
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
+  const [memoModalMode, setMemoModalMode] = useState("");
+  const [selectedMemo, setSelectedMemo] = useState(null);
 
   // 메모 정렬
   function sortDashboardMemos(memos) {
@@ -58,6 +60,7 @@ export default function DashboardMainContent({
     if (memoText.trim()) {
       addNewMemo();
     } else {
+      setMemoModalMode("create");
       setIsMemoModalOpen(true);
     }
   }
@@ -118,6 +121,13 @@ export default function DashboardMainContent({
         openModal(error.message);
       }
     }
+  }
+
+  // 메모 편집 모달
+  function openEditMemoModal(memo) {
+    setSelectedMemo(memo);
+    setMemoModalMode("edit");
+    setIsMemoModalOpen(true);
   }
 
   // 메모 완료 상태 변경
@@ -187,6 +197,7 @@ export default function DashboardMainContent({
                     memo={memo}
                     onComplete={handleToggleMemoCompletion}
                     onDelete={handleDeleteMemo}
+                    onEdit={openEditMemoModal}
                   />
                 </li>
               );
@@ -213,11 +224,16 @@ export default function DashboardMainContent({
       </div>
       <MemoModal
         isOpen={isMemoModalOpen}
-        onClose={() => setIsMemoModalOpen(false)}
+        onClose={() => {
+          setIsMemoModalOpen(false);
+          setSelectedMemo(null);
+        }}
         selectedDate={selectedDate}
-        mode="create"
+        mode={memoModalMode}
+        memo={selectedMemo}
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
+        periodId={selectedPeriod.id}
       />
     </div>
   );
