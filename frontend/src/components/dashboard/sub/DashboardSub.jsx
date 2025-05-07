@@ -14,6 +14,7 @@ export default function DashboardSub({
   selectedPeriod,
   selectedDate,
   loadDashboardMemos,
+  loadCalendarMemos,
 }) {
   const { openConfirm, openModal } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
@@ -93,6 +94,7 @@ export default function DashboardSub({
 
       await addMemo(memoArray);
       await loadDashboardMemos();
+      await loadCalendarMemos();
       setCheckedIds([]);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -129,6 +131,7 @@ export default function DashboardSub({
 
       await addMemo(memoArray);
       await loadDashboardMemos();
+      await loadCalendarMemos();
       setCheckedIds([]);
     } catch (error) {
       if (error instanceof LoginExpiredError) {

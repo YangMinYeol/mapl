@@ -54,6 +54,7 @@ export default function Dashboard({
         selectedPeriod={selectedPeriod}
         selectedDate={selectedDate}
         loadDashboardMemos={loadDashboardMemos}
+        loadCalendarMemos={loadCalendarMemos}
       />
     </div>
   );
