@@ -14,7 +14,6 @@ async function getMemo(userId, selectedDate) {
     FROM memo 
     WHERE user_id = $1 
     AND ((start_date <= $2 AND end_date >= $2) OR period_id = 5)
-    ORDER BY memo.start_date, memo.end_date DESC, memo.created_at, memo.id
   `;
   return db.query(query, [userId, selectedDate]);
 }
@@ -47,12 +46,10 @@ async function getCalendarMemo(userId, currentDate) {
     WHERE memo.user_id = $1
     AND memo.start_date <= $3
     AND memo.end_date >= $2
-    ORDER BY memo.start_date, memo.end_date DESC, memo.created_at, memo.id
   `;
 
   return db.query(query, [userId, startDate, endDate]);
 }
-
 
 // 메모 추가
 async function addMemo(memos) {
