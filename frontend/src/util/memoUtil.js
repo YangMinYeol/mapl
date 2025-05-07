@@ -1,8 +1,38 @@
+import { getDateKey } from "./calendarUtil";
+
 export const MEMO_TYPE = {
   DAILY: "daily",
   RANGE: "range",
   MORE: "more",
 };
+
+// 데일리 메모와 범위 메모 분류
+export function separateDailyAndRangeMemos(memos) {
+  const dailyMemos = {};
+  const rangeMemos = [];
+
+  for (const memo of memos) {
+    if (memo.periodId !== 1) continue;
+
+    const start = new Date(memo.startDate);
+    const end = new Date(memo.endDate);
+    const key = getDateKey(start);
+    const isDaily = start.toDateString() === end.toDateString();
+
+    if (isDaily) {
+      if (!dailyMemos[key]) dailyMemos[key] = [];
+      dailyMemos[key].push(memo);
+    } else {
+      rangeMemos.push(memo);
+    }
+  }
+
+  return { dailyMemos, rangeMemos };
+}
+
+export function dailyMemoObjectToArray(dailyMemosObj) {
+  return Object.values(dailyMemosObj).flat();
+}
 
 export function sortMemos(memos, isDaily) {
   return memos.sort((a, b) => {

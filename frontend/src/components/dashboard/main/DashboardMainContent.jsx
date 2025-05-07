@@ -17,6 +17,11 @@ import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { UserContext } from "../../../context/UserContext";
 import { useLoginExpiredHandler } from "../../../hooks/useLoginExpiredHandler";
+import {
+  dailyMemoObjectToArray,
+  separateDailyAndRangeMemos,
+  sortMemos,
+} from "../../../util/memoUtil";
 
 export default function DashboardMainContent({
   dashboardMemos,
@@ -34,6 +39,15 @@ export default function DashboardMainContent({
   const { user } = useContext(UserContext);
   const handleLoginExpired = useLoginExpiredHandler();
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
+
+  // 메모 정렬
+  function sortDashboardMemos(memos) {
+    const { dailyMemos, rangeMemos } = separateDailyAndRangeMemos(memos);
+    const sortedDaily = sortMemos(dailyMemoObjectToArray(dailyMemos), true);
+    const sortedRange = sortMemos(rangeMemos, false);
+
+    return [...sortedRange, ...sortedDaily];
+  }
 
   // 메모 추가
   function handleAddMemo() {
@@ -162,7 +176,10 @@ export default function DashboardMainContent({
     <div className="h-[480px] border-b border-mapl-slate">
       <div className="overflow-auto h-11/12 dashboard-main-content">
         <ul>
-          {dashboardMemos.map((memo) => {
+          {(selectedPeriod.id === 1
+            ? sortDashboardMemos(dashboardMemos)
+            : dashboardMemos
+          ).map((memo) => {
             if (memo.periodId === selectedPeriod.id) {
               return (
                 <li key={memo.id}>

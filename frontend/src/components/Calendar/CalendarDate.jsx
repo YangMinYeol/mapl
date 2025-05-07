@@ -5,7 +5,11 @@ import {
   getTagMaxCount,
   getWeekDates,
 } from "../../util/calendarUtil";
-import { sortMemos, MEMO_TYPE } from "../../util/memoUtil";
+import {
+  separateDailyAndRangeMemos,
+  sortMemos,
+  MEMO_TYPE,
+} from "../../util/memoUtil";
 import MemoTag from "./MemoTag";
 
 // 날짜별 메모 할당
@@ -24,7 +28,7 @@ function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount) {
   return truncateMemoMap(map, tagMaxCount);
 }
 
-// 1. 날짜 메모 맵을 작성
+// 날짜 메모 맵을 작성
 function buildDateMemoMap(weeks) {
   const map = {};
   const dailyMemosMap = {};
@@ -38,31 +42,7 @@ function buildDateMemoMap(weeks) {
   return { map, dailyMemosMap };
 }
 
-// 2. 데일리 메모와 범위 메모 분류
-function separateDailyAndRangeMemos(calendarMemos) {
-  const dailyMemos = {};
-  const rangeMemos = [];
-
-  for (const memo of calendarMemos) {
-    if (memo.periodId !== 1) continue;
-
-    const start = new Date(memo.startDate);
-    const end = new Date(memo.endDate);
-    const key = getDateKey(start);
-    const isDaily = start.toDateString() === end.toDateString();
-
-    if (isDaily) {
-      if (!dailyMemos[key]) dailyMemos[key] = [];
-      dailyMemos[key].push(memo);
-    } else {
-      rangeMemos.push(memo);
-    }
-  }
-
-  return { dailyMemos, rangeMemos };
-}
-
-// 3. 기간 메모 Level 지정
+// 기간 메모 Level 지정
 function placeRangeMemosInLevels(map, rangeMemos) {
   const sortedMemos = sortMemos(rangeMemos, false);
   const maxLevels = 100;
@@ -97,7 +77,7 @@ function placeRangeMemosInLevels(map, rangeMemos) {
   }
 }
 
-// 4. 데일리 메모 Levle 지정
+// 데일리 메모 Levle 지정
 function placeDailyMemosInLevels(map, dailyMemos) {
   for (const key in dailyMemos) {
     const sortedMemos = sortMemos(dailyMemos[key], true);
@@ -117,7 +97,7 @@ function placeDailyMemosInLevels(map, dailyMemos) {
   }
 }
 
-// 5. 최종 메모 실사용하도록 요약
+// 최종 메모 실사용하도록 요약
 function truncateMemoMap(memoMap, tagMaxCount) {
   const truncatedMap = {};
 
