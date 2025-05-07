@@ -12,6 +12,9 @@ router.get("/calendar", verifyToken, memoController.getCalendarMemo);
 // 메모 추가
 router.post("/", verifyToken, memoController.addMemo);
 
+// 메모 수정
+router.patch("/", verifyToken, memoController.updateMemo);
+
 // 메모 삭제
 router.delete("/", verifyToken, memoController.deleteMemo);
 

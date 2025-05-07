@@ -14,6 +14,7 @@ async function getMemo(userId, selectedDate) {
     FROM memo 
     WHERE user_id = $1 
     AND ((start_date <= $2 AND end_date >= $2) OR period_id = 5)
+    ORDER BY id;
   `;
   return db.query(query, [userId, selectedDate]);
 }
@@ -117,6 +118,45 @@ async function addMemo(memos) {
   }
 }
 
+// 메모 수정
+async function updateMemo(memoData) {
+  const {
+    id,
+    content,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    allDay,
+    colorId,
+  } = memoData;
+
+  const query = `
+  UPDATE memo
+  SET content = $1,
+      start_date = $2,
+      end_date = $3,
+      start_time = $4,
+      end_time = $5,
+      allDay = $6,
+      color_id = $7
+  WHERE id = $8;
+`;
+
+  const result = await db.query(query, [
+    content,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    allDay,
+    colorId,
+    id,
+  ]);
+
+  return result;
+}
+
 // 메모 삭제
 async function deleteMemo(memoId) {
   const query = `DELETE FROM memo WHERE id = $1`;
@@ -145,6 +185,7 @@ module.exports = {
   getMemo,
   getCalendarMemo,
   addMemo,
+  updateMemo,
   deleteMemo,
   deleteLinkedMemos,
   toggleMemoCompletion,

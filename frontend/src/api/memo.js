@@ -65,6 +65,28 @@ export async function addMemo(memoArray) {
   }
 }
 
+// 메모 수정
+export async function updateMemo(memoData) {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/memo/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(memoData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 // 메모 삭제
 export async function deleteMemo(memoId) {
   try {

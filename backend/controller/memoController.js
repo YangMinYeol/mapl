@@ -46,6 +46,22 @@ async function addMemo(req, res) {
   }
 }
 
+// 메모 수정
+async function updateMemo(req, res) {
+  const memo = req.body;
+
+  try {
+    await memoModel.updateMemo(memo);
+
+    return res.status(200).json({ message: "메모가 수정되었습니다." });
+  } catch (error) {
+    console.error("메모 수정 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "메모 수정 중 서버에서 문제가 발생하였습니다." });
+  }
+}
+
 // 메모 삭제
 async function deleteMemo(req, res) {
   const { memoId } = req.body;
@@ -107,6 +123,7 @@ module.exports = {
   getMemo,
   getCalendarMemo,
   addMemo,
+  updateMemo,
   deleteMemo,
   deleteLinkedMemos,
   toggleMemoCompletion,
