@@ -9,11 +9,11 @@ import { faSquare, faSquareCheck } from "@fortawesome/free-regular-svg-icons";
 import { formatDateYYYYMMDD } from "../../util/dateUtil";
 import { LoginExpiredError } from "../../util/error";
 import { useLoginExpiredHandler } from "../../hooks/useLoginExpiredHandler";
+import { useMemoModalForm } from "../../hooks/useMemoModalForm";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { addMemo, updateMemo } from "../../api/memo";
 import Loading from "../common/Loading";
-import { useColors } from "../../context/ColorContext";
 
 export default function MemoModal({
   isOpen,
@@ -25,67 +25,47 @@ export default function MemoModal({
   memo,
   periodId,
 }) {
-  const [allDay, setAllDay] = useState(true);
+  const {
+    allDay,
+    setAllDay,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    showStartDateSelect,
+    setShowStartDateSelect,
+    showEndDateSelect,
+    setShowEndDateSelect,
+    startTime,
+    setStartTime,
+    showStartTimeSelect,
+    setShowStartTimeSelect,
+    showEndTimeSelect,
+    setShowEndTimeSelect,
+    endTime,
+    setEndTime,
+    content,
+    setContent,
+    contentError,
+    setContentError,
+    dateTimeError,
+    setDateTimeError,
+    isPaletteOpen,
+    setIsPaletteOpen,
+    selectedColorId,
+    setSelectedColorId,
+    selectedColor,
+    setSelectedColor,
+  } = useMemoModalForm({ mode, memo, selectedDate, isOpen });
+
   const handleLoginExpired = useLoginExpiredHandler();
   const { openModal } = useModal();
   const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 팔레트
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const [selectedColorId, setSelectedColorId] = useState(10);
-  const [selectedColor, setSelectedColor] = useState("#173836");
-  const colors = useColors();
-
-  // 날짜
-  const [showStartDateSelect, setShowStartDateSelect] = useState(false);
-  const [showEndDateSelect, setShowEndDateSelect] = useState(false);
-  const [startDate, setStartDate] = useState(selectedDate);
-  const [endDate, setEndDate] = useState(selectedDate);
-
-  // 시간
-  const [showStartTimeSelect, setShowStartTimeSelect] = useState(false);
-  const [showEndTimeSelect, setShowEndTimeSelect] = useState(false);
-  const [startTime, setStartTime] = useState("00:00");
-  const [endTime, setEndTime] = useState("00:30");
-
-  const [content, setContent] = useState("");
-  const [contentError, setContentError] = useState(false);
-  const [dateTimeError, setDateTimeError] = useState(false);
-
   useEffect(() => {
     Modal.setAppElement("#root");
   }, []);
-
-  useEffect(() => {
-    if (mode === "create") {
-      setStartDate(selectedDate);
-      setEndDate(selectedDate);
-      setStartTime("00:00");
-      setEndTime("00:30");
-      setAllDay(true);
-      setContent("");
-      setSelectedColorId(10);
-      setSelectedColor("#173836");
-    } else if (mode === "edit" && memo) {
-      setStartDate(memo.startDate);
-      setEndDate(memo.endDate);
-      setStartTime((memo.startTime || "00:00").substring(0, 5));
-      setEndTime((memo.endTime || "00:30").substring(0, 5));
-      setAllDay(memo.allday);
-      setContent(memo.content);
-      setSelectedColorId(memo.colorId);
-      const selectedColor = colors.find((color) => color.id === memo.colorId);
-      if (selectedColor) {
-        setSelectedColor(selectedColor.hex);
-      }
-    }
-  }, [mode, isOpen]);
-
-  // Palette
-  function handlePalette() {
-    setIsPaletteOpen(!isPaletteOpen);
-  }
 
   // AllDay
   function handleAllDay() {
@@ -99,15 +79,9 @@ export default function MemoModal({
   // 메모 추가
   async function addDetailMemo() {
     try {
+      if (!validateAndCheckContent()) return;
+
       setIsLoading(true);
-
-      const isDateTimeError = validateDateTime();
-      const isContentBlank = content.trim() === "";
-
-      setDateTimeError(!isDateTimeError);
-      setContentError(isContentBlank);
-
-      if (!isDateTimeError || isContentBlank) return;
 
       await addMemo([
         {
@@ -123,18 +97,9 @@ export default function MemoModal({
           colorId: selectedColorId,
         },
       ]);
-      await loadDashboardMemos();
-      await loadCalendarMemos();
-      closeModal();
+      await reloadAndClose();
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        closeModal();
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 추가 오류:", error);
-        closeModal();
-        openModal(error.message);
-      }
+      handleMemoError(error, "add");
     } finally {
       setIsLoading(false);
     }
@@ -143,14 +108,10 @@ export default function MemoModal({
   // 메모 수정
   async function editMemo() {
     try {
-      const isDateTimeError = validateDateTime();
-      const isContentBlank = content.trim() === "";
+      if (!validateAndCheckContent()) return;
 
-      setDateTimeError(!isDateTimeError);
-      setContentError(isContentBlank);
-
-      if (!isDateTimeError || isContentBlank) return;
       setIsLoading(true);
+
       await updateMemo({
         id: memo.id,
         content,
@@ -161,20 +122,41 @@ export default function MemoModal({
         allDay,
         colorId: selectedColorId,
       });
-      await loadDashboardMemos();
-      await loadCalendarMemos();
-      closeModal();
+      await reloadAndClose();
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        closeModal();
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 편집 오류:", error);
-        closeModal();
-        openModal(error.message);
-      }
+      handleMemoError(error, "edit");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  // 날짜,시간 과 내용 유효성 검사
+  function validateAndCheckContent() {
+    const isDateTimeError = validateDateTime();
+    const isContentBlank = content.trim() === "";
+
+    setDateTimeError(!isDateTimeError);
+    setContentError(isContentBlank);
+
+    return isDateTimeError && !isContentBlank;
+  }
+
+  // 메모 목록 최신화 및 모달 닫기
+  async function reloadAndClose() {
+    await loadDashboardMemos();
+    await loadCalendarMemos();
+    closeModal();
+  }
+
+  // 메모 에러 처리
+  function handleMemoError(error, context) {
+    if (error instanceof LoginExpiredError) {
+      closeModal();
+      handleLoginExpired(error.message);
+    } else {
+      console.error(`메모 ${context === "add" ? "추가" : "편집"} 오류:`, error);
+      closeModal();
+      openModal(error.message);
     }
   }
 
@@ -322,7 +304,7 @@ export default function MemoModal({
                   backgroundColor: selectedColor,
                   borderColor: selectedColor,
                 }}
-                onClick={handlePalette}
+                onClick={() => setIsPaletteOpen(!isPaletteOpen)}
               ></div>
               {isPaletteOpen && (
                 <Palette
