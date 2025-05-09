@@ -132,6 +132,8 @@ export default function MemoModal({
         startTime: allDay ? null : startTime,
         endTime: allDay ? null : endTime,
         allDay,
+        isLinked: memo.isLinked,
+        link: memo.link,
         colorId: selectedColorId,
       });
       await reloadAndClose();
