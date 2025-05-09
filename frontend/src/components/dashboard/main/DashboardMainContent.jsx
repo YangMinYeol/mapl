@@ -224,6 +224,7 @@ export default function DashboardMainContent({
           value={memoText}
           onChange={handleMemoChange}
           onKeyUp={handleKeyPress}
+          maxLength={100}
         />
         <button
           className="cursor-pointer w-1/16"

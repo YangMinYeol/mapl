@@ -321,6 +321,7 @@ export default function MemoModal({
                 className="w-full px-1 border rounded outline-none border-mapl-black"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                maxLength={100}
               />
             </div>
             <div className="px-1 text-red-500">
