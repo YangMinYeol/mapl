@@ -131,7 +131,7 @@ async function markParentAsLinked(parentId) {
 }
 
 // 메모 수정
-async function updateMemo(memoData) {
+async function updateMemo(memo) {
   const {
     id,
     content,
@@ -140,22 +140,25 @@ async function updateMemo(memoData) {
     startTime,
     endTime,
     allDay,
+    link,
+    isLinked,
     colorId,
-  } = memoData;
+  } = memo;
 
-  const query = `
-  UPDATE memo
-  SET content = $1,
-      start_date = $2,
-      end_date = $3,
-      start_time = $4,
-      end_time = $5,
-      allDay = $6,
-      color_id = $7
-  WHERE id = $8;
-`;
+  // 1. 본인 메모(id 기준) 전체 수정
+  const updateSelfQuery = `
+    UPDATE memo
+    SET content = $1,
+        start_date = $2,
+        end_date = $3,
+        start_time = $4,
+        end_time = $5,
+        allDay = $6,
+        color_id = $7
+    WHERE id = $8;
+  `;
 
-  const result = await db.query(query, [
+  const selfResult = await db.query(updateSelfQuery, [
     content,
     startDate,
     endDate,
@@ -166,7 +169,17 @@ async function updateMemo(memoData) {
     id,
   ]);
 
-  return result;
+  // 2. 링크된 메모가 있다면 해당 group 전체의 content 수정
+  if (isLinked) {
+    const updateLinkedQuery = `
+      UPDATE memo
+      SET content = $1
+      WHERE link = $2;
+    `;
+    await db.query(updateLinkedQuery, [content, link]);
+  }
+
+  return selfResult;
 }
 
 // 메모 삭제

@@ -125,9 +125,21 @@ export default function DashboardMainContent({
 
   // 메모 편집 모달
   function openEditMemoModal(memo) {
-    setSelectedMemo(memo);
-    setMemoModalMode("edit");
-    setIsMemoModalOpen(true);
+    if (memo.isLinked) {
+      openConfirm(
+        "링크되어있는 메모입니다.",
+        "동기화되어있는 메모 모두 내용이 함께 변경됩니다.",
+        async () => {
+          setSelectedMemo(memo);
+          setMemoModalMode("edit");
+          setIsMemoModalOpen(true);
+        }
+      );
+    } else {
+      setSelectedMemo(memo);
+      setMemoModalMode("edit");
+      setIsMemoModalOpen(true);
+    }
   }
 
   // 메모 완료 상태 변경
@@ -233,7 +245,7 @@ export default function DashboardMainContent({
         memo={selectedMemo}
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
-        selectedPeriod = {selectedPeriod}
+        selectedPeriod={selectedPeriod}
       />
     </div>
   );
