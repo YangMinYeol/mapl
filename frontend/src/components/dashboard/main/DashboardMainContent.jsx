@@ -233,7 +233,7 @@ export default function DashboardMainContent({
         memo={selectedMemo}
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
-        periodId={selectedPeriod.id}
+        selectedPeriod = {selectedPeriod}
       />
     </div>
   );

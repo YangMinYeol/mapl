@@ -15,6 +15,7 @@ export default function DateTimeInput({
   time,
   setTime,
   allDay,
+  selectedPeriod,
 }) {
   const selectedTimeRef = useRef(null);
 
@@ -58,11 +59,14 @@ export default function DateTimeInput({
       />
 
       {/* Date Icon */}
-      <IconWrapper
-        icon={faCalendar}
-        position={`${allDay ? "right-1" : "right-6"}`}
-        onClick={toggleDatePicker}
-      />
+      {selectedPeriod.name === "Day" && (
+        <IconWrapper
+          icon={faCalendar}
+          position={`${allDay ? "right-1" : "right-6"}`}
+          onClick={toggleDatePicker}
+        />
+      )}
+
       {showDateSelect && <MiniCalendar date={date} setDate={setDate} />}
 
       {/* Time Icon */}

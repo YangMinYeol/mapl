@@ -23,7 +23,7 @@ export default function MemoModal({
   loadDashboardMemos,
   loadCalendarMemos,
   memo,
-  periodId,
+  selectedPeriod,
 }) {
   const {
     allDay,
@@ -56,7 +56,7 @@ export default function MemoModal({
     setSelectedColorId,
     selectedColor,
     setSelectedColor,
-  } = useMemoModalForm({ mode, memo, selectedDate, isOpen });
+  } = useMemoModalForm({ mode, memo, selectedDate, isOpen, selectedPeriod });
 
   const handleLoginExpired = useLoginExpiredHandler();
   const { openModal } = useModal();
@@ -87,12 +87,18 @@ export default function MemoModal({
         {
           userId: user.id,
           content,
-          startDate: formatDateYYYYMMDD(startDate),
-          endDate: formatDateYYYYMMDD(endDate),
-          startTime,
-          endTime,
+          startDate:
+            selectedPeriod.name === "Bucket List"
+              ? null
+              : formatDateYYYYMMDD(startDate),
+          endDate:
+            selectedPeriod.name === "Bucket List"
+              ? null
+              : formatDateYYYYMMDD(endDate),
+          startTime: allDay ? null : startTime,
+          endTime: allDay ? null : endTime,
           allDay,
-          periodId,
+          periodId: selectedPeriod.id,
           isLinked: false,
           colorId: selectedColorId,
         },
@@ -115,10 +121,16 @@ export default function MemoModal({
       await updateMemo({
         id: memo.id,
         content,
-        startDate: formatDateYYYYMMDD(startDate),
-        endDate: formatDateYYYYMMDD(endDate),
-        startTime,
-        endTime,
+        startDate:
+          selectedPeriod.name === "Bucket List"
+            ? null
+            : formatDateYYYYMMDD(startDate),
+        endDate:
+          selectedPeriod.name === "Bucket List"
+            ? null
+            : formatDateYYYYMMDD(endDate),
+        startTime: allDay ? null : startTime,
+        endTime: allDay ? null : endTime,
         allDay,
         colorId: selectedColorId,
       });
@@ -197,13 +209,27 @@ export default function MemoModal({
     onClose();
   }
 
+  // 높이 설정
+  const showDateInputs = selectedPeriod.name !== "Bucket List";
+  const showAllDay = selectedPeriod.name === "Day";
+  const showColor = selectedPeriod.name === "Day";
+  let modalHeight = "h-[345px]";
+  let contentHeight = "h-[250px]";
+  if (!showDateInputs) {
+    modalHeight = "h-[190px]";
+    contentHeight = "h-[95px]";
+  } else if (!showAllDay && !showColor) {
+    modalHeight = "h-[270px]";
+    contentHeight = "h-[175px]";
+  }
+
   return (
     <Modal
       isOpen={isOpen}
       shouldCloseOnOverlayClick={false}
       style={baseModalStyle}
     >
-      <div className="w-[550px] h-[345px]" onClick={handleModalClick}>
+      <div className={`w-[550px] ${modalHeight}`} onClick={handleModalClick}>
         {/* Header */}
         <div className="h-[46px] border-b modal-header border-mapl-slate flex justify-between items-center px-3">
           <div className="text-base">
@@ -224,58 +250,64 @@ export default function MemoModal({
         </div>
 
         {/* Content */}
-        <div className="h-[250px] modal-content flex-col px-3">
+        <div className={`${contentHeight} modal-content flex-col px-3`}>
           {/* 날짜/시간 */}
-          <div className="flex justify-between pb-3">
-            <div className="w-[49%]">
-              <div className="py-2">
-                <span>시작</span>
+          {selectedPeriod.name !== "Bucket List" && (
+            <div className="flex justify-between pb-3">
+              <div className="w-[49%]">
+                <div className="py-2">
+                  <span>시작</span>
+                </div>
+                <DateTimeInput
+                  showDateSelect={showStartDateSelect}
+                  setShowDateSelect={setShowStartDateSelect}
+                  date={startDate}
+                  setDate={setStartDate}
+                  showTimeSelect={showStartTimeSelect}
+                  setShowTimeSelect={setShowStartTimeSelect}
+                  time={startTime}
+                  setTime={setStartTime}
+                  allDay={allDay}
+                  selectedPeriod={selectedPeriod}
+                />
+                <div className="px-1 text-red-500">
+                  {dateTimeError && (
+                    <span>날짜 또는 시간을 다시 확인해 주세요.</span>
+                  )}
+                </div>
               </div>
-              <DateTimeInput
-                showDateSelect={showStartDateSelect}
-                setShowDateSelect={setShowStartDateSelect}
-                date={startDate}
-                setDate={setStartDate}
-                showTimeSelect={showStartTimeSelect}
-                setShowTimeSelect={setShowStartTimeSelect}
-                time={startTime}
-                setTime={setStartTime}
-                allDay={allDay}
-              />
-              <div className="px-1 text-red-500">
-                {dateTimeError && (
-                  <span>날짜 또는 시간을 다시 확인해 주세요.</span>
-                )}
+              <div className="w-[49%]">
+                <div className="py-2">
+                  <span>종료</span>
+                </div>
+                <DateTimeInput
+                  showDateSelect={showEndDateSelect}
+                  setShowDateSelect={setShowEndDateSelect}
+                  date={endDate}
+                  setDate={setEndDate}
+                  showTimeSelect={showEndTimeSelect}
+                  setShowTimeSelect={setShowEndTimeSelect}
+                  time={endTime}
+                  setTime={setEndTime}
+                  allDay={allDay}
+                  selectedPeriod={selectedPeriod}
+                />
               </div>
             </div>
-            <div className="w-[49%]">
-              <div className="py-2">
-                <span>종료</span>
-              </div>
-              <DateTimeInput
-                showDateSelect={showEndDateSelect}
-                setShowDateSelect={setShowEndDateSelect}
-                date={endDate}
-                setDate={setEndDate}
-                showTimeSelect={showEndTimeSelect}
-                setShowTimeSelect={setShowEndTimeSelect}
-                time={endTime}
-                setTime={setEndTime}
-                allDay={allDay}
-              />
-            </div>
-          </div>
+          )}
 
           {/* 하루종일 */}
-          <div className="flex items-center h-8 pb-3">
-            <button
-              className="w-[18px] h-[18px] hover:bg-mapl-slate flex items-center justify-center cursor-pointer rounded"
-              onClick={handleAllDay}
-            >
-              <FontAwesomeIcon icon={allDay ? faSquareCheck : faSquare} />
-            </button>
-            <span>하루종일</span>
-          </div>
+          {selectedPeriod.name === "Day" && (
+            <div className="flex items-center h-8 pb-3">
+              <button
+                className="w-[18px] h-[18px] hover:bg-mapl-slate flex items-center justify-center cursor-pointer rounded"
+                onClick={handleAllDay}
+              >
+                <FontAwesomeIcon icon={allDay ? faSquareCheck : faSquare} />
+              </button>
+              <span>하루종일</span>
+            </div>
+          )}
 
           {/* 내용 */}
           <div className="pb-3">
@@ -295,25 +327,27 @@ export default function MemoModal({
           </div>
 
           {/* 색상 */}
-          <div className="flex items-center h-8 pb-3">
-            <span>색상</span>
-            <div className="flex items-center h-full ml-1 w-96">
-              <div
-                className="w-4 h-4 mr-1 border rounded cursor-pointer"
-                style={{
-                  backgroundColor: selectedColor,
-                  borderColor: selectedColor,
-                }}
-                onClick={() => setIsPaletteOpen(!isPaletteOpen)}
-              ></div>
-              {isPaletteOpen && (
-                <Palette
-                  setSelectedColorId={setSelectedColorId}
-                  setSelectedColor={setSelectedColor}
-                />
-              )}
+          {selectedPeriod.name === "Day" && (
+            <div className="flex items-center h-8 pb-3">
+              <span>색상</span>
+              <div className="flex items-center h-full ml-1 w-96">
+                <div
+                  className="w-4 h-4 mr-1 border rounded cursor-pointer"
+                  style={{
+                    backgroundColor: selectedColor,
+                    borderColor: selectedColor,
+                  }}
+                  onClick={() => setIsPaletteOpen(!isPaletteOpen)}
+                ></div>
+                {isPaletteOpen && (
+                  <Palette
+                    setSelectedColorId={setSelectedColorId}
+                    setSelectedColor={setSelectedColor}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}

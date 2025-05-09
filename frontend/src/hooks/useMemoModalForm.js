@@ -1,25 +1,32 @@
 import { useEffect, useState } from "react";
 import { useColors } from "../context/ColorContext";
+import { setDateByPeriod } from "../util/dateUtil";
 
-export function useMemoModalForm({ mode, memo, selectedDate, isOpen }) {
+export function useMemoModalForm({
+  mode,
+  memo,
+  selectedDate,
+  isOpen,
+  selectedPeriod,
+}) {
   // 날짜
   const [allDay, setAllDay] = useState(true);
   const [startDate, setStartDate] = useState(selectedDate);
   const [endDate, setEndDate] = useState(selectedDate);
   const [showStartDateSelect, setShowStartDateSelect] = useState(false);
   const [showEndDateSelect, setShowEndDateSelect] = useState(false);
-  
+
   // 시간
   const [startTime, setStartTime] = useState("00:00");
   const [endTime, setEndTime] = useState("00:30");
   const [showStartTimeSelect, setShowStartTimeSelect] = useState(false);
   const [showEndTimeSelect, setShowEndTimeSelect] = useState(false);
-  
+
   // 내용
   const [content, setContent] = useState("");
   const [contentError, setContentError] = useState(false);
   const [dateTimeError, setDateTimeError] = useState(false);
-  
+
   // 팔레트
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState(10);
@@ -28,8 +35,9 @@ export function useMemoModalForm({ mode, memo, selectedDate, isOpen }) {
 
   useEffect(() => {
     if (mode === "create") {
-      setStartDate(selectedDate);
-      setEndDate(selectedDate);
+      const { startDate, endDate } = setDateByPeriod(selectedPeriod, selectedDate);
+      setStartDate(startDate);
+      setEndDate(endDate);
       setStartTime("00:00");
       setEndTime("00:30");
       setAllDay(true);
