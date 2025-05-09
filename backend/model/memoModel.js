@@ -59,63 +59,75 @@ async function addMemo(memos) {
 
     const insertedMemos = [];
 
-    for (const memoData of memos) {
-      const {
-        userId,
-        content,
-        startDate,
-        endDate,
-        startTime = null,
-        endTime = null,
-        allDay = true,
-        periodId,
-        link,
-        isLinked,
-        colorId = 10,
-      } = memoData;
+    for (const memo of memos) {
+      // 1. 메모 추가
+      const memoId = await insertMemo(memo);
 
-      // 1. 메모를 추가하면서 link는 임시로 NULL로 설정
-      const insertQuery = `
-        INSERT INTO memo (user_id, content, start_date, end_date,start_time, end_time, allday, period_id, color_id, is_linked, link )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NULL)
-        RETURNING id;
-      `;
-
-      const result = await db.query(insertQuery, [
-        userId,
-        content,
-        startDate,
-        endDate,
-        startTime,
-        endTime,
-        allDay,
-        periodId,
-        colorId,
-        isLinked,
-      ]);
-
-      const memoId = result.rows[0].id;
-
-      // 2. link를 해당 값 업데이트
-      const finalLink = isLinked ? link : memoId;
-
-      const updateLinkQuery = `
-        UPDATE memo
-        SET link = $1
-        WHERE id = $2
-        RETURNING *;
-      `;
-      const updatedMemo = await db.query(updateLinkQuery, [finalLink, memoId]);
-
-      insertedMemos.push(updatedMemo.rows[0]);
+      if (memo.isLinked) {
+        // 2. 메모 링크 값 업데이트
+        const updatedMemo = await updateMemoLink(memoId, memo.link);
+        insertedMemos.push(updatedMemo);
+        // 3. 부모 메모 링크여부 업데이트
+        await markParentAsLinked(memo.link);
+      } else {
+        const updatedMemo = await updateMemoLink(memoId, memoId);
+        insertedMemos.push(updatedMemo);
+      }
     }
 
     await db.query("COMMIT");
+    return insertedMemos;
   } catch (error) {
     await db.query("ROLLBACK");
-    console.error("메모 추가 중 오류 발생:", error);
     throw new Error("메모 추가 실패: " + error.message);
   }
+}
+
+// 메모 추가
+async function insertMemo({
+  userId,
+  content,
+  startDate,
+  endDate,
+  startTime = null,
+  endTime = null,
+  allDay = true,
+  periodId,
+  isLinked,
+  colorId = 10,
+}) {
+  const query = `
+    INSERT INTO memo (user_id, content, start_date, end_date, start_time, end_time, allday, period_id, color_id, is_linked, link)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NULL)
+    RETURNING id;
+  `;
+  const result = await db.query(query, [
+    userId,
+    content,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    allDay,
+    periodId,
+    colorId,
+    isLinked,
+  ]);
+  return result.rows[0].id;
+}
+
+// 메모 링크 업데이트
+async function updateMemoLink(memoId, linkId) {
+  const query = `
+    UPDATE memo SET link = $1 WHERE id = $2 RETURNING *;
+  `;
+  const result = await db.query(query, [linkId, memoId]);
+  return result.rows[0];
+}
+
+// 부모 메모 링크여부 업데이트
+async function markParentAsLinked(parentId) {
+  await db.query(`UPDATE memo SET is_linked = true WHERE id = $1`, [parentId]);
 }
 
 // 메모 수정
