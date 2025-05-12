@@ -119,6 +119,20 @@ async function toggleLinkedMemosCompletion(req, res) {
   }
 }
 
+// 메모 미루기
+async function postponeMemo(req, res) {
+  const { memoId, startDate, endDate } = req.body;
+  try {
+    await memoModel.postponeMemo(memoId, startDate, endDate);
+    return res.status(200).json({ message: "메모가 미루어졌습니다." });
+  } catch (error) {
+    console.error("메모 미루기 오류", error);
+    return res
+      .status(500)
+      .json({ message: "메모 미루기 중 서버에서 문제가 발생하였습니다." });
+  }
+}
+
 module.exports = {
   getMemo,
   getCalendarMemo,
@@ -128,4 +142,5 @@ module.exports = {
   deleteLinkedMemos,
   toggleMemoCompletion,
   toggleLinkedMemosCompletion,
+  postponeMemo,
 };
