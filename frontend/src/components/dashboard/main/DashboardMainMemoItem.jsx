@@ -25,7 +25,7 @@ export default function DashboardMainMemoItem({
       <div
         className={`w-16/20 ${
           memo.completed && "line-through"
-        } break-words whitespace-normal`}
+        } break-words`}
       >
         {memo.content}
       </div>
