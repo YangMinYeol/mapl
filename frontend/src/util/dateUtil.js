@@ -46,6 +46,62 @@ export function setDateByPeriod(period, selectedDate) {
   return { startDate: formatDateYYYYMMDD(startDate), endDate };
 }
 
+// 미루기 위한 startDate와 endDate를 설정
+export function postponeDates(period, startDate) {
+  let newStart = new Date(startDate);
+  let newEnd = null;
+
+  switch (period.name) {
+    case "Day":
+      newStart = addDays(newStart, 1);
+      newEnd = newStart;
+      break;
+    case "Week":
+      newStart = addWeeks(newStart, 1);
+      newEnd = endOfWeek(newStart, { weekStartsOn: 0 });
+      break;
+    case "Month":
+      newStart = addMonths(newStart, 1);
+      newEnd = endOfMonth(newStart);
+      break;
+    case "Year":
+      newStart = addYears(newStart, 1);
+      newEnd = endOfYear(newStart);
+      break;
+  }
+
+  return {
+    newStartDate: formatDateYYYYMMDD(newStart),
+    newEndDate: formatDateYYYYMMDD(newEnd),
+  };
+}
+
+// 날짜에 지정된 일수를 더하는 함수
+function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+// 날짜에 지정된 주수를 더하는 함수
+function addWeeks(date, weeks) {
+  return addDays(date, weeks * 7);
+}
+
+// 날짜에 지정된 월수를 더하는 함수
+function addMonths(date, months) {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+}
+
+// 날짜에 지정된 연수를 더하는 함수
+function addYears(date, years) {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + years);
+  return result;
+}
+
 // 두 날짜 사이에 포함되는지 확인
 export function isBetween(date, start, end) {
   return (

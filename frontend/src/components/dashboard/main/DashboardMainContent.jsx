@@ -10,9 +10,14 @@ import {
   toggleMemoCompletion,
   toggleLinkedMemosCompletion,
   deleteLinkedMemos,
+  postponeMemo,
 } from "../../../api/memo";
 import { LoginExpiredError } from "../../../util/error";
-import { setDateByPeriod } from "../../../util/dateUtil";
+import {
+  formatDateYYYYMMDD,
+  postponeDates,
+  setDateByPeriod,
+} from "../../../util/dateUtil";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { UserContext } from "../../../context/UserContext";
@@ -142,6 +147,40 @@ export default function DashboardMainContent({
     }
   }
 
+  // 메모 미루기,연장하기
+  async function handlePostponeMemo(memo) {
+    try {
+      const { periodId, startDate, endDate } = memo;
+      if (
+        periodId === 1 &&
+        formatDateYYYYMMDD(startDate) !== formatDateYYYYMMDD(endDate)
+      ) {
+        openModal(
+          "시작일과 종료일이 같지 않은 메모는 미루기가 불가능합니다.",
+          null,
+          "기간 메모는 편집을 통해 직접 날짜를 변경해 주세요."
+        );
+        return;
+      }
+
+      const { newStartDate, newEndDate } = postponeDates(
+        selectedPeriod,
+        startDate
+      );
+
+      await postponeMemo(memo.id, newStartDate, newEndDate);
+      await loadDashboardMemos();
+      await loadCalendarMemos();
+    } catch (error) {
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 미루기 오류:", error);
+        openModal(error.message);
+      }
+    }
+  }
+
   // 메모 완료 상태 변경
   async function handleToggleMemoCompletion(memo) {
     try {
@@ -210,6 +249,8 @@ export default function DashboardMainContent({
                     onComplete={handleToggleMemoCompletion}
                     onDelete={handleDeleteMemo}
                     onEdit={openEditMemoModal}
+                    onPostpone={handlePostponeMemo}
+                    selectedPeriod={selectedPeriod}
                   />
                 </li>
               );

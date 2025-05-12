@@ -31,4 +31,7 @@ router.post(
   memoController.toggleLinkedMemosCompletion
 );
 
+// 메모 미루기
+router.post("/postpone", verifyToken, memoController.postponeMemo);
+
 module.exports = router;

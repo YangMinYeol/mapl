@@ -206,6 +206,17 @@ async function toggleLinkedMemosCompletion(linkId) {
   return db.query(query, [linkId]);
 }
 
+// 메모 미루기
+async function postponeMemo(memoId, startDate, endDate) {
+  const query = `
+    UPDATE memo
+    SET start_date = $1,
+        end_date = $2
+    WHERE id = $3
+  `;
+  return db.query(query, [startDate, endDate, memoId]);
+}
+
 module.exports = {
   getMemo,
   getCalendarMemo,
@@ -215,4 +226,5 @@ module.exports = {
   deleteLinkedMemos,
   toggleMemoCompletion,
   toggleLinkedMemosCompletion,
+  postponeMemo,
 };
