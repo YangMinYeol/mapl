@@ -34,15 +34,15 @@ export default function DashboardMainMemoItem({
 
       <div className="flex gap-2 ml-auto opacity-0 group-hover:opacity-100">
         {/* 링크 아이콘: 연결된 메모일 경우만 표시 */}
-        {memo.isLinked && <IconButton icon={faLink} />}
+        {memo.isLinked && <IconButton icon={faLink} title="링크"/>}
         {/* 미루기 아이콘: 버킷리스트가 아닐 경우만 표시 */}
         {selectedPeriod.name !== "Bucket List" && (
-          <IconButton icon={faArrowRight} onClick={() => onPostpone(memo)} />
+          <IconButton icon={faArrowRight} onClick={() => onPostpone(memo)} title="미루기"/>
         )}
         {/* 수정 아이콘 */}
-        <IconButton icon={faPenToSquare} onClick={() => onEdit(memo)} />
+        <IconButton icon={faPenToSquare} onClick={() => onEdit(memo)} title="수정"/>
         {/* 삭제 아이콘 */}
-        <IconButton icon={faTrashCan} onClick={() => onDelete(memo)} />
+        <IconButton icon={faTrashCan} onClick={() => onDelete(memo)} title="삭제"/>
       </div>
     </div>
   );
