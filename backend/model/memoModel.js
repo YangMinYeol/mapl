@@ -8,7 +8,7 @@ const {
 } = require("date-fns");
 
 // 메모 목록 조회
-async function getMemo(userId, selectedDate) {
+async function getMemos(userId, selectedDate) {
   const query = `
     SELECT * 
     FROM memo 
@@ -20,7 +20,7 @@ async function getMemo(userId, selectedDate) {
 }
 
 // 달력 메모 목록 조회
-async function getCalendarMemo(userId, currentDate) {
+async function getCalendarMemos(userId, currentDate) {
   const prevMonthStart = startOfMonth(subMonths(currentDate, 1));
   const nextMonthEnd = endOfMonth(addMonths(currentDate, 1));
 
@@ -207,8 +207,8 @@ async function postponeMemo(memoId, startDate, endDate) {
 }
 
 module.exports = {
-  getMemo,
-  getCalendarMemo,
+  getMemos,
+  getCalendarMemos,
   addMemo,
   updateMemo,
   deleteMemo,
