@@ -11,6 +11,9 @@ import {
   MEMO_TYPE,
 } from "../../util/memoUtil";
 import MemoTag from "./MemoTag";
+import MemoModal from "../memo/MemoModal";
+import { useState } from "react";
+import { useModal } from "../../context/ModalContext";
 
 // 날짜별 메모 할당
 function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount) {
@@ -130,10 +133,32 @@ export default function CalendarDate({
   selectedDate,
   setSelectedDate,
   calendarMemos,
+  loadDashboardMemos,
+  loadCalendarMemos,
 }) {
   const weeks = getWeekDates(currentDate);
   const tagMaxCount = getTagMaxCount(weeks);
   const memoLevelMap = buildMemoLevelMap(weeks, calendarMemos, tagMaxCount);
+  const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
+  const [selectedMemo, setSelectedMemo] = useState(null);
+  const { openConfirm } = useModal();
+
+  // 메모 클릭 시 동작
+  function handleMemoClick(memo) {
+    if (memo.isLinked) {
+      openConfirm(
+        "링크되어있는 메모입니다.",
+        "내용 변경시 동기화되어있는 메모 모두 내용이 함께 변경됩니다.",
+        async () => {
+          setSelectedMemo(memo);
+          setIsMemoModalOpen(true);
+        }
+      );
+    } else {
+      setSelectedMemo(memo);
+      setIsMemoModalOpen(true);
+    }
+  }
 
   return (
     <div
@@ -173,6 +198,7 @@ export default function CalendarDate({
                       key={memo?.id ?? `placeholder-${i}`}
                       memo={memo}
                       date={date}
+                      onClick={() => handleMemoClick(memo)}
                     />
                   ))}
                 </div>
@@ -181,6 +207,19 @@ export default function CalendarDate({
           })}
         </div>
       ))}
+      <MemoModal
+        isOpen={isMemoModalOpen}
+        onClose={() => {
+          setIsMemoModalOpen(false);
+          setSelectedMemo(null);
+        }}
+        selectedDate={selectedDate}
+        mode="edit"
+        memo={selectedMemo}
+        selectedPeriod={{ id: 1, name: "Day" }}
+        loadDashboardMemos={loadDashboardMemos}
+        loadCalendarMemos={loadCalendarMemos}
+      />
     </div>
   );
 }
