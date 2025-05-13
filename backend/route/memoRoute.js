@@ -4,10 +4,10 @@ const memoController = require("../controller/memoController");
 const verifyToken = require("../middleware/authMiddleware");
 
 // 메모 목록
-router.get("/", verifyToken, memoController.getMemo);
+router.get("/", verifyToken, memoController.getMemos);
 
 // 달력 메모 목록
-router.get("/calendar", verifyToken, memoController.getCalendarMemo);
+router.get("/calendar", verifyToken, memoController.getCalendarMemos);
 
 // 메모 추가
 router.post("/", verifyToken, memoController.addMemo);
@@ -33,5 +33,6 @@ router.post(
 
 // 메모 미루기
 router.post("/postpone", verifyToken, memoController.postponeMemo);
+
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const memoModel = require("../model/memoModel");
 
 // 메모 목록 불러오기
-async function getMemo(req, res) {
+async function getMemos(req, res) {
   const { userId, selectedDate } = req.query;
   try {
     const result = await memoModel.getMemo(userId, selectedDate);
@@ -16,7 +16,7 @@ async function getMemo(req, res) {
 }
 
 // 달력 메모 불러오기
-async function getCalendarMemo(req, res) {
+async function getCalendarMemos(req, res) {
   const { userId, currentDate } = req.query;
   try {
     const result = await memoModel.getCalendarMemo(userId, currentDate);
@@ -134,8 +134,8 @@ async function postponeMemo(req, res) {
 }
 
 module.exports = {
-  getMemo,
-  getCalendarMemo,
+  getMemos,
+  getCalendarMemos,
   addMemo,
   updateMemo,
   deleteMemo,
