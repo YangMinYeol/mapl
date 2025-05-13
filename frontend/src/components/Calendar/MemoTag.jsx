@@ -13,25 +13,35 @@ function getMemoTagClass(memo, date) {
 
   return [
     "text-white",
-    isStart ? "rounded-l ml-0.5" : "",
-    isEnd ? "rounded-r mr-0.5" : "",
+    isStart ? "rounded-l ml-1" : "",
+    isEnd ? "rounded-r mr-1" : "",
   ]
     .filter(Boolean)
     .join(" ");
 }
 
-export default function MemoTag({ memo, date }) {
+export default function MemoTag({ memo, date, onClick }) {
   const shouldShow =
     memo?.content &&
     (memo.type === MEMO_TYPE.MORE ||
       isSameDay(date, new Date(memo.startDate)) ||
       date.getDay() === 0);
 
+  const handleClick = (e) => {
+    if (memo) {
+      e.stopPropagation(); // 버블링 방지
+      onClick(memo);
+    }
+  };
+
   return (
     <div
       key={memo?.id}
-      className={`px-1 h-[20px] truncate ${getMemoTagClass(memo, date)}`}
+      className={`px-1 h-5 truncate ${getMemoTagClass(memo, date)} ${
+        memo && "hover:cursor-pointer hover:font-bold"
+      }`}
       style={memo ? { backgroundColor: memo.colorHex } : {}}
+      onClick={handleClick}
     >
       {shouldShow ? memo.content : null}
     </div>

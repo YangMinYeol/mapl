@@ -113,6 +113,8 @@ export default function MainPage() {
             setCurrentDate={setCurrentDate}
             selectedDate={selectedDate}
             setSelectedDate={handleSetSelectedDate}
+            loadDashboardMemos={loadDashboardMemos}
+            loadCalendarMemos={loadCalendarMemos}
           />
         </div>
         <div className="w-full h-full detail-container md:w-[30%]">

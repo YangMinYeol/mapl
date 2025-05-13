@@ -29,18 +29,7 @@ async function getCalendarMemo(userId, currentDate) {
 
   const query = `
     SELECT 
-      memo.id,
-      memo.user_id,
-      memo.content,
-      memo.start_date,
-      memo.end_date,
-      memo.start_time,
-      memo.end_time,
-      memo.period_id,
-      memo.completed,
-      memo.allday,
-      memo.color_id,
-      memo.created_at,
+      memo.*,
       color.hex AS color_hex
     FROM memo
     JOIN color ON memo.color_id = color.id
