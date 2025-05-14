@@ -7,16 +7,37 @@ const {
   format,
 } = require("date-fns");
 
+// DB memo row → 프론트용 메모 객체로 매핑
+function mapMemoRow(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    content: row.content,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    colorId: row.color_id,
+    colorHex: row.color_hex,
+    periodId: row.period_id,
+    completed: row.completed,
+    createdAt: row.created_at,
+    link: row.link,
+    isLinked: row.is_linked,
+  };
+}
+
 // 메모 목록 조회
 async function getMemos(userId, selectedDate) {
   const query = `
-    SELECT * 
+    SELECT memo.* ,
+      color.hex AS color_hex
     FROM memo 
+    JOIN color ON memo.color_id = color.id
     WHERE user_id = $1 
     AND ((start_date <= $2 AND end_date >= $2) OR period_id = 5)
     ORDER BY id;
   `;
-  return db.query(query, [userId, selectedDate]);
+  const result = await db.query(query, [userId, selectedDate]);
+  return result.rows.map(mapMemoRow);
 }
 
 // 달력 메모 목록 조회
@@ -38,7 +59,8 @@ async function getCalendarMemos(userId, currentDate) {
     AND memo.end_date >= $2
   `;
 
-  return db.query(query, [userId, startDate, endDate]);
+  const result = await db.query(query, [userId, startDate, endDate]);
+  return result.rows.map(mapMemoRow);
 }
 
 // 메모 추가
@@ -206,6 +228,21 @@ async function postponeMemo(memoId, startDate, endDate) {
   return db.query(query, [startDate, endDate, memoId]);
 }
 
+// 링크 연결되어있는 메모 목록 불러오기
+async function getLinkedMemos(linkId) {
+  const query = `
+    SELECT memo.*,
+      color.hex AS color_hex
+    FROM memo 
+    JOIN color 
+    ON memo.color_id = color.id
+    WHERE link = $1
+    AND memo.id != $1;
+  `;
+  const result = await db.query(query, [linkId]);
+  return result.rows.map(mapMemoRow);
+}
+
 module.exports = {
   getMemos,
   getCalendarMemos,
@@ -216,4 +253,5 @@ module.exports = {
   toggleMemoCompletion,
   toggleLinkedMemosCompletion,
   postponeMemo,
+  getLinkedMemos,
 };

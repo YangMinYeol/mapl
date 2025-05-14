@@ -199,3 +199,26 @@ export async function postponeMemo(memoId, newStartDate, newEndDate) {
     throw error;
   }
 }
+
+// 링크되어있는 메모 목록 불러오기
+export async function fetchLinkedMemos(linkId) {
+  try {
+    const response = await fetchWithAuth(
+      `${API_URL}/api/memo/linked/${linkId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
