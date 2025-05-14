@@ -27,6 +27,7 @@ import {
   separateDailyAndRangeMemos,
   sortMemos,
 } from "../../../util/memoUtil";
+import LinkModal from "../../link/LinkModal";
 
 export default function DashboardMainContent({
   dashboardMemos,
@@ -46,6 +47,10 @@ export default function DashboardMainContent({
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memoModalMode, setMemoModalMode] = useState("");
   const [selectedMemo, setSelectedMemo] = useState(null);
+
+  // 링크 메모
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [selectedLinkMemo, setSelectedLinkMemo] = useState(null);
 
   // 메모 정렬
   function sortDashboardMemos(memos) {
@@ -207,6 +212,11 @@ export default function DashboardMainContent({
     }
   }
 
+  function openLinkModal(memo) {
+    setSelectedLinkMemo(memo);
+    setIsLinkModalOpen(true);
+  }
+
   // Enter키 눌렀을때 메모 추가
   function handleKeyPress(e) {
     if (e.key === "Enter") {
@@ -250,6 +260,7 @@ export default function DashboardMainContent({
                     onDelete={handleDeleteMemo}
                     onEdit={openEditMemoModal}
                     onPostpone={handlePostponeMemo}
+                    openLinkModal={openLinkModal}
                     selectedPeriod={selectedPeriod}
                   />
                 </li>
@@ -288,6 +299,13 @@ export default function DashboardMainContent({
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
         selectedPeriod={selectedPeriod}
+      />
+      <LinkModal
+        isOpen={isLinkModalOpen}
+        onClose={() => {
+          setIsLinkModalOpen(false);
+        }}
+        selectedLinkMemo={selectedLinkMemo}
       />
     </div>
   );

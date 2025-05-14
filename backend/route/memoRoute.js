@@ -34,5 +34,7 @@ router.post(
 // 메모 미루기
 router.post("/postpone", verifyToken, memoController.postponeMemo);
 
+// 링크되어있는 메모 목록 불러오기
+router.get("/linked/:linkId", verifyToken, memoController.getLinkedMemos);
 
 module.exports = router;

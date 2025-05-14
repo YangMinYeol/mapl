@@ -4,9 +4,9 @@ const memoModel = require("../model/memoModel");
 async function getMemos(req, res) {
   const { userId, selectedDate } = req.query;
   try {
-    const result = await memoModel.getMemo(userId, selectedDate);
+    const result = await memoModel.getMemos(userId, selectedDate);
 
-    return res.status(200).json(result.rows);
+    return res.status(200).json(result);
   } catch (error) {
     console.error("메모 목록 오류:", error);
     return res
@@ -19,9 +19,9 @@ async function getMemos(req, res) {
 async function getCalendarMemos(req, res) {
   const { userId, currentDate } = req.query;
   try {
-    const result = await memoModel.getCalendarMemo(userId, currentDate);
+    const result = await memoModel.getCalendarMemos(userId, currentDate);
 
-    return res.status(200).json(result.rows);
+    return res.status(200).json(result);
   } catch (error) {
     console.error("달력 메모 목록 오류:", error);
     return res
@@ -133,6 +133,21 @@ async function postponeMemo(req, res) {
   }
 }
 
+// 링크되어있는 메모 목록 불러오기
+async function getLinkedMemos(req, res) {
+  const { linkId } = req.params;
+  try {
+    const result = await memoModel.getLinkedMemos(linkId);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("링크 연결된 메모 목록 오류", error);
+    return res.status(500).json({
+      message:
+        "링크 연결된 메모 목록을 불러오던 중 서버에서 문제가 발생하였습니다.",
+    });
+  }
+}
+
 module.exports = {
   getMemos,
   getCalendarMemos,
@@ -143,4 +158,5 @@ module.exports = {
   toggleMemoCompletion,
   toggleLinkedMemosCompletion,
   postponeMemo,
+  getLinkedMemos,
 };
