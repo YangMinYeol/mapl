@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { format } from "date-fns";
 
 import MiniCalendar from "../calendar/mini/MiniCalendar";
+import { formatTimeTo12Hour } from "../../util/timeUtil";
 
 export default function DateTimeInput({
   showDateSelect,
@@ -55,7 +56,7 @@ export default function DateTimeInput({
       <input
         readOnly
         className="w-full px-1 pr-10 border rounded outline-none border-mapl-black"
-        value={`${format(date, "yyyy년 MM월 dd일")}${allDay ? "" : ` ${time}`}`}
+        value={`${format(date, "yyyy년 MM월 dd일")}${allDay ? "" : ` ${formatTimeTo12Hour(time)}`}`}
       />
 
       {/* Date Icon */}
