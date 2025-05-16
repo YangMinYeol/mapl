@@ -15,13 +15,17 @@ function mapMemoRow(row) {
     content: row.content,
     startDate: row.start_date,
     endDate: row.end_date,
-    colorId: row.color_id,
-    colorHex: row.color_hex,
-    periodId: row.period_id,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    allday: row.allday,
     completed: row.completed,
-    createdAt: row.created_at,
+    periodId: row.period_id,
     link: row.link,
     isLinked: row.is_linked,
+    colorId: row.color_id,
+    createdAt: row.created_at,
+    colorHex: row.color_hex,
+    periodName: row.period_name,
   };
 }
 
@@ -232,12 +236,14 @@ async function postponeMemo(memoId, startDate, endDate) {
 async function getLinkedMemos(linkId) {
   const query = `
     SELECT memo.*,
-      color.hex AS color_hex
+      color.hex AS color_hex,
+      period_type.name AS period_name
     FROM memo 
     JOIN color 
     ON memo.color_id = color.id
-    WHERE link = $1
-    AND memo.id != $1;
+    JOIN period_type
+    ON memo.period_id = period_type.id
+    WHERE link = $1;
   `;
   const result = await db.query(query, [linkId]);
   return result.rows.map(mapMemoRow);
