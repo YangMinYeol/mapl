@@ -10,7 +10,7 @@ import LinkMemoItem from "./LinkMemoItem";
 import { sortMemos } from "../../util/memoUtil";
 
 export default function LinkModal({ isOpen, onClose, selectedLinkMemo }) {
-  const [linkedMemos, setLinkedMemos] = useState(null);
+  const [linkedMemos, setLinkedMemos] = useState([]);
   const { openModal } = useModal();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,7 +49,7 @@ export default function LinkModal({ isOpen, onClose, selectedLinkMemo }) {
       shouldCloseOnOverlayClick={false}
       style={baseModalStyle}
     >
-      <div className="w-96">
+      <div className="w-[350px]">
         {/* Header */}
         <div className="h-[46px] border-b modal-header border-mapl-slate flex justify-between items-center px-3">
           <div className="text-base">
@@ -72,7 +72,7 @@ export default function LinkModal({ isOpen, onClose, selectedLinkMemo }) {
         {/* Content */}
         <div className="px-3 modal-content">
           <div className="p-1 my-1 border rounded border-mapl-slate">
-            {selectedLinkMemo.content}
+            {selectedLinkMemo && selectedLinkMemo.content}
           </div>
           <div className="flex-col h-48 overflow-auto">
             <ul>
