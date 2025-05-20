@@ -145,6 +145,7 @@ export default function CalendarDate({
 
   // 메모 클릭 시 동작
   function handleMemoClick(memo) {
+    if (memo.type === MEMO_TYPE.MORE) return;
     if (memo.isLinked) {
       openConfirm(
         "링크되어있는 메모입니다.",
@@ -192,7 +193,7 @@ export default function CalendarDate({
                 </div>
 
                 {/* 메모 태그 */}
-                <div className="flex flex-col gap-[2px] overflow-hidden">
+                <div className="flex flex-col gap-[1px]">
                   {memoTags.map((memo, i) => (
                     <MemoTag
                       key={memo?.id ?? `placeholder-${i}`}

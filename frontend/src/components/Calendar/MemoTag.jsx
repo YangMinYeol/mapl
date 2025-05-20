@@ -1,5 +1,6 @@
 import { isSameDay } from "date-fns";
 import { MEMO_TYPE } from "../../util/memoUtil";
+import Tooltip from "../common/Tooltip";
 
 function getMemoTagClass(memo, date) {
   if (!memo) return "";
@@ -29,12 +30,12 @@ export default function MemoTag({ memo, date, onClick }) {
 
   const handleClick = (e) => {
     if (memo) {
-      e.stopPropagation(); // 버블링 방지
+      e.stopPropagation();
       onClick(memo);
     }
   };
 
-  return (
+  const memoTag = (
     <div
       key={memo?.id}
       className={`px-1 h-5 truncate ${getMemoTagClass(memo, date)} ${
@@ -45,5 +46,11 @@ export default function MemoTag({ memo, date, onClick }) {
     >
       {shouldShow ? memo.content : null}
     </div>
+  );
+
+  return memo && memo.type !== MEMO_TYPE.MORE ? (
+    <Tooltip memo={memo}>{memoTag}</Tooltip>
+  ) : (
+    memoTag
   );
 }
