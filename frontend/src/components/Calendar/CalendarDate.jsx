@@ -135,6 +135,8 @@ export default function CalendarDate({
   calendarMemos,
   loadDashboardMemos,
   loadCalendarMemos,
+  periods,
+  setSelectedPeriod,
 }) {
   const weeks = getWeekDates(currentDate);
   const tagMaxCount = getTagMaxCount(weeks);
@@ -161,6 +163,11 @@ export default function CalendarDate({
     }
   }
 
+  function handleDateClick(date) {
+    setSelectedDate(date);
+    setSelectedPeriod(periods[0]);
+  }
+
   return (
     <div
       className={`grid flex-1 grid-rows-${weeks.length} gap-[1px] bg-gray-200 h-[820px]`}
@@ -180,7 +187,7 @@ export default function CalendarDate({
                     ? "bg-gray-100"
                     : "hover:bg-gray-50 bg-white"
                 }`}
-                onClick={() => setSelectedDate(date)}
+                onClick={() => handleDateClick(date)}
               >
                 {/* 날짜 */}
                 <div

@@ -10,7 +10,7 @@ export default function Dashboard({
   selectedDate,
   periods,
   selectedPeriod,
-  handleSelectedPeriod,
+  setSelectedPeriod,
 }) {
   const [totalMemos, setTotalMemos] = useState(0);
   const [completedMemos, setCompletedMemos] = useState(0);
@@ -36,7 +36,7 @@ export default function Dashboard({
       <PeriodSelector
         periods={periods}
         selectedPeriod={selectedPeriod}
-        handleSelectedPeriod={handleSelectedPeriod}
+        setSelectedPeriod={setSelectedPeriod}
       />
       <DashboardMain
         dashboardMemos={dashboardMemos}

@@ -1,7 +1,7 @@
 export default function PeriodSelector({
   periods,
   selectedPeriod,
-  handleSelectedPeriod,
+  setSelectedPeriod,
 }) {
   return (
     <div className="h-[40px] font-medium border-y-1 border-mapl-slate">
@@ -14,7 +14,7 @@ export default function PeriodSelector({
                 period.id === selectedPeriod.id &&
                 " text-green-900 underline decoration-green-900"
               } flex items-center justify-center w-full cursor-pointer nav-item hover:text-green-900 hover:underline hover:decoration-green-900`}
-              onClick={() => handleSelectedPeriod(period)}
+              onClick={() => setSelectedPeriod(period)}
             >
               <span>{period.name}</span>
             </li>
