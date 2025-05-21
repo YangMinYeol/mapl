@@ -12,6 +12,8 @@ export default function Calendar({
   setSelectedDate,
   loadDashboardMemos,
   loadCalendarMemos,
+  periods,
+  setSelectedPeriod,
 }) {
   const today = useMemo(() => new Date(), []);
 
@@ -51,6 +53,8 @@ export default function Calendar({
         calendarMemos={calendarMemos}
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
+        periods={periods}
+        setSelectedPeriod={setSelectedPeriod}
       />
     </div>
   );

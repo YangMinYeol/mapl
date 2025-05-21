@@ -115,6 +115,8 @@ export default function MainPage() {
             setSelectedDate={handleSetSelectedDate}
             loadDashboardMemos={loadDashboardMemos}
             loadCalendarMemos={loadCalendarMemos}
+            periods={periods}
+            setSelectedPeriod={handleSelectedPeriod}
           />
         </div>
         <div className="w-full h-full detail-container md:w-[30%]">
@@ -125,7 +127,7 @@ export default function MainPage() {
             selectedDate={selectedDate}
             periods={periods}
             selectedPeriod={selectedPeriod}
-            handleSelectedPeriod={handleSelectedPeriod}
+            setSelectedPeriod={handleSelectedPeriod}
           />
         </div>
       </div>
