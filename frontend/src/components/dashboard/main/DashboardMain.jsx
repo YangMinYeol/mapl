@@ -10,6 +10,7 @@ export default function DashboardMain({
   completedMemos,
   loadDashboardMemos,
   loadCalendarMemos,
+  openLinkModal,
 }) {
   return (
     <div className="h-[520px]">
@@ -26,6 +27,7 @@ export default function DashboardMain({
         selectedDate={selectedDate}
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
+        openLinkModal={openLinkModal}
       />
     </div>
   );

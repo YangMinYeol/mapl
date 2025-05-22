@@ -15,6 +15,7 @@ export default function DashboardSub({
   selectedDate,
   loadDashboardMemos,
   loadCalendarMemos,
+  openLinkModal,
 }) {
   const { openConfirm, openModal } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
@@ -164,6 +165,7 @@ export default function DashboardSub({
         checkedIds={checkedIds}
         handleToggle={handleToggle}
         isBucketList={isBucketList}
+        openLinkModal={openLinkModal}
       />
     </div>
   );
