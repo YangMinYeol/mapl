@@ -12,6 +12,7 @@ export default function DashboardSubContent({
   checkedIds,
   handleToggle,
   isBucketList,
+  openLinkModal,
 }) {
   const randomQuote = getRandomQuote();
   return (
@@ -36,6 +37,7 @@ export default function DashboardSubContent({
                   memo={memo}
                   checked={checkedIds.includes(memo.id)}
                   onToggle={() => handleToggle(memo.id)}
+                  openLinkModal={openLinkModal}
                 />
               </li>
             ))}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PeriodSelector from "./PeriodSelector";
 import DashboardMain from "./main/DashboardMain";
 import DashboardSub from "./sub/DashboardSub";
+import LinkModal from "../link/LinkModal";
 
 export default function Dashboard({
   dashboardMemos,
@@ -14,6 +15,10 @@ export default function Dashboard({
 }) {
   const [totalMemos, setTotalMemos] = useState(0);
   const [completedMemos, setCompletedMemos] = useState(0);
+
+  // 링크 메모
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [selectedLinkMemo, setSelectedLinkMemo] = useState(null);
 
   useEffect(() => {
     if (selectedPeriod.id) {
@@ -29,6 +34,15 @@ export default function Dashboard({
 
     setTotalMemos(filteredMemos.length);
     setCompletedMemos(filteredMemos.filter((memo) => memo.completed).length);
+  }
+
+  function openLinkModal(memo) {
+    setSelectedLinkMemo(memo);
+    setIsLinkModalOpen(true);
+  }
+
+  function closeLinkModal() {
+    setIsLinkModalOpen(false);
   }
 
   return (
@@ -47,6 +61,7 @@ export default function Dashboard({
         completedMemos={completedMemos}
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
+        openLinkModal={openLinkModal}
       />
       <DashboardSub
         dashboardMemos={dashboardMemos}
@@ -55,6 +70,12 @@ export default function Dashboard({
         selectedDate={selectedDate}
         loadDashboardMemos={loadDashboardMemos}
         loadCalendarMemos={loadCalendarMemos}
+        openLinkModal={openLinkModal}
+      />
+      <LinkModal
+        isOpen={isLinkModalOpen}
+        onClose={closeLinkModal}
+        selectedLinkMemo={selectedLinkMemo}
       />
     </div>
   );
