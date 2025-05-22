@@ -12,8 +12,12 @@ import { useLoginExpiredHandler } from "../../hooks/useLoginExpiredHandler";
 import { useMemoModalForm } from "../../hooks/useMemoModalForm";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
-import { addMemo, updateMemo } from "../../api/memo";
+import { addMemo, deleteLinkedMemos, updateMemo } from "../../api/memo";
 import Loading from "../common/Loading";
+import { MEMO_MODE } from "../../constants/memoMode";
+
+const footerButtonClass =
+  "h-8 px-3 font-semibold border rounded cursor-pointer";
 
 export default function MemoModal({
   isOpen,
@@ -141,6 +145,21 @@ export default function MemoModal({
       handleMemoError(error, "edit");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  // 메모 삭제
+  async function deleteMemo() {
+    try {
+      await deleteLinkedMemos(memo.link);
+      await reloadAndClose();
+    } catch (error) {
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 삭제 오류:", error);
+        openModal(error.message);
+      }
     }
   }
 
@@ -354,19 +373,29 @@ export default function MemoModal({
         </div>
 
         {/* Footer */}
-        <div className="h-[46px]  modal-footer border-mapl-slate px-3 flex items-center justify-end">
-          <button
-            className="h-8 px-3 font-semibold text-white border rounded cursor-pointer bg-deep-green"
-            onClick={mode === "create" ? addDetailMemo : editMemo}
-          >
-            {mode === "create" ? "추가" : "수정"}
-          </button>
-          <button
-            className="h-8 px-3 ml-2 font-semibold border rounded cursor-pointer"
-            onClick={closeModal}
-          >
-            닫기
-          </button>
+        <div className="h-[46px] modal-footer border-mapl-slate px-3 flex items-center">
+          <div className="flex-1">
+            {mode === MEMO_MODE.EDIT && (
+              <button
+                className={`${footerButtonClass} bg-red-500 text-white`}
+                onClick={deleteMemo}
+              >
+                삭제
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              className={`${footerButtonClass} bg-deep-green text-white`}
+              onClick={mode === MEMO_MODE.CREATE ? addDetailMemo : editMemo}
+            >
+              {mode === MEMO_MODE.CREATE ? "추가" : "수정"}
+            </button>
+            <button className={footerButtonClass} onClick={closeModal}>
+              닫기
+            </button>
+          </div>
         </div>
       </div>
       {isLoading && <Loading />}

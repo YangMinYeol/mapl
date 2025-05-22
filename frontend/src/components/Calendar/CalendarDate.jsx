@@ -149,14 +149,10 @@ export default function CalendarDate({
   function handleMemoClick(memo) {
     if (memo.type === MEMO_TYPE.MORE) return;
     if (memo.isLinked) {
-      openConfirm(
-        "링크되어있는 메모입니다.",
-        "내용 변경시 동기화되어있는 메모 모두 내용이 함께 변경됩니다.",
-        async () => {
-          setSelectedMemo(memo);
-          setIsMemoModalOpen(true);
-        }
-      );
+      openConfirm(LINKED_MEMO.TITLE, LINKED_MEMO.EDIT_CONFIRM, async () => {
+        setSelectedMemo(memo);
+        setIsMemoModalOpen(true);
+      });
     } else {
       setSelectedMemo(memo);
       setIsMemoModalOpen(true);

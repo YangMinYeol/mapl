@@ -28,6 +28,8 @@ import {
   sortMemos,
 } from "../../../util/memoUtil";
 import LinkModal from "../../link/LinkModal";
+import { MEMO_MODE } from "../../../constants/memoMode";
+import { LINKED_MEMO } from "../../../constants/messages";
 
 export default function DashboardMainContent({
   dashboardMemos,
@@ -70,7 +72,7 @@ export default function DashboardMainContent({
     if (memoText.trim()) {
       addNewMemo();
     } else {
-      setMemoModalMode("create");
+      setMemoModalMode(MEMO_MODE.CREATE);
       setIsMemoModalOpen(true);
     }
   }
@@ -110,7 +112,7 @@ export default function DashboardMainContent({
     try {
       if (memo.isLinked) {
         openConfirm(
-          "링크되어있는 메모입니다.",
+          LINKED_MEMO.TITLE,
           "동기화되어있는 메모 모두 삭제하시겠습니까?",
           async () => {
             await deleteLinkedMemos(memo.link);
@@ -136,18 +138,14 @@ export default function DashboardMainContent({
   // 메모 편집 모달
   function openEditMemoModal(memo) {
     if (memo.isLinked) {
-      openConfirm(
-        "링크되어있는 메모입니다.",
-        "동기화되어있는 메모 모두 내용이 함께 변경됩니다.",
-        async () => {
-          setSelectedMemo(memo);
-          setMemoModalMode("edit");
-          setIsMemoModalOpen(true);
-        }
-      );
+      openConfirm(LINKED_MEMO.TITLE, LINKED_MEMO.EDIT_CONFIRM, async () => {
+        setSelectedMemo(memo);
+        setMemoModalMode(MEMO_MODE.EDIT);
+        setIsMemoModalOpen(true);
+      });
     } else {
       setSelectedMemo(memo);
-      setMemoModalMode("edit");
+      setMemoModalMode(MEMO_MODE.EDIT);
       setIsMemoModalOpen(true);
     }
   }
@@ -191,7 +189,7 @@ export default function DashboardMainContent({
     try {
       if (memo.isLinked) {
         openConfirm(
-          "링크되어있는 메모입니다.",
+          LINKED_MEMO.TITLE,
           "동기화되어있는 메모 모두 complete 하시겠습니까?",
           async () => {
             await toggleLinkedMemosCompletion(memo.link);
