@@ -29,12 +29,16 @@ export default function MainPage() {
 
   // 대시보드 메모 목록 불러오기
   useEffect(() => {
-    loadDashboardMemos();
+    if (user) {
+      loadDashboardMemos();
+    }
   }, [user, selectedDate]);
 
   // 달력 메모 목록 불러오기
   useEffect(() => {
-    loadCalendarMemos();
+    if (user) {
+      loadCalendarMemos();
+    }
   }, [user, currentDate]);
 
   // 기한 목록 불러오기
