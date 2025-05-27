@@ -36,15 +36,25 @@ export function getWeekDates(currentDate) {
 }
 
 // 날짜 텍스트 색상을 결정하는 함수
-export function getDateTextColor(date, currentDate) {
+export function getDateTextColor(date, currentDate, holidays) {
   const day = getDay(date);
-  if (day === 0) {
-    return !isSameMonth(date, currentDate) ? "text-red-200" : "text-red-500";
+  const isOtherMonth = !isSameMonth(date, currentDate);
+  const dateStr = format(date, "yyyyMMdd");
+
+  const isHoliday = holidays.some((holiday) => {
+    const { locdate, isHoliday } = holiday;
+    return locdate?.toString() === dateStr && isHoliday;
+  });
+
+  if (day === 0 || isHoliday) {
+    return isOtherMonth ? "text-red-200" : "text-red-500"; // 일요일 또는 공휴일
   }
+
   if (day === 6) {
-    return !isSameMonth(date, currentDate) ? "text-blue-200" : "text-blue-500";
+    return isOtherMonth ? "text-blue-200" : "text-blue-500"; // 토요일
   }
-  return isSameMonth(date, currentDate) ? "text-black" : "text-slate-400";
+
+  return isOtherMonth ? "text-slate-400" : "text-black"; // 평일
 }
 
 // 요일별 색상을 결정하는 함수
