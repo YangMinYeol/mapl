@@ -12,13 +12,17 @@ import {
 } from "../../util/memoUtil";
 import MemoTag from "./MemoTag";
 import MemoModal from "../memo/MemoModal";
-import { useState } from "react";
+import Loading from "../common/Loading";
+import { useEffect, useState } from "react";
 import { useModal } from "../../context/ModalContext";
+import { fetchMultipleMonthsHolidays } from "../../api/holiday";
+import { formatHolidayDate } from "../../util/dateUtil";
 
 // 날짜별 메모 할당
-function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount) {
+function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount, holidays) {
   const { map, dailyMemosMap } = buildDateMemoMap(weeks);
   const { dailyMemos, rangeMemos } = separateDailyAndRangeMemos(calendarMemos);
+  addHolidayMemos(dailyMemos, holidays);
 
   for (const key in dailyMemos) {
     if (dailyMemosMap[key]) {
@@ -31,7 +35,7 @@ function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount) {
   return truncateMemoMap(map, tagMaxCount);
 }
 
-// 날짜 메모 맵을 작성
+// 1. 날짜 메모 맵을 작성
 function buildDateMemoMap(weeks) {
   const map = {};
   const dailyMemosMap = {};
@@ -45,7 +49,28 @@ function buildDateMemoMap(weeks) {
   return { map, dailyMemosMap };
 }
 
-// 기간 메모 Level 지정
+// 2. 공휴일 추가
+function addHolidayMemos(dailyMemos, holidays) {
+  holidays.forEach((holiday) => {
+    const dateStr = formatHolidayDate(holiday.locdate);
+    const memo = {
+      id: `holiday-${holiday.locdate}-${holiday.seq}`,
+      content: holiday.dateName,
+      colorHex: "#ce5f65",
+      type: MEMO_TYPE.HOLIDAY,
+    };
+
+    if (!dailyMemos[dateStr]) {
+      dailyMemos[dateStr] = [];
+    }
+
+    dailyMemos[dateStr].push(memo);
+  });
+
+  return dailyMemos;
+}
+
+// 3. 기간 메모 Level 지정
 function placeRangeMemosInLevels(map, rangeMemos) {
   const sortedMemos = sortMemos(rangeMemos, false);
   const maxLevels = 100;
@@ -79,8 +104,7 @@ function placeRangeMemosInLevels(map, rangeMemos) {
     }
   }
 }
-
-// 데일리 메모 Levle 지정
+// 4. 데일리 메모 Levle 지정
 function placeDailyMemosInLevels(map, dailyMemos) {
   for (const key in dailyMemos) {
     const sortedMemos = sortMemos(dailyMemos[key], true);
@@ -92,7 +116,7 @@ function placeDailyMemosInLevels(map, dailyMemos) {
       current[level] = {
         ...memo,
         level,
-        type: MEMO_TYPE.DAILY,
+        type: memo.type === MEMO_TYPE.HOLIDAY ? memo.type : MEMO_TYPE.DAILY,
       };
     }
 
@@ -100,7 +124,7 @@ function placeDailyMemosInLevels(map, dailyMemos) {
   }
 }
 
-// 최종 메모 실사용하도록 요약
+// 5. 최종 사용 메모 맵
 function truncateMemoMap(memoMap, tagMaxCount) {
   const truncatedMap = {};
 
@@ -140,14 +164,35 @@ export default function CalendarDate({
 }) {
   const weeks = getWeekDates(currentDate);
   const tagMaxCount = getTagMaxCount(weeks);
-  const memoLevelMap = buildMemoLevelMap(weeks, calendarMemos, tagMaxCount);
+  const [holidays, setHolidays] = useState([]);
+  const memoLevelMap = buildMemoLevelMap(
+    weeks,
+    calendarMemos,
+    tagMaxCount,
+    holidays
+  );
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedMemo, setSelectedMemo] = useState(null);
   const { openConfirm } = useModal();
 
+  // 공휴일 데이터 fetch
+  useEffect(() => {
+    const loadHolidays = async () => {
+      setIsLoading(true);
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const data = await fetchMultipleMonthsHolidays(year, month);
+      setHolidays(data);
+      setIsLoading(false);
+    };
+    loadHolidays();
+  }, [currentDate]);
+
   // 메모 클릭 시 동작
   function handleMemoClick(memo) {
-    if (memo.type === MEMO_TYPE.MORE) return;
+    if (memo.type === MEMO_TYPE.MORE || memo.type === MEMO_TYPE.HOLIDAY) return;
+
     if (memo.isLinked) {
       openConfirm(LINKED_MEMO.TITLE, LINKED_MEMO.EDIT_CONFIRM, async () => {
         setSelectedMemo(memo);
@@ -162,6 +207,9 @@ export default function CalendarDate({
   function handleDateClick(date) {
     setSelectedDate(date);
     setSelectedPeriod(periods[0]);
+  }
+  if (isLoading) {
+    return <Loading />;
   }
 
   return (
@@ -189,7 +237,8 @@ export default function CalendarDate({
                 <div
                   className={`flex items-center justify-center rounded-full w-[24px] h-[24px] date-label hover:cursor-default ${getDateTextColor(
                     date,
-                    currentDate
+                    currentDate,
+                    holidays
                   )} ${isToday(date) && "text-white bg-deep-green"}`}
                 >
                   {format(date, "d")}

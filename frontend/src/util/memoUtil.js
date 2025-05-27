@@ -4,6 +4,7 @@ export const MEMO_TYPE = {
   DAILY: "daily",
   RANGE: "range",
   MORE: "more",
+  HOLIDAY: "holiday",
 };
 
 // 데일리 메모와 범위 메모 분류
@@ -37,7 +38,13 @@ export function dailyMemoObjectToArray(dailyMemosObj) {
 export function sortMemos(memos, isDaily) {
   return memos.sort((a, b) => {
     if (isDaily) {
-      // 1. AllDay가 우선
+      // 1. 공휴일 우선
+      if (a.type === MEMO_TYPE.HOLIDAY && b.type !== MEMO_TYPE.HOLIDAY)
+        return -1;
+      if (a.type !== MEMO_TYPE.HOLIDAY && b.type === MEMO_TYPE.HOLIDAY)
+        return 1;
+
+      // 2. AllDay가 우선
       if (a.allday && !b.allday) return -1;
       if (!a.allday && b.allday) return 1;
     } else {

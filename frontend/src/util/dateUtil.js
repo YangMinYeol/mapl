@@ -109,3 +109,12 @@ export function isBetween(date, start, end) {
     (isBefore(date, end) || isEqual(date, end))
   );
 }
+
+// 공휴일 포멧팅
+export function formatHolidayDate(locdate) {
+  const str = locdate.toString();
+  const year = str.slice(0, 4);
+  const month = str.slice(4, 6);
+  const day = str.slice(6, 8);
+  return `${year}-${month}-${day}`;
+}
