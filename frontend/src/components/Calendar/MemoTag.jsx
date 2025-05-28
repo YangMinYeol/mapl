@@ -54,8 +54,7 @@ export default function MemoTag({ memo, date, onClick }) {
   );
 
   return memo &&
-    memo.type === MEMO_TYPE.DAILY &&
-    memo.type === MEMO_TYPE.RANGE ? (
+    (memo.type === MEMO_TYPE.DAILY || memo.type === MEMO_TYPE.RANGE) ? (
     <Tooltip memo={memo}>{memoTag}</Tooltip>
   ) : (
     memoTag
