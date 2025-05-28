@@ -249,6 +249,37 @@ async function getLinkedMemos(linkId) {
   return result.rows.map(mapMemoRow);
 }
 
+// 링크되어있는 메모 링크 해제
+async function unlinkMemo(memoId, linkId) {
+  const linkedMemoCount = await getLinkedMemoCount(linkId);
+
+  if (linkedMemoCount === 2) {
+    const query = `
+      UPDATE memo SET link = id, is_linked = false WHERE link = $1;
+    `;
+    const result = await db.query(query, [linkId]);
+    return result.rowCount;
+  } else if (linkedMemoCount >= 3) {
+    const query = `
+      UPDATE memo SET link = $1, is_linked = false WHERE id = $1;
+    `;
+    const result = await db.query(query, [memoId]);
+    return result.rowCount;
+  } else {
+    // 링크된 메모가 1개 이하인 경우: 아무 것도 하지 않음
+    return 0;
+  }
+}
+
+// 링크된 메모 개수 조회
+async function getLinkedMemoCount(linkId) {
+  const query = `
+    SELECT COUNT(*) FROM memo WHERE link = $1 AND is_linked = true;
+  `;
+  const result = await db.query(query, [linkId]);
+  return parseInt(result.rows[0].count, 10);
+}
+
 module.exports = {
   getMemos,
   getCalendarMemos,
@@ -260,4 +291,5 @@ module.exports = {
   toggleLinkedMemosCompletion,
   postponeMemo,
   getLinkedMemos,
+  unlinkMemo,
 };

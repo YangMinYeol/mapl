@@ -222,3 +222,23 @@ export async function fetchLinkedMemos(linkId) {
     throw error;
   }
 }
+
+// 링크 되어있는 메모 링크 해제
+export async function unlinkMemo(memoId, linkId) {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/memo/unlink`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ memoId, linkId }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}

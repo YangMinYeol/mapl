@@ -10,7 +10,7 @@ export default function LinkMemoItem({ memo }) {
   const isBucketList = periodName === "Bucket List";
 
   return (
-    <div className="flex items-center py-1.5 my-1 border rounded hover:bg-gray-50 group border-mapl-slate">
+    <div className="flex items-center py-1.5 m-1 border rounded hover:bg-gray-50 group border-mapl-slate">
       <div className="flex w-full">
         {isBucketList ? (
           <div className="flex items-center justify-center w-full font-semibold text-center">
