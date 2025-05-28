@@ -76,6 +76,8 @@ export default function Dashboard({
         isOpen={isLinkModalOpen}
         onClose={closeLinkModal}
         selectedLinkMemo={selectedLinkMemo}
+        loadDashboardMemos={loadDashboardMemos}
+        loadCalendarMemos={loadCalendarMemos}
       />
     </div>
   );

@@ -36,7 +36,7 @@ export function getWeekDates(currentDate) {
 }
 
 // 날짜 텍스트 색상을 결정하는 함수
-export function getDateTextColor(date, currentDate, holidays) {
+export function getDateTextColor(date, currentDate, holidays=[]) {
   const day = getDay(date);
   const isOtherMonth = !isSameMonth(date, currentDate);
   const dateStr = format(date, "yyyyMMdd");

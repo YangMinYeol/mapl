@@ -37,4 +37,7 @@ router.post("/postpone", verifyToken, memoController.postponeMemo);
 // 링크되어있는 메모 목록 불러오기
 router.get("/linked/:linkId", verifyToken, memoController.getLinkedMemos);
 
+// 링크되어있는 메모 링크 해제
+router.post("/unlink", verifyToken, memoController.unlinkMemo);
+
 module.exports = router;
