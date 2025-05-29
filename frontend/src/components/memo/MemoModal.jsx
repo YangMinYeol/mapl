@@ -73,10 +73,6 @@ export default function MemoModal({
 
   // AllDay
   function handleAllDay() {
-    if (!allDay) {
-      setStartTime("00:00");
-      setEndTime("00:30");
-    }
     setAllDay(!allDay);
   }
 
@@ -221,8 +217,8 @@ export default function MemoModal({
   function closeModal() {
     setStartDate(selectedDate);
     setEndDate(selectedDate);
-    setStartTime("00:00");
-    setEndTime("00:30");
+    setStartTime("12:00");
+    setEndTime("12:30");
     setDateTimeError(false);
     setAllDay(true);
     setContent("");
