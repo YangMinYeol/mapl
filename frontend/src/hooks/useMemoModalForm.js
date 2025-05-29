@@ -17,8 +17,8 @@ export function useMemoModalForm({
   const [showEndDateSelect, setShowEndDateSelect] = useState(false);
 
   // 시간
-  const [startTime, setStartTime] = useState("00:00");
-  const [endTime, setEndTime] = useState("00:30");
+  const [startTime, setStartTime] = useState("12:00");
+  const [endTime, setEndTime] = useState("12:30");
   const [showStartTimeSelect, setShowStartTimeSelect] = useState(false);
   const [showEndTimeSelect, setShowEndTimeSelect] = useState(false);
 
@@ -35,11 +35,14 @@ export function useMemoModalForm({
 
   useEffect(() => {
     if (mode === "create") {
-      const { startDate, endDate } = setDateByPeriod(selectedPeriod, selectedDate);
+      const { startDate, endDate } = setDateByPeriod(
+        selectedPeriod,
+        selectedDate
+      );
       setStartDate(startDate);
       setEndDate(endDate);
-      setStartTime("00:00");
-      setEndTime("00:30");
+      setStartTime("12:00");
+      setEndTime("12:30");
       setAllDay(true);
       setContent("");
       setSelectedColorId(10);
@@ -47,8 +50,8 @@ export function useMemoModalForm({
     } else if (mode === "edit" && memo) {
       setStartDate(memo.startDate);
       setEndDate(memo.endDate);
-      setStartTime((memo.startTime || "00:00").substring(0, 5));
-      setEndTime((memo.endTime || "00:30").substring(0, 5));
+      setStartTime((memo.startTime || "12:00").substring(0, 5));
+      setEndTime((memo.endTime || "12:30").substring(0, 5));
       setAllDay(memo.allday);
       setContent(memo.content);
       setSelectedColorId(memo.colorId);

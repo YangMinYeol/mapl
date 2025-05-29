@@ -56,7 +56,9 @@ export default function DateTimeInput({
       <input
         readOnly
         className="w-full px-1 pr-10 border rounded outline-none border-mapl-black"
-        value={`${format(date, "yyyy년 MM월 dd일")}${allDay ? "" : ` ${formatTimeTo12Hour(time)}`}`}
+        value={`${format(date, "yyyy년 MM월 dd일")}${
+          allDay ? "" : ` ${formatTimeTo12Hour(time)}`
+        }`}
       />
 
       {/* Date Icon */}
@@ -79,7 +81,7 @@ export default function DateTimeInput({
         />
       )}
       {showTimeSelect && (
-        <ul className="absolute right-0 z-10 w-20 mt-1 overflow-auto bg-white border rounded max-h-44 time-selector border-mapl-black top-5">
+        <ul className="absolute right-0 z-10 mt-1 overflow-auto bg-white border rounded w-30 max-h-44 time-selector border-mapl-black top-5">
           {timeOptions.map((timeOption, index) => (
             <li
               key={index}
@@ -89,7 +91,7 @@ export default function DateTimeInput({
               `}
               onClick={() => setTime(timeOption)}
             >
-              {timeOption}
+              {formatTimeTo12Hour(timeOption)}
             </li>
           ))}
         </ul>
