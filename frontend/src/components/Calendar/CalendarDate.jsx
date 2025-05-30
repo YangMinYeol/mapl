@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useModal } from "../../context/ModalContext";
 import { fetchMultipleMonthsHolidays } from "../../api/holiday";
 import { formatHolidayDate } from "../../util/dateUtil";
+import { LINKED_MEMO } from "../../constants/messages";
 
 // 날짜별 메모 할당
 function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount, holidays) {
