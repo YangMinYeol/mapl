@@ -38,6 +38,9 @@ export default function Header() {
               >
                 로그아웃
               </Link>
+              <Link to="/board" className="hover:underline">
+                게시판
+              </Link>
             </div>
           ) : (
             <Link to="/login" className="hover:underline">
