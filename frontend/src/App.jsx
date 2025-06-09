@@ -5,6 +5,7 @@ import { ColorProvider } from "./context/ColorContext";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MainPage from "./pages/MainPage";
+import BoardPage from "./pages/BoardPage";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import AlertModal from "./components/common/AlertModal";
@@ -24,6 +25,7 @@ function AppContent() {
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/board" element={<BoardPage />} />
         </Routes>
       </div>
       {!hideHeaderFooter && <Footer />}
