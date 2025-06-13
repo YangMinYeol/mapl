@@ -23,6 +23,8 @@ export default function Header() {
     setUser(null);
   }
 
+  const isBoardPage = location.pathname === "/board";
+
   return (
     <header className="py-3 bg-deep-green">
       <div className="flex justify-between w-full px-8">
@@ -30,7 +32,8 @@ export default function Header() {
         <div className="flex items-center text-white">
           {user ? (
             <div className="flex gap-2">
-              <span>{user.name}님</span>
+              <span>{user.name} 님</span>
+              <span>|</span>
               <Link
                 to="/login"
                 onClick={handleLogout}
@@ -38,9 +41,16 @@ export default function Header() {
               >
                 로그아웃
               </Link>
-              <Link to="/board" className="hover:underline">
-                게시판
-              </Link>
+              <span>|</span>
+              {isBoardPage ? (
+                <Link to="/" className="hover:underline">
+                  홈으로
+                </Link>
+              ) : (
+                <Link to="/board" className="hover:underline">
+                  게시판
+                </Link>
+              )}
             </div>
           ) : (
             <Link to="/login" className="hover:underline">
