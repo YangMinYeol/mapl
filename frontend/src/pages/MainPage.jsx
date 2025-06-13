@@ -1,13 +1,12 @@
+import { useContext, useEffect, useState } from "react";
 import { fetchCalendarMemos, fetchMemos } from "../api/memo";
 import Calendar from "../components/calendar/Calendar";
 import Dashboard from "../components/dashboard/Dashboard";
-import { convertArraySnakeToCamel } from "../util/caseConverter";
-import { formatDateYYYYMMDD } from "../util/dateUtil";
-import { useContext, useEffect, useState } from "react";
-import { LoginExpiredError } from "../util/error";
 import { useModal } from "../context/ModalContext";
 import { UserContext } from "../context/UserContext";
 import { useLoginExpiredHandler } from "../hooks/useLoginExpiredHandler";
+import { formatDateYYYYMMDD } from "../util/dateUtil";
+import { LoginExpiredError } from "../util/error";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -50,9 +49,8 @@ export default function MainPage() {
   async function loadDashboardMemos() {
     try {
       const memoData = await fetchMemos(user.id, selectedDate);
-      const convertedMemos = convertArraySnakeToCamel(memoData);
 
-      setDashboardMemos(convertedMemos);
+      setDashboardMemos(memoData);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
         handleLoginExpired(error.message);
@@ -70,7 +68,7 @@ export default function MainPage() {
         user.id,
         formatDateYYYYMMDD(currentDate)
       );
-      setCalendarMemos(convertArraySnakeToCamel(memoData));
+      setCalendarMemos(memoData);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
         handleLoginExpired(error.message);
