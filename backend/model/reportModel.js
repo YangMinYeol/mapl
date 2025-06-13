@@ -6,19 +6,24 @@ function mapReportRow(row) {
     userId: row.user_id,
     title: row.title,
     content: row.content,
-    imagePath: row.image_path,
-    reportType: row.report_type,
+    type: row.type,
     status: row.status,
     createdAt: row.created_at,
+    images: row.image_paths || [],
   };
 }
 
 async function getReportBoardList(page) {
   // 게시글 목록 가져오기
   const query = `
-    SELECT *
-    FROM report
-    ORDER BY id DESC, created_at DESC LIMIT 15 OFFSET ($1 - 1) * 15`;
+    SELECT 
+      r.*,
+      COALESCE(array_agg(ri.url) FILTER (WHERE ri.url IS NOT NULL), '{}') AS image_paths
+    FROM report r
+    LEFT JOIN report_image ri ON r.id = ri.report_id
+    GROUP BY r.id
+    ORDER BY r.id DESC, r.created_at DESC
+    LIMIT 15 OFFSET ($1 - 1) * 15`;
   const result = await db.query(query, [page]);
   const posts = result.rows.map(mapReportRow);
 
@@ -30,4 +35,45 @@ async function getReportBoardList(page) {
   return { posts, totalCount };
 }
 
-module.exports = { getReportBoardList };
+// 오류 보고 게시글 등록
+async function addReportWithImages({ userId, type, title, content, images }) {
+  try {
+    await db.query("BEGIN");
+
+    const insertReportQuery = `
+      INSERT INTO report (user_id, type, title, content)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id
+    `;
+    const reportResult = await db.query(insertReportQuery, [
+      userId,
+      type,
+      title,
+      content,
+    ]);
+    const reportId = reportResult.rows[0].id;
+
+    if (images && images.length > 0) {
+      const insertImageQuery = `
+        INSERT INTO report_image (report_id, url)
+        VALUES ${images.map((_, i) => `($1, $${i + 2})`).join(", ")}
+      `;
+
+      const imagePaths = images.map(
+        (file) => `/uploads/${file.filename}`
+      );
+      await db.query(insertImageQuery, [reportId, ...imagePaths]);
+    }
+
+    await db.query("COMMIT");
+    return reportId;
+  } catch (error) {
+    await db.query("ROLLBACK");
+    throw error;
+  }
+}
+
+module.exports = {
+  getReportBoardList,
+  addReportWithImages,
+};

@@ -1,8 +1,17 @@
 const express = require("express");
-const router = express.Router();
 const reportController = require("../controller/reportController");
+const verifyToken = require("../middleware/authMiddleware");
+const { upload } = require("../middleware/multer");
 
-// 오류 보고 게시글 목록
+const router = express.Router();
+
 router.get("/", reportController.getReportBoardList);
+
+router.post(
+  "/",
+  verifyToken,
+  upload.array("images", 6),
+  reportController.addReport
+);
 
 module.exports = router;
