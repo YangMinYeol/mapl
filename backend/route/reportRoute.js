@@ -12,11 +12,19 @@ router.get("/", reportController.getReportBoardList);
 router.post(
   "/",
   verifyToken,
-  upload.array("images", 6),
+  upload.array("newImages", 6),
   reportController.addReport
 );
 
 // 오류 보고 게시글 삭제
 router.delete("/:id", verifyToken, reportController.deleteReport);
+
+// 오류 보고 게시글 수정 추가
+router.put(
+  "/:id",
+  verifyToken,
+  upload.array("newImages", 6),
+  reportController.updateReport
+);
 
 module.exports = router;
