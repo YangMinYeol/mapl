@@ -1,7 +1,7 @@
 import { faCamera, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useRef, useState } from "react";
-import { submitReport } from "../../../api/report";
+import { deleteReport, submitReport } from "../../../api/report";
 import { POST_FORM_MODE } from "../../../constants/board";
 import { REPORT_TYPE_MAP } from "../../../constants/report";
 import { UserContext } from "../../../context/UserContext";
@@ -24,6 +24,7 @@ export default function ReportPost({
   formMode = POST_FORM_MODE.CREATE,
   onClose,
   openModal,
+  openConfirm,
   post,
 }) {
   const { user } = useContext(UserContext);
@@ -35,18 +36,16 @@ export default function ReportPost({
   const [images, setImages] = useState([]);
 
   const isReadOnly = formMode === POST_FORM_MODE.VIEW;
+  const isWriter = user?.id === post?.userId;
 
   useEffect(() => {
     if (post) {
       setTitle(post.title || "");
       setContent(post.content || "");
       typeRef.current.value = post.type || Object.keys(REPORT_TYPE_MAP)[0];
-      // 이미지도 추가
-      console.log(post);
     }
   }, [formMode, post]);
 
-  // 이미지 유효성 검사
   function isValidImage(file) {
     const ext = file.name.split(".").pop().toLowerCase();
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
@@ -66,16 +65,13 @@ export default function ReportPost({
     return true;
   }
 
-  // 이미지 선택 핸들러
   function handleImageSelect(e) {
     const selectedFiles = Array.from(e.target.files);
     let updatedImages = [...images];
 
     for (const file of selectedFiles) {
       if (!isValidImage(file)) continue;
-
       updatedImages.push(file);
-
       if (updatedImages.length > MAX_IMAGES) {
         openModal(`최대 ${MAX_IMAGES}장까지만 업로드할 수 있습니다.`);
         updatedImages = updatedImages.slice(0, MAX_IMAGES);
@@ -84,10 +80,9 @@ export default function ReportPost({
     }
 
     setImages(updatedImages);
-    e.target.value = ""; // 선택 초기화
+    e.target.value = "";
   }
 
-  // 이미지 제거
   function handleRemoveImage(index) {
     setImages((prev) => {
       URL.revokeObjectURL(prev[index].url);
@@ -95,7 +90,6 @@ export default function ReportPost({
     });
   }
 
-  // 제목, 내용 입력값 검증
   function validateInputs() {
     if (!title.trim()) {
       openModal("제목을 입력해주세요.");
@@ -108,10 +102,8 @@ export default function ReportPost({
     return true;
   }
 
-  // 오류 보고 등록
   async function handleSubmitReport() {
     if (!validateInputs()) return;
-
     try {
       const type = typeRef.current.value;
       await submitReport({ userId: user.id, type, title, content, images });
@@ -122,10 +114,30 @@ export default function ReportPost({
     }
   }
 
+  async function handleDeleteReport() {
+    openConfirm(
+      "정말로 삭제하시겠습니까?",
+      "한번 삭제한 게시글은 되돌릴 수 없습니다.",
+      async () => {
+        try {
+          if (!isWriter) return;
+          await deleteReport(post.id);
+          onClose();
+        } catch (error) {
+          openModal(error.message || "삭제 중 오류가 발생했습니다.");
+          console.error(error);
+        }
+      }
+    );
+  }
+
+  async function handleEditReport() {}
+
+  function handleEditCancelReport() {}
+
   return (
     <div className="flex flex-col p-5">
       <div className="border-b border-mapl-slate">
-        {/* 유형 선택 */}
         <FormRow label="유형">
           <div className="relative w-full">
             <select
@@ -144,7 +156,6 @@ export default function ReportPost({
           </div>
         </FormRow>
 
-        {/* 제목 입력 */}
         <FormRow label="제목">
           <input
             type="text"
@@ -160,7 +171,6 @@ export default function ReportPost({
           />
         </FormRow>
 
-        {/* 내용 입력 */}
         <FormRow label="내용" isTextarea>
           <textarea
             className="w-full p-3 border rounded border-mapl-slate h-[450px] resize-none"
@@ -177,7 +187,6 @@ export default function ReportPost({
           </div>
         </FormRow>
 
-        {/* 이미지 첨부 */}
         <FormRow label="">
           <div className="flex w-full gap-8">
             {isReadOnly
@@ -229,7 +238,6 @@ export default function ReportPost({
                 <FontAwesomeIcon icon={faCamera} color="#666" size="xl" />
               </div>
             )}
-
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
@@ -244,21 +252,30 @@ export default function ReportPost({
 
       {/* 버튼 영역 */}
       <div className="flex items-center justify-center mt-7">
-        <button
-          className="h-14 mx-8 text-base border rounded text-[#666] font-semibold border-mapl-slate w-36 hover:cursor-pointer"
-          onClick={onClose}
-          type="button"
-        >
-          취소
-        </button>
-        {!isReadOnly && (
-          <button
-            className="mx-8 text-base font-semibold text-white rounded h-14 w-36 bg-deep-green hover:cursor-pointer"
-            onClick={handleSubmitReport}
-            type="button"
-          >
-            등록
-          </button>
+        {formMode === POST_FORM_MODE.VIEW && (
+          <>
+            {isWriter ? (
+              <>
+                <Button text="편집" onClick={handleEditReport} color="green" />
+                <Button text="목록" onClick={onClose} />
+                <Button text="삭제" onClick={handleDeleteReport} color="red" />
+              </>
+            ) : (
+              <Button text="목록" onClick={onClose} />
+            )}
+          </>
+        )}
+        {formMode === POST_FORM_MODE.CREATE && (
+          <>
+            <Button text="목록" onClick={onClose} />
+            <Button text="등록" onClick={handleSubmitReport} color="green" />
+          </>
+        )}
+        {formMode === POST_FORM_MODE.EDIT && (
+          <>
+            <Button text="취소" onClick={handleEditCancelReport} />
+            <Button text="등록" onClick={handleSubmitReport} color="green" />
+          </>
         )}
       </div>
     </div>
@@ -277,5 +294,22 @@ function FormRow({ label, children, isTextarea = false }) {
       </label>
       <div className="w-full">{children}</div>
     </div>
+  );
+}
+
+function Button({ text, onClick, color = "default" }) {
+  const base =
+    "h-14 mx-3 text-base font-semibold rounded w-36 hover:cursor-pointer";
+  const colorClass =
+    color === "green"
+      ? "text-white bg-deep-green"
+      : color === "red"
+      ? "text-white bg-red-500"
+      : "text-[#666] border border-mapl-slate";
+
+  return (
+    <button className={`${base} ${colorClass}`} onClick={onClick} type="button">
+      {text}
+    </button>
   );
 }
