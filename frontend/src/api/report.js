@@ -1,4 +1,5 @@
 import { fetchWithAuth } from "../api/auth";
+import { POST_FORM_MODE } from "../constants/board";
 const API_URL = import.meta.env.VITE_API_URL;
 
 // 오류 보고 게시판 목록 불러오기
@@ -20,8 +21,17 @@ export async function fetchReportBoard(page) {
   }
 }
 
-// 오류 보고 등록
-export async function submitReport({ userId, type, title, content, images }) {
+// 오류 보고 등록 및 수정
+export async function submitReport({
+  userId,
+  type,
+  title,
+  content,
+  serverImages = [],
+  newImages = [],
+  postId,
+  mode,
+}) {
   try {
     const formData = new FormData();
     formData.append("userId", userId);
@@ -29,13 +39,27 @@ export async function submitReport({ userId, type, title, content, images }) {
     formData.append("title", title);
     formData.append("content", content);
 
-    images.forEach((file) => {
-      formData.append("images", file);
+    // 기존 서버에 남겨둘 이미지 경로 전달
+    serverImages.forEach((path) => {
+      formData.append("serverImages", path);
     });
 
-    const response = await fetchWithAuth(`${API_URL}/api/report`, {
-      method: "POST",
-      body: formData, // 헤더 자동설정됨 (multipart/form-data)
+    // 새로 추가된 이미지 파일들
+    newImages.forEach((file) => {
+      formData.append("newImages", file);
+    });
+
+    let url = `${API_URL}/api/report`;
+    let method = "POST";
+
+    if (mode === POST_FORM_MODE.EDIT && postId) {
+      url = `${API_URL}/api/report/${postId}`;
+      method = "PUT";
+    }
+
+    const response = await fetchWithAuth(url, {
+      method,
+      body: formData,
     });
 
     const data = await response.json();

@@ -54,8 +54,42 @@ async function deleteReport(req, res) {
   }
 }
 
+// 오류 보고 게시글 수정
+async function updateReport(req, res) {
+  const reportId = req.params.id;
+  const { userId, type, title, content } = req.body;
+  const newImages = req.files || [];
+  let serverImages = req.body.serverImages || [];
+
+  if (typeof serverImages === "string") {
+    serverImages = [serverImages];
+  }
+
+  try {
+    await reportModel.updateReportWithImages({
+      reportId,
+      userId,
+      type,
+      title,
+      content,
+      serverImages,
+      newImages,
+    });
+
+    return res
+      .status(200)
+      .json({ message: "오류 보고 게시글이 수정되었습니다." });
+  } catch (error) {
+    console.error("오류 보고 게시글 수정 오류:", error);
+    return res.status(500).json({
+      message: "오류 보고 게시글 수정 중 문제가 발생하였습니다.",
+    });
+  }
+}
+
 module.exports = {
   getReportBoardList,
   addReport,
   deleteReport,
+  updateReport,
 };

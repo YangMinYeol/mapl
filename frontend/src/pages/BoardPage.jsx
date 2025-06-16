@@ -99,6 +99,7 @@ export default function BoardPage() {
         return (
           <ReportPost
             formMode={formMode}
+            setFormMode={setFormMode}
             post={selectedPost}
             onClose={() => setScreenMode(BOARD_SCREEN_MODE.LIST)}
             openModal={openModal}

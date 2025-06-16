@@ -80,8 +80,65 @@ async function deleteReport(reportId) {
   return db.query(query, [reportId]);
 }
 
+// 게시글 수정
+async function updateReportWithImages({
+  reportId,
+  userId,
+  type,
+  title,
+  content,
+  serverImages,
+  newImages,
+}) {
+  try {
+    await db.query("BEGIN");
+
+    // 게시글 수정
+    const updateReportQuery = `
+      UPDATE report
+      SET user_id = $1, type = $2, title = $3, content = $4
+      WHERE id = $5
+    `;
+    await db.query(updateReportQuery, [userId, type, title, content, reportId]);
+
+    // 기존 이미지 삭제 (남겨둔 서버 이미지 외 나머지 삭제)
+    const selectQuery = `SELECT url FROM report_image WHERE report_id = $1`;
+    const existing = await db.query(selectQuery, [reportId]);
+    const existingImages = existing.rows.map((row) => row.url);
+
+    const imagesToDelete = existingImages.filter(
+      (url) => !serverImages.includes(url)
+    );
+    if (imagesToDelete.length > 0) {
+      const deleteQuery = `
+        DELETE FROM report_image 
+        WHERE report_id = $1 AND url = ANY($2)
+      `;
+      await db.query(deleteQuery, [reportId, imagesToDelete]);
+    }
+
+    // 새 이미지 삽입
+    if (newImages.length > 0) {
+      const insertQuery = `
+        INSERT INTO report_image (report_id, url)
+        VALUES ${newImages.map((_, i) => `($1, $${i + 2})`).join(", ")}
+      `;
+      const newImagePaths = newImages.map(
+        (file) => `/uploads/${file.filename}`
+      );
+      await db.query(insertQuery, [reportId, ...newImagePaths]);
+    }
+
+    await db.query("COMMIT");
+  } catch (error) {
+    await db.query("ROLLBACK");
+    throw error;
+  }
+}
+
 module.exports = {
   getReportBoardList,
   addReportWithImages,
   deleteReport,
+  updateReportWithImages,
 };

@@ -22,6 +22,7 @@ const ALLOWED_MIME_TYPES = [
 
 export default function ReportPost({
   formMode = POST_FORM_MODE.CREATE,
+  setFormMode,
   onClose,
   openModal,
   openConfirm,
@@ -33,7 +34,8 @@ export default function ReportPost({
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [images, setImages] = useState([]);
+  const [serverImages, setServerImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
 
   const isReadOnly = formMode === POST_FORM_MODE.VIEW;
   const isWriter = user?.id === post?.userId;
@@ -43,9 +45,12 @@ export default function ReportPost({
       setTitle(post.title || "");
       setContent(post.content || "");
       typeRef.current.value = post.type || Object.keys(REPORT_TYPE_MAP)[0];
+      setServerImages(post.images || []);
+      setNewImages([]);
     }
   }, [formMode, post]);
 
+  // 이미지 유효성 검사
   function isValidImage(file) {
     const ext = file.name.split(".").pop().toLowerCase();
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
@@ -56,40 +61,45 @@ export default function ReportPost({
       openModal(`허용하지 않는 파일 형식입니다: ${file.name}`);
       return false;
     }
-    if (
-      images.some((img) => img.name === file.name && img.size === file.size)
-    ) {
-      openModal("같은 이미지를 중복해서 추가할 수 없습니다.");
-      return false;
-    }
     return true;
   }
 
+  // 이미지 선택
   function handleImageSelect(e) {
     const selectedFiles = Array.from(e.target.files);
-    let updatedImages = [...images];
+    let updatedImages = [...newImages];
 
     for (const file of selectedFiles) {
       if (!isValidImage(file)) continue;
       updatedImages.push(file);
-      if (updatedImages.length > MAX_IMAGES) {
+      if (serverImages.length + updatedImages.length > MAX_IMAGES) {
         openModal(`최대 ${MAX_IMAGES}장까지만 업로드할 수 있습니다.`);
-        updatedImages = updatedImages.slice(0, MAX_IMAGES);
+        updatedImages = updatedImages.slice(
+          0,
+          MAX_IMAGES - serverImages.length
+        );
         break;
       }
     }
 
-    setImages(updatedImages);
+    setNewImages(updatedImages);
     e.target.value = "";
   }
 
-  function handleRemoveImage(index) {
-    setImages((prev) => {
+  // 기존 이미지 삭제
+  function handleRemoveServerImage(index) {
+    setServerImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  // 새로 추가된 이미지 삭제
+  function handleRemoveNewImage(index) {
+    setNewImages((prev) => {
       URL.revokeObjectURL(prev[index].url);
       return prev.filter((_, i) => i !== index);
     });
   }
 
+  // Input 유효성 검사
   function validateInputs() {
     if (!title.trim()) {
       openModal("제목을 입력해주세요.");
@@ -102,11 +112,21 @@ export default function ReportPost({
     return true;
   }
 
+  // 오류 보고서 등록
   async function handleSubmitReport() {
     if (!validateInputs()) return;
     try {
       const type = typeRef.current.value;
-      await submitReport({ userId: user.id, type, title, content, images });
+      await submitReport({
+        userId: user.id,
+        type,
+        title,
+        content,
+        serverImages,
+        newImages,
+        postId: post?.id,
+        mode: formMode,
+      });
       onClose();
     } catch (error) {
       openModal(error.message || "등록 중 오류가 발생했습니다.");
@@ -131,9 +151,15 @@ export default function ReportPost({
     );
   }
 
-  async function handleEditReport() {}
+  // 편집
+  async function handleEditReport() {
+    setFormMode(POST_FORM_MODE.EDIT);
+  }
 
-  function handleEditCancelReport() {}
+  // 편집 취소
+  function handleEditCancelReport() {
+    setFormMode(POST_FORM_MODE.VIEW);
+  }
 
   return (
     <div className="flex flex-col p-5">
@@ -189,55 +215,61 @@ export default function ReportPost({
 
         <FormRow label="">
           <div className="flex w-full gap-8">
-            {isReadOnly
-              ? post?.images?.map((imgPath, idx) => (
-                  <div
-                    key={idx}
-                    className="relative w-20 h-20 overflow-hidden border rounded border-mapl-slate hover:cursor-pointer"
-                    onClick={() =>
-                      window.open(
-                        `${import.meta.env.VITE_API_URL}${imgPath}`,
-                        "_blank"
-                      )
-                    }
-                  >
-                    <img
-                      src={`${import.meta.env.VITE_API_URL}${imgPath}`}
-                      alt={`이미지-${idx}`}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                ))
-              : images.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="relative w-20 h-20 overflow-hidden border rounded border-mapl-slate"
-                  >
-                    <img
-                      src={URL.createObjectURL(img)}
-                      alt={`preview-${idx}`}
-                      className="object-cover w-full h-full"
-                    />
-                    <button
-                      className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 bg-gray-500 rounded-full hover:cursor-pointer"
-                      onClick={() => handleRemoveImage(idx)}
-                      type="button"
-                    >
-                      <FontAwesomeIcon icon={faXmark} color="white" />
-                    </button>
-                  </div>
-                ))}
-
-            {!isReadOnly && images.length < MAX_IMAGES && (
+            {/* 기존 서버 이미지 */}
+            {serverImages.map((imgPath, idx) => (
               <div
-                className="flex items-center justify-center w-20 h-20 border rounded border-mapl-slate hover:cursor-pointer"
-                onClick={() => fileInputRef.current.click()}
-                role="button"
-                tabIndex={0}
+                key={`server-${idx}`}
+                className="relative w-20 h-20 overflow-hidden border rounded border-mapl-slate"
               >
-                <FontAwesomeIcon icon={faCamera} color="#666" size="xl" />
+                <img
+                  src={`${import.meta.env.VITE_API_URL}${imgPath}`}
+                  alt={`서버이미지-${idx}`}
+                  className="object-cover w-full h-full"
+                />
+                {!isReadOnly && (
+                  <button
+                    className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 bg-gray-500 rounded-full hover:cursor-pointer"
+                    onClick={() => handleRemoveServerImage(idx)}
+                    type="button"
+                  >
+                    <FontAwesomeIcon icon={faXmark} color="white" />
+                  </button>
+                )}
               </div>
-            )}
+            ))}
+
+            {/* 새로 추가된 이미지 */}
+            {newImages.map((img, idx) => (
+              <div
+                key={`local-${idx}`}
+                className="relative w-20 h-20 overflow-hidden border rounded border-mapl-slate"
+              >
+                <img
+                  src={URL.createObjectURL(img)}
+                  alt={`preview-${idx}`}
+                  className="object-cover w-full h-full"
+                />
+                <button
+                  className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 bg-gray-500 rounded-full hover:cursor-pointer"
+                  onClick={() => handleRemoveNewImage(idx)}
+                  type="button"
+                >
+                  <FontAwesomeIcon icon={faXmark} color="white" />
+                </button>
+              </div>
+            ))}
+
+            {!isReadOnly &&
+              serverImages.length + newImages.length < MAX_IMAGES && (
+                <div
+                  className="flex items-center justify-center w-20 h-20 border rounded border-mapl-slate hover:cursor-pointer"
+                  onClick={() => fileInputRef.current.click()}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <FontAwesomeIcon icon={faCamera} color="#666" size="xl" />
+                </div>
+              )}
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
