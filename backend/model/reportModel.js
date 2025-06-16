@@ -4,6 +4,7 @@ function mapReportRow(row) {
   return {
     id: row.id,
     userId: row.user_id,
+    name: row.name,
     title: row.title,
     content: row.content,
     type: row.type,
@@ -18,10 +19,12 @@ async function getReportBoardList(page) {
   const query = `
     SELECT 
       r.*,
+      u.name,
       COALESCE(array_agg(ri.url) FILTER (WHERE ri.url IS NOT NULL), '{}') AS image_paths
     FROM report r
     LEFT JOIN report_image ri ON r.id = ri.report_id
-    GROUP BY r.id
+    LEFT JOIN users u ON r.user_id = u.id
+    GROUP BY r.id, u.name
     ORDER BY r.id DESC, r.created_at DESC
     LIMIT 15 OFFSET ($1 - 1) * 15`;
   const result = await db.query(query, [page]);

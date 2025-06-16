@@ -27,7 +27,7 @@ export default function ReportBoard({
     loadPost();
   }, [currentPage]);
 
-  const columns = ["번호", "제목", "진행상태", "작성일"];
+  const columns = ["번호", "제목", "진행상태", "작성자", "작성일"];
   const rows = posts.map((post) => ({
     post,
     cells: [
@@ -37,13 +37,14 @@ export default function ReportBoard({
         style: "text-left",
       },
       { content: STATUS_LABEL_MAP[post.status], style: "text-center" },
+      { content: post.name, style: "text-center" },
       { content: formatDateYYYYMMDD(post.createdAt), style: "text-center" },
     ],
   }));
 
   return (
     <BoardList
-      columnTemplate={"grid-cols-[75px_1fr_75px_100px]"}
+      columnTemplate={"grid-cols-[75px_1fr_75px_75px_100px]"}
       columns={columns}
       rows={rows}
       onPostClick={onPostClick}
