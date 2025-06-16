@@ -34,7 +34,7 @@ const boardTabs = [
 ];
 
 export default function BoardPage() {
-  const { openModal } = useModal();
+  const { openModal, openConfirm } = useModal();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -102,6 +102,7 @@ export default function BoardPage() {
             post={selectedPost}
             onClose={() => setScreenMode(BOARD_SCREEN_MODE.LIST)}
             openModal={openModal}
+            openConfirm={openConfirm}
           />
         );
       default:

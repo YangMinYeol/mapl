@@ -62,9 +62,7 @@ async function addReportWithImages({ userId, type, title, content, images }) {
         VALUES ${images.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `;
 
-      const imagePaths = images.map(
-        (file) => `/uploads/${file.filename}`
-      );
+      const imagePaths = images.map((file) => `/uploads/${file.filename}`);
       await db.query(insertImageQuery, [reportId, ...imagePaths]);
     }
 
@@ -76,7 +74,14 @@ async function addReportWithImages({ userId, type, title, content, images }) {
   }
 }
 
+// 오류 보고 게시글 삭제
+async function deleteReport(reportId) {
+  const query = `DELETE FROM report WHERE id = $1`;
+  return db.query(query, [reportId]);
+}
+
 module.exports = {
   getReportBoardList,
   addReportWithImages,
+  deleteReport,
 };
