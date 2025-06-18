@@ -1,11 +1,11 @@
 import { faCamera, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useEffect, useRef, useState } from "react";
-import { deleteReport, submitReport } from "../../../api/report";
-import { POST_FORM_MODE } from "../../../constants/board";
-import { REPORT_TYPE_MAP } from "../../../constants/report";
-import { UserContext } from "../../../context/UserContext";
-import SelectArrow from "../../common/SelectArrow";
+import { useEffect, useRef, useState } from "react";
+import { BOARD_TYPE, POST_FORM_MODE } from "../../constants/board";
+import { REPORT_TYPE_MAP } from "../../constants/report";
+import SelectArrow from "../common/SelectArrow";
+import { deleteReport, submitReport } from "../../api/report";
+import { deleteNotice, submitNotice } from "../../api/notice";
 
 const MAX_TITLE_LENGTH = 50;
 const MAX_LENGTH = 2000;
@@ -20,15 +20,16 @@ const ALLOWED_MIME_TYPES = [
   "image/svg+xml",
 ];
 
-export default function ReportPost({
-  formMode = POST_FORM_MODE.CREATE,
+export default function BoardPost({
+  user,
+  formMode,
   setFormMode,
+  boardType,
   onClose,
   openModal,
   openConfirm,
   post,
 }) {
-  const { user } = useContext(UserContext);
   const fileInputRef = useRef(null);
   const typeRef = useRef(null);
 
@@ -39,14 +40,17 @@ export default function ReportPost({
 
   const isReadOnly = formMode === POST_FORM_MODE.VIEW;
   const isWriter = user?.id === post?.userId;
+  const isReport = boardType === BOARD_TYPE.REPORT;
 
   useEffect(() => {
     if (post) {
       setTitle(post.title || "");
       setContent(post.content || "");
-      typeRef.current.value = post.type || Object.keys(REPORT_TYPE_MAP)[0];
       setServerImages(post.images || []);
       setNewImages([]);
+      if (isReport) {
+        typeRef.current.value = post.type || Object.keys(REPORT_TYPE_MAP)[0];
+      }
     }
   }, [formMode, post]);
 
@@ -112,21 +116,38 @@ export default function ReportPost({
     return true;
   }
 
-  // 오류 보고서 등록
-  async function handleSubmitReport() {
+  // 게시글 등록
+  async function handleSubmitPost() {
     if (!validateInputs()) return;
     try {
-      const type = typeRef.current.value;
-      await submitReport({
-        userId: user.id,
-        type,
-        title,
-        content,
-        serverImages,
-        newImages,
-        postId: post?.id,
-        mode: formMode,
-      });
+      switch (boardType) {
+        case BOARD_TYPE.NOTICE:
+          await submitNotice({
+            userId: user.id,
+            title,
+            content,
+            serverImages,
+            newImages,
+            postId: post?.id,
+            mode: formMode,
+          });
+          break;
+        case BOARD_TYPE.FREE:
+          break;
+        case BOARD_TYPE.REPORT:
+          const type = typeRef.current.value;
+          await submitReport({
+            userId: user.id,
+            type,
+            title,
+            content,
+            serverImages,
+            newImages,
+            postId: post?.id,
+            mode: formMode,
+          });
+          break;
+      }
       onClose();
     } catch (error) {
       openModal(error.message || "등록 중 오류가 발생했습니다.");
@@ -134,14 +155,25 @@ export default function ReportPost({
     }
   }
 
-  async function handleDeleteReport() {
+  // 게시글 삭제
+  async function handleDeletePost() {
     openConfirm(
       "정말로 삭제하시겠습니까?",
       "한번 삭제한 게시글은 되돌릴 수 없습니다.",
       async () => {
         try {
           if (!isWriter) return;
-          await deleteReport(post.id);
+          const id = post.id;
+          switch (boardType) {
+            case BOARD_TYPE.NOTICE:
+              await deleteNotice(id);
+              break;
+            case BOARD_TYPE.FREE:
+              break;
+            case BOARD_TYPE.REPORT:
+              await deleteReport(id);
+              break;
+          }
           onClose();
         } catch (error) {
           openModal(error.message || "삭제 중 오류가 발생했습니다.");
@@ -152,35 +184,37 @@ export default function ReportPost({
   }
 
   // 편집
-  async function handleEditReport() {
+  async function handleEditPost() {
     setFormMode(POST_FORM_MODE.EDIT);
   }
 
   // 편집 취소
-  function handleEditCancelReport() {
+  function handleEditCancelPost() {
     setFormMode(POST_FORM_MODE.VIEW);
   }
 
   return (
     <div className="flex flex-col p-5">
       <div className="border-b border-mapl-slate">
-        <FormRow label="유형">
-          <div className="relative w-full">
-            <select
-              ref={typeRef}
-              className="w-full h-full p-3 pr-10 border rounded appearance-none border-mapl-slate hover:cursor-pointer"
-              defaultValue={Object.keys(REPORT_TYPE_MAP)[0]}
-              disabled={isReadOnly}
-            >
-              {Object.entries(REPORT_TYPE_MAP).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-            <SelectArrow />
-          </div>
-        </FormRow>
+        {isReport && (
+          <FormRow label="유형">
+            <div className="relative w-full">
+              <select
+                ref={typeRef}
+                className="w-full h-full p-3 pr-10 border rounded appearance-none border-mapl-slate hover:cursor-pointer"
+                defaultValue={Object.keys(REPORT_TYPE_MAP)[0]}
+                disabled={isReadOnly}
+              >
+                {Object.entries(REPORT_TYPE_MAP).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <SelectArrow />
+            </div>
+          </FormRow>
+        )}
 
         <FormRow label="제목">
           <input
@@ -221,11 +255,12 @@ export default function ReportPost({
                 key={`server-${idx}`}
                 className="relative w-20 h-20 overflow-hidden border rounded border-mapl-slate"
               >
-                <img
-                  src={`${import.meta.env.VITE_API_URL}${imgPath}`}
+                <ImageViewer
+                  src={imgPath}
                   alt={`서버이미지-${idx}`}
-                  className="object-cover w-full h-full"
+                  readOnly={isReadOnly}
                 />
+
                 {!isReadOnly && (
                   <button
                     className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 bg-gray-500 rounded-full hover:cursor-pointer"
@@ -288,9 +323,9 @@ export default function ReportPost({
           <>
             {isWriter ? (
               <>
-                <Button text="편집" onClick={handleEditReport} color="green" />
+                <Button text="편집" onClick={handleEditPost} color="green" />
                 <Button text="목록" onClick={onClose} />
-                <Button text="삭제" onClick={handleDeleteReport} color="red" />
+                <Button text="삭제" onClick={handleDeletePost} color="red" />
               </>
             ) : (
               <Button text="목록" onClick={onClose} />
@@ -300,13 +335,13 @@ export default function ReportPost({
         {formMode === POST_FORM_MODE.CREATE && (
           <>
             <Button text="목록" onClick={onClose} />
-            <Button text="등록" onClick={handleSubmitReport} color="green" />
+            <Button text="등록" onClick={handleSubmitPost} color="green" />
           </>
         )}
         {formMode === POST_FORM_MODE.EDIT && (
           <>
-            <Button text="취소" onClick={handleEditCancelReport} />
-            <Button text="등록" onClick={handleSubmitReport} color="green" />
+            <Button text="취소" onClick={handleEditCancelPost} />
+            <Button text="등록" onClick={handleSubmitPost} color="green" />
           </>
         )}
       </div>
@@ -343,5 +378,25 @@ function Button({ text, onClick, color = "default" }) {
     <button className={`${base} ${colorClass}`} onClick={onClick} type="button">
       {text}
     </button>
+  );
+}
+
+function ImageViewer({ src, alt, readOnly }) {
+  const fullSrc = `${import.meta.env.VITE_API_URL}${src}`;
+
+  return readOnly ? (
+    <a href={fullSrc} target="_blank" rel="noopener noreferrer">
+      <img
+        src={fullSrc}
+        alt={alt}
+        className="object-cover w-full h-full cursor-pointer"
+      />
+    </a>
+  ) : (
+    <img
+      src={fullSrc}
+      alt={alt}
+      className="object-cover w-full h-full cursor-default"
+    />
   );
 }

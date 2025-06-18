@@ -1,19 +1,18 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import BoardFooter from "../components/board/BoardFooter";
 import BoardHeader from "../components/board/BoardHeader";
+import BoardPost from "../components/board/BoardPost";
 import BoardTabs from "../components/board/BoardTabs";
 import FreeBoard from "../components/board/free/FreeBoard";
-import FreePost from "../components/board/free/FreePost";
 import NoticeBoard from "../components/board/notice/NoticeBoard";
-import NoticePost from "../components/board/notice/NoticePost";
 import ReportBoard from "../components/board/report/ReportBoard";
-import ReportPost from "../components/board/report/ReportPost";
 import {
   BOARD_SCREEN_MODE,
   BOARD_TYPE,
   POST_FORM_MODE,
 } from "../constants/board";
 import { useModal } from "../context/ModalContext";
+import { UserContext } from "../context/UserContext";
 
 const boardTabs = [
   {
@@ -42,6 +41,20 @@ export default function BoardPage() {
   const [screenMode, setScreenMode] = useState(BOARD_SCREEN_MODE.LIST);
   const [formMode, setFormMode] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
+  const { user } = useContext(UserContext);
+
+  const canWrite = (() => {
+    switch (activeBoard) {
+      case BOARD_TYPE.NOTICE:
+        return user.role === "admin";
+      case BOARD_TYPE.REPORT:
+        return true;
+      case BOARD_TYPE.FREE:
+        return true;
+      default:
+        return false;
+    }
+  })();
 
   // 탭 클릭
   function handleTabClick(tab) {
@@ -72,7 +85,14 @@ export default function BoardPage() {
     if (screenMode === BOARD_SCREEN_MODE.LIST) {
       switch (activeBoard) {
         case BOARD_TYPE.NOTICE:
-          return <NoticeBoard />;
+          return (
+            <NoticeBoard
+              currentPage={currentPage}
+              setTotalCount={setTotalCount}
+              openModal={openModal}
+              onPostClick={handleViewPost}
+            />
+          );
         case BOARD_TYPE.FREE:
           return <FreeBoard />;
         case BOARD_TYPE.REPORT:
@@ -90,25 +110,16 @@ export default function BoardPage() {
     }
 
     // POST 화면일 때 (작성 / 수정 / 상세)
-    switch (activeBoard) {
-      case BOARD_TYPE.NOTICE:
-        return <NoticePost />;
-      case BOARD_TYPE.FREE:
-        return <FreePost />;
-      case BOARD_TYPE.REPORT:
-        return (
-          <ReportPost
-            formMode={formMode}
-            setFormMode={setFormMode}
-            post={selectedPost}
-            onClose={() => setScreenMode(BOARD_SCREEN_MODE.LIST)}
-            openModal={openModal}
-            openConfirm={openConfirm}
-          />
-        );
-      default:
-        return null;
-    }
+    return <BoardPost
+      user={user}
+      formMode={formMode}
+      setFormMode={setFormMode}
+      boardType={activeBoard}
+      post={selectedPost}
+      onClose={() => setScreenMode(BOARD_SCREEN_MODE.LIST)}
+      openModal={openModal}
+      openConfirm={openConfirm}
+    />;
   }
 
   return (
@@ -129,6 +140,7 @@ export default function BoardPage() {
             totalCount={totalCount}
             onPageChange={setCurrentPage}
             onWriteClick={handleWriteClick}
+            canWrite={canWrite}
           />
         )}
       </div>
