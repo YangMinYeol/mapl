@@ -5,6 +5,7 @@ export default function BoardFooter({
   totalCount,
   onPageChange,
   onWriteClick,
+  canWrite,
 }) {
   const totalPages = Math.ceil(totalCount / 15);
   return (
@@ -20,12 +21,14 @@ export default function BoardFooter({
         onPageChange={(page) => onPageChange(page)}
       />
       {/* 글작성 */}
-      <button
-        className="h-8 text-white rounded w-18 bg-deep-green hover:cursor-pointer"
-        onClick={onWriteClick}
-      >
-        글쓰기
-      </button>
+      {canWrite && (
+        <button
+          className="h-8 text-white rounded w-18 bg-deep-green hover:cursor-pointer"
+          onClick={onWriteClick}
+        >
+          글쓰기
+        </button>
+      )}
     </div>
   );
 }
