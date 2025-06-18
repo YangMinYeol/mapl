@@ -6,6 +6,7 @@ const periodRoute = require("./route/periodRoute");
 const colorRoute = require("./route/colorRoute");
 const reportRoute = require("./route/reportRoute");
 const noticeRoute = require("./route/noticeRoute");
+const freeRoute = require("./route/freeRoute");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 
@@ -23,6 +24,7 @@ app.use("/api/period", periodRoute);
 app.use("/api/color", colorRoute);
 app.use("/api/report", reportRoute);
 app.use("/api/notice", noticeRoute);
+app.use("/api/free", freeRoute);
 
 // 업로드 이미지 설정
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));

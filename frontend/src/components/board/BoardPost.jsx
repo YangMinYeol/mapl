@@ -6,6 +6,7 @@ import { REPORT_TYPE_MAP } from "../../constants/report";
 import SelectArrow from "../common/SelectArrow";
 import { deleteReport, submitReport } from "../../api/report";
 import { deleteNotice, submitNotice } from "../../api/notice";
+import { deleteFreePost, submitFreePost } from "../../api/free";
 
 const MAX_TITLE_LENGTH = 50;
 const MAX_LENGTH = 2000;
@@ -133,6 +134,15 @@ export default function BoardPost({
           });
           break;
         case BOARD_TYPE.FREE:
+          await submitFreePost({
+            userId: user.id,
+            title,
+            content,
+            serverImages,
+            newImages,
+            postId: post?.id,
+            mode: formMode,
+          });
           break;
         case BOARD_TYPE.REPORT:
           const type = typeRef.current.value;
@@ -169,6 +179,7 @@ export default function BoardPost({
               await deleteNotice(id);
               break;
             case BOARD_TYPE.FREE:
+              await deleteFreePost(id);
               break;
             case BOARD_TYPE.REPORT:
               await deleteReport(id);
