@@ -22,7 +22,7 @@ const boardTabs = [
   },
   {
     key: BOARD_TYPE.FREE,
-    title: "게시판",
+    title: "자유게시판",
     content: "다른 사용자와 의견을 나눠보세요.",
   },
   {
@@ -94,7 +94,14 @@ export default function BoardPage() {
             />
           );
         case BOARD_TYPE.FREE:
-          return <FreeBoard />;
+          return (
+            <FreeBoard
+              currentPage={currentPage}
+              setTotalCount={setTotalCount}
+              openModal={openModal}
+              onPostClick={handleViewPost}
+            />
+          );
         case BOARD_TYPE.REPORT:
           return (
             <ReportBoard
@@ -110,16 +117,18 @@ export default function BoardPage() {
     }
 
     // POST 화면일 때 (작성 / 수정 / 상세)
-    return <BoardPost
-      user={user}
-      formMode={formMode}
-      setFormMode={setFormMode}
-      boardType={activeBoard}
-      post={selectedPost}
-      onClose={() => setScreenMode(BOARD_SCREEN_MODE.LIST)}
-      openModal={openModal}
-      openConfirm={openConfirm}
-    />;
+    return (
+      <BoardPost
+        user={user}
+        formMode={formMode}
+        setFormMode={setFormMode}
+        boardType={activeBoard}
+        post={selectedPost}
+        onClose={() => setScreenMode(BOARD_SCREEN_MODE.LIST)}
+        openModal={openModal}
+        openConfirm={openConfirm}
+      />
+    );
   }
 
   return (
