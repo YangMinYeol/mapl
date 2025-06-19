@@ -26,8 +26,8 @@ export default function Header() {
   const isBoardPage = location.pathname === "/board";
 
   return (
-    <header className="py-3 bg-deep-green">
-      <div className="flex justify-between w-full px-8">
+    <header className="py-3 bg-deep-green min-w-[910px]">
+      <div className="flex justify-between px-8">
         <Logo height="h-12" useWhiteLogo={true} />
         <div className="flex items-center text-white">
           {user ? (
