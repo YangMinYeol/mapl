@@ -107,8 +107,8 @@ export default function MainPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap h-[900px]">
-        <div className="w-full h-full calendar-container md:w-[70%]">
+      <div className="flex flex-nowwrap h-[900px]">
+        <div className="w-[70%] h-full min-w-[600px] calendar-container">
           <Calendar
             calendarMemos={calendarMemos}
             currentDate={currentDate}
@@ -121,7 +121,7 @@ export default function MainPage() {
             setSelectedPeriod={handleSelectedPeriod}
           />
         </div>
-        <div className="w-full h-full detail-container md:w-[30%]">
+        <div className="w-[30%] h-full min-w-[300px] dashboard-container">
           <Dashboard
             dashboardMemos={dashboardMemos}
             loadDashboardMemos={loadDashboardMemos}
