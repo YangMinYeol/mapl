@@ -1,4 +1,4 @@
-import { format, getWeekOfMonth } from "date-fns";
+import { formatDateByPeriod } from "../../../../util/dateUtil";
 
 export default function MainMemoHeader({
   selectedDate,
@@ -6,26 +6,7 @@ export default function MainMemoHeader({
   totalMemos,
   completedMemos,
 }) {
-  let formattedDate = "yyyy년 MM월 dd일";
-
-  switch (selectedPeriod.name) {
-    case "Day":
-      formattedDate = "yyyy년 MM월 dd일";
-      break;
-    case "Week":
-      formattedDate = `yyyy년 MM월 ${getWeekOfMonth(selectedDate)}주차`;
-      break;
-    case "Month":
-      formattedDate = "yyyy년 MM월";
-      break;
-    case "Year":
-      formattedDate = "yyyy년";
-      break;
-    case "Other":
-      formattedDate = "버킷 리스트";
-      break;
-  }
-  const date = format(selectedDate, formattedDate);
+  const date = formatDateByPeriod(selectedDate, selectedPeriod.name, false);
 
   return (
     <div className="flex justify-between px-2 py-2 font-medium border-b border-mapl-slate h-[40px]">
