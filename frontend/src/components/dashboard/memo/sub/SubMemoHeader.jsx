@@ -1,4 +1,4 @@
-export default function DashboardSubHeader({
+export default function SubMemoHeader({
   filterPeriods,
   selectedValue,
   handleChange,

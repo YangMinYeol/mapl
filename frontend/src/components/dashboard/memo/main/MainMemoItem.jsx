@@ -1,13 +1,13 @@
 import {
   faPenToSquare,
-  faTrashCan,
   faSquare,
   faSquareCheck,
+  faTrashCan,
 } from "@fortawesome/free-regular-svg-icons";
-import { faLink, faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import IconButton from "../../common/IconButton";
+import { faArrowRight, faLink } from "@fortawesome/free-solid-svg-icons";
+import IconButton from "../../../common/IconButton";
 
-export default function DashboardMainMemoItem({
+export default function MainMemoItem({
   memo,
   onComplete,
   onPostpone,

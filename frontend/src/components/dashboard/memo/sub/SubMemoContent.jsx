@@ -1,12 +1,12 @@
-import DashboardSubMemoItem from "./DashboardSubMemoItem";
-import { bucketQuotes } from "../../../constants/bucketQuotes";
+import SubMemoItem from "./SubMemoItem";
+import { bucketQuotes } from "../../../../constants/bucketQuotes";
 
 function getRandomQuote() {
   const randomIndex = Math.floor(Math.random() * bucketQuotes.length);
   return bucketQuotes[randomIndex];
 }
 
-export default function DashboardSubContent({
+export default function SubMemoContent({
   dashboardMemos,
   selectedValue,
   checkedIds,
@@ -33,7 +33,7 @@ export default function DashboardSubContent({
             .filter((memo) => memo.periodId == selectedValue && !memo.completed)
             .map((memo) => (
               <li key={memo.id}>
-                <DashboardSubMemoItem
+                <SubMemoItem
                   memo={memo}
                   checked={checkedIds.includes(memo.id)}
                   onToggle={() => handleToggle(memo.id)}

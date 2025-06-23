@@ -1,7 +1,7 @@
-import DashboardMainHeader from "./DashboardMainHeader";
-import DashboardMainContent from "./DashboardMainContent";
+import MainMemoHeader from "./MainMemoHeader";
+import MainMemoContent from "./MainMemoContent";
 
-export default function DashboardMain({
+export default function MainMemo({
   dashboardMemos,
   periods,
   selectedPeriod,
@@ -14,13 +14,13 @@ export default function DashboardMain({
 }) {
   return (
     <div className="h-[520px]">
-      <DashboardMainHeader
+      <MainMemoHeader
         selectedDate={selectedDate}
         selectedPeriod={selectedPeriod}
         totalMemos={totalMemos}
         completedMemos={completedMemos}
       />
-      <DashboardMainContent
+      <MainMemoContent
         dashboardMemos={dashboardMemos}
         periods={periods}
         selectedPeriod={selectedPeriod}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PeriodSelector from "./PeriodSelector";
-import DashboardMain from "./main/DashboardMain";
-import DashboardSub from "./sub/DashboardSub";
+import MainMemo from "./memo/main/MainMemo";
+import SubMemo from "./memo/sub/SubMemo";
 import LinkModal from "../link/LinkModal";
 
 export default function Dashboard({
@@ -52,7 +52,7 @@ export default function Dashboard({
         selectedPeriod={selectedPeriod}
         setSelectedPeriod={setSelectedPeriod}
       />
-      <DashboardMain
+      <MainMemo
         dashboardMemos={dashboardMemos}
         periods={periods}
         selectedPeriod={selectedPeriod}
@@ -63,7 +63,7 @@ export default function Dashboard({
         loadCalendarMemos={loadCalendarMemos}
         openLinkModal={openLinkModal}
       />
-      <DashboardSub
+      <SubMemo
         dashboardMemos={dashboardMemos}
         periods={periods}
         selectedPeriod={selectedPeriod}
