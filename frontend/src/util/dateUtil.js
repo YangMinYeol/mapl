@@ -1,14 +1,15 @@
 import {
-  format,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
   endOfMonth,
-  startOfYear,
+  endOfWeek,
   endOfYear,
+  format,
+  getWeekOfMonth,
   isAfter,
   isBefore,
   isEqual,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
 } from "date-fns";
 
 export function formatDateYYYYMMDD(date) {
@@ -117,4 +118,22 @@ export function formatHolidayDate(locdate) {
   const month = str.slice(4, 6);
   const day = str.slice(6, 8);
   return `${year}-${month}-${day}`;
+}
+
+// 기한에 따른 날짜 포멧팅
+export function formatDateByPeriod(date, periodName, isAccountBook) {
+  switch (periodName) {
+    case "Day":
+      return format(date, "yyyy년 MM월 dd일");
+    case "Week":
+      return format(date, `yyyy년 MM월 ${getWeekOfMonth(date)}주차`);
+    case "Month":
+      return format(date, "yyyy년 MM월");
+    case "Year":
+      return format(date, "yyyy년");
+    case "Other":
+      return isAccountBook ? "전체" : "버킷 리스트";
+    default:
+      return format(date, "yyyy년 MM월 dd일");
+  }
 }
