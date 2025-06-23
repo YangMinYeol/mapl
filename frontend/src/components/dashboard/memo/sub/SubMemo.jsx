@@ -9,12 +9,12 @@ import SubMemoContent from "./SubMemoContent";
 import SubMemoHeader from "./SubMemoHeader";
 
 export default function SubMemo({
-  dashboardMemos,
+  dashboardDatas,
   periods,
   selectedPeriod,
   selectedDate,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  loadDashboardDatas,
+  loadCalendarDatas,
   openLinkModal,
 }) {
   const { openConfirm, openModal } = useModal();
@@ -22,16 +22,16 @@ export default function SubMemo({
   const handleLoginExpired = useLoginExpiredHandler();
   const { user } = useContext(UserContext);
   const isBucketList = useMemo(
-    () => selectedPeriod.name === "Bucket List",
+    () => selectedPeriod.name === "Other",
     [selectedPeriod]
   );
 
   const periodFilterMap = {
-    Day: ["Week", "Month", "Year", "Bucket List"],
-    Week: ["Month", "Year", "Bucket List"],
-    Month: ["Year", "Bucket List"],
-    Year: ["Bucket List"],
-    "Bucket List": ["Bucket List"],
+    Day: ["Week", "Month", "Year", "Other"],
+    Week: ["Month", "Year", "Other"],
+    Month: ["Year", "Other"],
+    Year: ["Other"],
+    Other: ["Other"],
   };
 
   const filterPeriods = useMemo(() => {
@@ -94,8 +94,8 @@ export default function SubMemo({
       }
 
       await addMemo(memoArray);
-      await loadDashboardMemos();
-      await loadCalendarMemos();
+      await loadDashboardDatas();
+      await loadCalendarDatas();
       setCheckedIds([]);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -131,8 +131,8 @@ export default function SubMemo({
       }
 
       await addMemo(memoArray);
-      await loadDashboardMemos();
-      await loadCalendarMemos();
+      await loadDashboardDatas();
+      await loadCalendarDatas();
       setCheckedIds([]);
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -146,7 +146,7 @@ export default function SubMemo({
 
   // 체크된 메모만 필터링
   function filterCheckedMemos() {
-    return dashboardMemos.filter((memo) => checkedIds.includes(memo.id));
+    return dashboardDatas.filter((memo) => checkedIds.includes(memo.id));
   }
 
   return (
@@ -159,7 +159,7 @@ export default function SubMemo({
         isBucketList={isBucketList}
       />
       <SubMemoContent
-        dashboardMemos={dashboardMemos}
+        dashboardDatas={dashboardDatas}
         selectedValue={selectedValue}
         selectedDate={selectedDate}
         checkedIds={checkedIds}

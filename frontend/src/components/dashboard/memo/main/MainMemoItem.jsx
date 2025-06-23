@@ -43,7 +43,7 @@ export default function MainMemoItem({
           />
         )}
         {/* 미루기 아이콘: 버킷리스트가 아닐 경우만 표시 */}
-        {selectedPeriod.name !== "Bucket List" && (
+        {selectedPeriod.name !== "Other" && (
           <IconButton
             icon={faArrowRight}
             onClick={() => onPostpone(memo)}

@@ -31,11 +31,11 @@ import MemoModal from "../../../memo/MemoModal";
 import MainMemoItem from "./MainMemoItem";
 
 export default function MainMemoContent({
-  dashboardMemos,
+  dashboardDatas,
   selectedPeriod,
   selectedDate,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  loadDashboardDatas,
+  loadCalendarDatas,
   openLinkModal,
 }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -90,8 +90,8 @@ export default function MainMemoContent({
           isLinked: false,
         },
       ]);
-      await loadDashboardMemos();
-      await loadCalendarMemos();
+      await loadDashboardDatas();
+      await loadCalendarDatas();
       setMemoText("");
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -112,14 +112,14 @@ export default function MainMemoContent({
           "동기화되어있는 메모 모두 삭제하시겠습니까?",
           async () => {
             await deleteLinkedMemos(memo.link);
-            await loadDashboardMemos();
-            await loadCalendarMemos();
+            await loadDashboardDatas();
+            await loadCalendarDatas();
           }
         );
       } else {
         await deleteMemo(memo.id);
-        await loadDashboardMemos();
-        await loadCalendarMemos();
+        await loadDashboardDatas();
+        await loadCalendarDatas();
       }
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -168,8 +168,8 @@ export default function MainMemoContent({
       );
 
       await postponeMemo(memo.id, newStartDate, newEndDate);
-      await loadDashboardMemos();
-      await loadCalendarMemos();
+      await loadDashboardDatas();
+      await loadCalendarDatas();
     } catch (error) {
       if (error instanceof LoginExpiredError) {
         handleLoginExpired(error.message);
@@ -189,12 +189,12 @@ export default function MainMemoContent({
           "동기화되어있는 메모 모두 complete 하시겠습니까?",
           async () => {
             await toggleLinkedMemosCompletion(memo.link);
-            await loadDashboardMemos();
+            await loadDashboardDatas();
           }
         );
       } else {
         await toggleMemoCompletion(memo.id);
-        await loadDashboardMemos();
+        await loadDashboardDatas();
       }
     } catch (error) {
       if (error instanceof LoginExpiredError) {
@@ -237,8 +237,8 @@ export default function MainMemoContent({
       <div className="overflow-auto h-11/12 dashboard-main-content">
         <ul>
           {(selectedPeriod.id === 1
-            ? sortDashboardMemos(dashboardMemos)
-            : dashboardMemos
+            ? sortDashboardMemos(dashboardDatas)
+            : dashboardDatas
           ).map((memo) => {
             if (memo.periodId === selectedPeriod.id) {
               return (
@@ -285,8 +285,8 @@ export default function MainMemoContent({
         selectedDate={selectedDate}
         mode={memoModalMode}
         memo={selectedMemo}
-        loadDashboardMemos={loadDashboardMemos}
-        loadCalendarMemos={loadCalendarMemos}
+        loadDashboardDatas={loadDashboardDatas}
+        loadCalendarDatas={loadCalendarDatas}
         selectedPeriod={selectedPeriod}
       />
     </div>

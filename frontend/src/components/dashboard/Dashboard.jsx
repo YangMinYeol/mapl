@@ -1,84 +1,40 @@
-import { useEffect, useState } from "react";
-import PeriodSelector from "./PeriodSelector";
-import MainMemo from "./memo/main/MainMemo";
-import SubMemo from "./memo/sub/SubMemo";
-import LinkModal from "../link/LinkModal";
+import { TABS } from "../../constants/tab";
+import AccountBookDashboard from "./account-book/AccountBookDashboard";
+import MemoDashboard from "./memo/MemoDashboard";
 
 export default function Dashboard({
-  dashboardMemos,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  activeTab,
+  dashboardDatas,
+  loadDashboardDatas,
+  loadCalendarDatas,
   selectedDate,
   periods,
   selectedPeriod,
   setSelectedPeriod,
 }) {
-  const [totalMemos, setTotalMemos] = useState(0);
-  const [completedMemos, setCompletedMemos] = useState(0);
-
-  // 링크 메모
-  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-  const [selectedLinkMemo, setSelectedLinkMemo] = useState(null);
-
-  useEffect(() => {
-    if (selectedPeriod.id) {
-      updateCount(dashboardMemos);
-    }
-  }, [selectedPeriod, dashboardMemos]);
-
-  // 카운트 업데이트
-  function updateCount(memoList) {
-    const filteredMemos = memoList.filter(
-      (memo) => memo.periodId === selectedPeriod.id
-    );
-
-    setTotalMemos(filteredMemos.length);
-    setCompletedMemos(filteredMemos.filter((memo) => memo.completed).length);
-  }
-
-  function openLinkModal(memo) {
-    setSelectedLinkMemo(memo);
-    setIsLinkModalOpen(true);
-  }
-
-  function closeLinkModal() {
-    setIsLinkModalOpen(false);
-  }
-
   return (
     <div className="h-full">
-      <PeriodSelector
-        periods={periods}
-        selectedPeriod={selectedPeriod}
-        setSelectedPeriod={setSelectedPeriod}
-      />
-      <MainMemo
-        dashboardMemos={dashboardMemos}
-        periods={periods}
-        selectedPeriod={selectedPeriod}
-        selectedDate={selectedDate}
-        totalMemos={totalMemos}
-        completedMemos={completedMemos}
-        loadDashboardMemos={loadDashboardMemos}
-        loadCalendarMemos={loadCalendarMemos}
-        openLinkModal={openLinkModal}
-      />
-      <SubMemo
-        dashboardMemos={dashboardMemos}
-        periods={periods}
-        selectedPeriod={selectedPeriod}
-        selectedDate={selectedDate}
-        loadDashboardMemos={loadDashboardMemos}
-        loadCalendarMemos={loadCalendarMemos}
-        openLinkModal={openLinkModal}
-      />
-      <LinkModal
-        isOpen={isLinkModalOpen}
-        onClose={closeLinkModal}
-        selectedLinkMemo={selectedLinkMemo}
-        loadDashboardMemos={loadDashboardMemos}
-        loadCalendarMemos={loadCalendarMemos}
-      />
+      {activeTab === TABS.MEMO ? (
+        <MemoDashboard
+          dashboardDatas={dashboardDatas}
+          loadDashboardDatas={loadDashboardDatas}
+          loadCalendarDatas={loadCalendarDatas}
+          selectedDate={selectedDate}
+          periods={periods}
+          selectedPeriod={selectedPeriod}
+          setSelectedPeriod={setSelectedPeriod}
+        />
+      ) : (
+        <AccountBookDashboard
+          dashboardDatas={dashboardDatas}
+          loadDashboardDatas={loadDashboardDatas}
+          loadCalendarDatas={loadCalendarDatas}
+          selectedDate={selectedDate}
+          periods={periods}
+          selectedPeriod={selectedPeriod}
+          setSelectedPeriod={setSelectedPeriod}
+        />
+      )}
     </div>
   );
 }

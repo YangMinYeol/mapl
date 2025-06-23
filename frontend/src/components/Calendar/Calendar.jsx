@@ -5,15 +5,17 @@ import { useMemo } from "react";
 import { addMonths, setMonth, setYear } from "date-fns";
 
 export default function Calendar({
-  calendarMemos,
+  calendarDatas,
   currentDate,
   setCurrentDate,
   selectedDate,
   setSelectedDate,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  loadDashboardDatas,
+  loadCalendarDatas,
   periods,
   setSelectedPeriod,
+  setActiveTab,
+  activeTab
 }) {
   const today = useMemo(() => new Date(), []);
 
@@ -44,15 +46,17 @@ export default function Calendar({
         handleChangeMonth={handleChangeMonth}
         handleYearMonth={handleYearMonth}
         goToToday={goToToday}
+        setActiveTab={setActiveTab}
+        activeTab={activeTab}
       />
       <CalendarDays />
       <CalendarDate
         currentDate={currentDate}
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
-        calendarMemos={calendarMemos}
-        loadDashboardMemos={loadDashboardMemos}
-        loadCalendarMemos={loadCalendarMemos}
+        calendarDatas={calendarDatas}
+        loadDashboardDatas={loadDashboardDatas}
+        loadCalendarDatas={loadCalendarDatas}
         periods={periods}
         setSelectedPeriod={setSelectedPeriod}
       />

@@ -7,7 +7,7 @@ function getRandomQuote() {
 }
 
 export default function SubMemoContent({
-  dashboardMemos,
+  dashboardDatas,
   selectedValue,
   checkedIds,
   handleToggle,
@@ -29,7 +29,7 @@ export default function SubMemoContent({
         </div>
       ) : (
         <ul>
-          {dashboardMemos
+          {dashboardDatas
             .filter((memo) => memo.periodId == selectedValue && !memo.completed)
             .map((memo) => (
               <li key={memo.id}>
