@@ -4,24 +4,19 @@ import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
 import { useRef, useState } from "react";
 import DropdownCalendar from "./DropdownCalendar";
 import { createMonthNavigationButton } from "../../util/calendarUtil";
+import { TABS } from "../../constants/tab";
 
 export default function CalendarHeader({
   currentDate,
   handleChangeMonth,
   handleYearMonth,
   goToToday,
+  setActiveTab,
+  activeTab,
 }) {
-  const TABS = { MEMO: "Memo", TODO: "Todo", WALLET: "Wallet" };
-  const tabs = Object.values(TABS);
-  const [activeTab, setActiveTab] = useState(TABS.MEMO);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownButtonRef = useRef(null);
   const yearMonth = format(currentDate, "yyyy년 MM월");
-
-  // Memo, Todo, Wallet 탭 변경
-  function handleTab(tabId) {
-    setActiveTab(tabId);
-  }
 
   // 드롭다운 달력 열기/닫기
   function toggleCalendarDropdown() {
@@ -39,13 +34,13 @@ export default function CalendarHeader({
       {/* Left */}
       <div className="calendar-header-left">
         <div className="flex pl-1 space-x-1">
-          {tabs.map((tab) => (
+          {Object.values(TABS).map((tab) => (
             <button
               key={tab}
               className={`px-1 border border-mapl-slate cursor-pointer rounded-md ${
                 activeTab === tab ? "bg-deep-green text-white" : "bg-white"
               } hover:bg-deep-green hover:text-white`}
-              onClick={() => handleTab(tab)}
+              onClick={() => setActiveTab(tab)}
             >
               {tab}
             </button>

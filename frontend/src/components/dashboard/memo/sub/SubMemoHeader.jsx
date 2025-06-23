@@ -1,3 +1,5 @@
+import { getPeriodDisplayName } from "../../../../util/periodUtil";
+
 export default function SubMemoHeader({
   filterPeriods,
   selectedValue,
@@ -15,7 +17,7 @@ export default function SubMemoHeader({
         >
           {filterPeriods.map((period) => (
             <option key={period.id} value={period.id}>
-              {period.name}
+              {getPeriodDisplayName(period.name, "memo")}
             </option>
           ))}
         </select>

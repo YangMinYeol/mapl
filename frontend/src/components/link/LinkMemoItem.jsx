@@ -7,7 +7,7 @@ export default function LinkMemoItem({ memo }) {
   const formattedStartDate = formatDateYYYYMMDD(startDate);
   const formattedEndDate = formatDateYYYYMMDD(endDate);
 
-  const isBucketList = periodName === "Bucket List";
+  const isBucketList = periodName === "Other";
 
   return (
     <div className="flex items-center py-1.5 m-1 border rounded hover:bg-gray-50 group border-mapl-slate">

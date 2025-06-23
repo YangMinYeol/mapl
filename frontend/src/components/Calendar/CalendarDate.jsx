@@ -20,9 +20,9 @@ import { formatHolidayDate } from "../../util/dateUtil";
 import { LINKED_MEMO } from "../../constants/messages";
 
 // 날짜별 메모 할당
-function buildMemoLevelMap(weeks, calendarMemos, tagMaxCount, holidays) {
+function buildMemoLevelMap(weeks, calendarDatas, tagMaxCount, holidays) {
   const { map, dailyMemosMap } = buildDateMemoMap(weeks);
-  const { dailyMemos, rangeMemos } = separateDailyAndRangeMemos(calendarMemos);
+  const { dailyMemos, rangeMemos } = separateDailyAndRangeMemos(calendarDatas);
   addHolidayMemos(dailyMemos, holidays);
 
   for (const key in dailyMemos) {
@@ -157,9 +157,9 @@ export default function CalendarDate({
   currentDate,
   selectedDate,
   setSelectedDate,
-  calendarMemos,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  calendarDatas,
+  loadDashboardDatas,
+  loadCalendarDatas,
   periods,
   setSelectedPeriod,
 }) {
@@ -168,7 +168,7 @@ export default function CalendarDate({
   const [holidays, setHolidays] = useState([]);
   const memoLevelMap = buildMemoLevelMap(
     weeks,
-    calendarMemos,
+    calendarDatas,
     tagMaxCount,
     holidays
   );
@@ -271,8 +271,8 @@ export default function CalendarDate({
         mode="edit"
         memo={selectedMemo}
         selectedPeriod={{ id: 1, name: "Day" }}
-        loadDashboardMemos={loadDashboardMemos}
-        loadCalendarMemos={loadCalendarMemos}
+        loadDashboardDatas={loadDashboardDatas}
+        loadCalendarDatas={loadCalendarDatas}
       />
     </div>
   );

@@ -24,8 +24,8 @@ export default function MemoModal({
   onClose,
   selectedDate,
   mode,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  loadDashboardDatas,
+  loadCalendarDatas,
   memo,
   selectedPeriod,
 }) {
@@ -88,11 +88,11 @@ export default function MemoModal({
           userId: user.id,
           content,
           startDate:
-            selectedPeriod.name === "Bucket List"
+            selectedPeriod.name === "Other"
               ? null
               : formatDateYYYYMMDD(startDate),
           endDate:
-            selectedPeriod.name === "Bucket List"
+            selectedPeriod.name === "Other"
               ? null
               : formatDateYYYYMMDD(endDate),
           startTime: allDay ? null : startTime,
@@ -122,11 +122,11 @@ export default function MemoModal({
         id: memo.id,
         content,
         startDate:
-          selectedPeriod.name === "Bucket List"
+          selectedPeriod.name === "Other"
             ? null
             : formatDateYYYYMMDD(startDate),
         endDate:
-          selectedPeriod.name === "Bucket List"
+          selectedPeriod.name === "Other"
             ? null
             : formatDateYYYYMMDD(endDate),
         startTime: allDay ? null : startTime,
@@ -172,8 +172,8 @@ export default function MemoModal({
 
   // 메모 목록 최신화 및 모달 닫기
   async function reloadAndClose() {
-    await loadDashboardMemos();
-    await loadCalendarMemos();
+    await loadDashboardDatas();
+    await loadCalendarDatas();
     closeModal();
   }
 
@@ -227,7 +227,7 @@ export default function MemoModal({
   }
 
   // 높이 설정
-  const showDateInputs = selectedPeriod.name !== "Bucket List";
+  const showDateInputs = selectedPeriod.name !== "Other";
   const showAllDay = selectedPeriod.name === "Day";
   const showColor = selectedPeriod.name === "Day";
   let modalHeight = "h-[345px]";
@@ -269,7 +269,7 @@ export default function MemoModal({
         {/* Content */}
         <div className={`${contentHeight} modal-content flex-col px-3`}>
           {/* 날짜/시간 */}
-          {selectedPeriod.name !== "Bucket List" && (
+          {selectedPeriod.name !== "Other" && (
             <div className="flex justify-between pb-3">
               <div className="w-[49%]">
                 <div className="py-2">

@@ -22,7 +22,7 @@ export function formatDateYYYYMMDD(date) {
 export function setDateByPeriod(period, selectedDate) {
   let startDate = null;
   let endDate = null;
-  if (period.name === "Bucket List") {
+  if (period.name === "Other") {
     return { startDate, endDate };
   }
   switch (period.name) {

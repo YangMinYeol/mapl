@@ -13,8 +13,8 @@ export default function LinkModal({
   isOpen,
   onClose,
   selectedLinkMemo,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  loadDashboardDatas,
+  loadCalendarDatas,
 }) {
   const [linkedMemos, setLinkedMemos] = useState([]);
   const { openModal } = useModal();
@@ -55,8 +55,8 @@ export default function LinkModal({
       const { id, link } = selectedLinkMemo;
       setIsLoading(true);
       await unlinkMemo(id, link);
-      loadDashboardMemos();
-      loadCalendarMemos();
+      loadDashboardDatas();
+      loadCalendarDatas();
       closeModal();
     } catch (error) {
       console.error("메모 링크 해제 오류:", error);

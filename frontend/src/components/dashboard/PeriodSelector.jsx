@@ -1,7 +1,10 @@
+import { getPeriodDisplayName } from "../../util/periodUtil";
+
 export default function PeriodSelector({
   periods,
   selectedPeriod,
   setSelectedPeriod,
+  isAccountBook = false,
 }) {
   return (
     <div className="h-[40px] font-medium border-y-1 border-mapl-slate">
@@ -18,7 +21,9 @@ export default function PeriodSelector({
               onClick={() => setSelectedPeriod(period)}
             >
               <span className=" whitespace-nowrap">
-                {period.name}
+                {isAccountBook
+                  ? getPeriodDisplayName(period.name, "accountBook")
+                  : getPeriodDisplayName(period.name, "memo")}
               </span>
             </div>
           ))}

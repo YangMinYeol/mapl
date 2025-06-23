@@ -2,14 +2,14 @@ import MainMemoHeader from "./MainMemoHeader";
 import MainMemoContent from "./MainMemoContent";
 
 export default function MainMemo({
-  dashboardMemos,
+  dashboardDatas,
   periods,
   selectedPeriod,
   selectedDate,
   totalMemos,
   completedMemos,
-  loadDashboardMemos,
-  loadCalendarMemos,
+  loadDashboardDatas,
+  loadCalendarDatas,
   openLinkModal,
 }) {
   return (
@@ -21,12 +21,12 @@ export default function MainMemo({
         completedMemos={completedMemos}
       />
       <MainMemoContent
-        dashboardMemos={dashboardMemos}
+        dashboardDatas={dashboardDatas}
         periods={periods}
         selectedPeriod={selectedPeriod}
         selectedDate={selectedDate}
-        loadDashboardMemos={loadDashboardMemos}
-        loadCalendarMemos={loadCalendarMemos}
+        loadDashboardDatas={loadDashboardDatas}
+        loadCalendarDatas={loadCalendarDatas}
         openLinkModal={openLinkModal}
       />
     </div>
