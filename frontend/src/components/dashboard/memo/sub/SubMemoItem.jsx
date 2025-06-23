@@ -1,8 +1,8 @@
 import { faSquare, faSquareCheck } from "@fortawesome/free-regular-svg-icons";
 import { faLink } from "@fortawesome/free-solid-svg-icons";
-import IconButton from "../../common/IconButton";
+import IconButton from "../../../common/IconButton";
 
-export default function DashboardSubMemoItem({
+export default function SubMemoItem({
   memo,
   checked,
   onToggle,

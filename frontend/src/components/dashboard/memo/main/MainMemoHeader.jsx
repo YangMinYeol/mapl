@@ -1,6 +1,6 @@
 import { format, getWeekOfMonth } from "date-fns";
 
-export default function DashboardMainHeader({
+export default function MainMemoHeader({
   selectedDate,
   selectedPeriod,
   totalMemos,

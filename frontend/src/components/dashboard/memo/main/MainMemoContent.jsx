@@ -1,36 +1,36 @@
-import MemoModal from "../../memo/MemoModal";
-import DashboardMainMemoItem from "./DashboardMainMemoItem";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCirclePlus, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCircleCheck as faCircleCheckRegular } from "@fortawesome/free-regular-svg-icons";
-import { useRef, useState, useContext } from "react";
+import { faCircleCheck, faCirclePlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useContext, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   addMemo,
-  deleteMemo,
-  toggleMemoCompletion,
-  toggleLinkedMemosCompletion,
   deleteLinkedMemos,
+  deleteMemo,
   postponeMemo,
-} from "../../../api/memo";
-import { LoginExpiredError } from "../../../util/error";
+  toggleLinkedMemosCompletion,
+  toggleMemoCompletion,
+} from "../../../../api/memo";
+import { MEMO_MODE } from "../../../../constants/memoMode";
+import { LINKED_MEMO } from "../../../../constants/messages";
+import { useModal } from "../../../../context/ModalContext";
+import { UserContext } from "../../../../context/UserContext";
+import { useLoginExpiredHandler } from "../../../../hooks/useLoginExpiredHandler";
 import {
   formatDateYYYYMMDD,
   postponeDates,
   setDateByPeriod,
-} from "../../../util/dateUtil";
-import { useNavigate } from "react-router-dom";
-import { useModal } from "../../../context/ModalContext";
-import { UserContext } from "../../../context/UserContext";
-import { useLoginExpiredHandler } from "../../../hooks/useLoginExpiredHandler";
+} from "../../../../util/dateUtil";
+import { LoginExpiredError } from "../../../../util/error";
 import {
   dailyMemoObjectToArray,
   separateDailyAndRangeMemos,
   sortMemos,
-} from "../../../util/memoUtil";
-import { MEMO_MODE } from "../../../constants/memoMode";
-import { LINKED_MEMO } from "../../../constants/messages";
+} from "../../../../util/memoUtil";
+import MemoModal from "../../../memo/MemoModal";
+import MainMemoItem from "./MainMemoItem";
 
-export default function DashboardMainContent({
+export default function MainMemoContent({
   dashboardMemos,
   selectedPeriod,
   selectedDate,
@@ -243,7 +243,7 @@ export default function DashboardMainContent({
             if (memo.periodId === selectedPeriod.id) {
               return (
                 <li key={memo.id}>
-                  <DashboardMainMemoItem
+                  <MainMemoItem
                     memo={memo}
                     onComplete={handleToggleMemoCompletion}
                     onDelete={handleDeleteMemo}

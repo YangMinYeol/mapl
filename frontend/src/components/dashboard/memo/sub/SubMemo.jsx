@@ -1,14 +1,14 @@
-import DashboardSubHeader from "./DashboardSubHeader";
-import DashboardSubContent from "./DashboardSubContent";
-import { useEffect, useState, useMemo, useContext } from "react";
-import { useModal } from "../../../context/ModalContext";
-import { LoginExpiredError } from "../../../util/error";
-import { useLoginExpiredHandler } from "../../../hooks/useLoginExpiredHandler";
-import { setDateByPeriod } from "../../../util/dateUtil";
-import { UserContext } from "../../../context/UserContext";
-import { addMemo } from "../../../api/memo";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { addMemo } from "../../../../api/memo";
+import { useModal } from "../../../../context/ModalContext";
+import { UserContext } from "../../../../context/UserContext";
+import { useLoginExpiredHandler } from "../../../../hooks/useLoginExpiredHandler";
+import { setDateByPeriod } from "../../../../util/dateUtil";
+import { LoginExpiredError } from "../../../../util/error";
+import SubMemoContent from "./SubMemoContent";
+import SubMemoHeader from "./SubMemoHeader";
 
-export default function DashboardSub({
+export default function SubMemo({
   dashboardMemos,
   periods,
   selectedPeriod,
@@ -151,14 +151,14 @@ export default function DashboardSub({
 
   return (
     <div className="h-[340px]">
-      <DashboardSubHeader
+      <SubMemoHeader
         filterPeriods={filterPeriods}
         selectedValue={selectedValue}
         handleChange={(e) => setSelectedValue(e.target.value)}
         handleAddMemo={handleAddMemo}
         isBucketList={isBucketList}
       />
-      <DashboardSubContent
+      <SubMemoContent
         dashboardMemos={dashboardMemos}
         selectedValue={selectedValue}
         selectedDate={selectedDate}
