@@ -11,7 +11,7 @@ import {
   toggleLinkedMemosCompletion,
   toggleMemoCompletion,
 } from "../../../../api/memo";
-import { MEMO_MODE } from "../../../../constants/memoMode";
+import { MEMO_MODE } from "../../../../util/memoUtil";
 import { LINKED_MEMO } from "../../../../constants/messages";
 import { useModal } from "../../../../context/ModalContext";
 import { UserContext } from "../../../../context/UserContext";

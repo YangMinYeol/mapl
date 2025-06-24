@@ -7,6 +7,11 @@ export const MEMO_TYPE = {
   HOLIDAY: "holiday",
 };
 
+export const MEMO_MODE = {
+  CREATE: "create",
+  EDIT: "edit",
+};
+
 // 데일리 메모와 범위 메모 분류
 export function separateDailyAndRangeMemos(memos) {
   const dailyMemos = {};
