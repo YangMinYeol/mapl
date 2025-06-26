@@ -19,6 +19,7 @@ export default function DateTimeInput({
   selectedPeriod,
 }) {
   const selectedTimeRef = useRef(null);
+  const periodName = selectedPeriod?.name || "Day";
 
   // 날짜 아이콘 클릭
   function toggleDatePicker() {
@@ -62,7 +63,7 @@ export default function DateTimeInput({
       />
 
       {/* Date Icon */}
-      {selectedPeriod.name === "Day" && (
+      {periodName === "Day" && (
         <IconWrapper
           icon={faCalendar}
           position={`${allDay ? "right-1" : "right-6"}`}
