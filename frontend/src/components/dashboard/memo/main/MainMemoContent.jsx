@@ -11,7 +11,7 @@ import {
   toggleLinkedMemosCompletion,
   toggleMemoCompletion,
 } from "../../../../api/memo";
-import { MEMO_MODE } from "../../../../util/memoUtil";
+import { MEMO_MODAL_MODE } from "../../../../util/memoUtil";
 import { LINKED_MEMO } from "../../../../constants/messages";
 import { useModal } from "../../../../context/ModalContext";
 import { UserContext } from "../../../../context/UserContext";
@@ -68,7 +68,7 @@ export default function MainMemoContent({
     if (memoText.trim()) {
       addNewMemo();
     } else {
-      setMemoModalMode(MEMO_MODE.CREATE);
+      setMemoModalMode(MEMO_MODAL_MODE.CREATE);
       setIsMemoModalOpen(true);
     }
   }
@@ -136,12 +136,12 @@ export default function MainMemoContent({
     if (memo.isLinked) {
       openConfirm(LINKED_MEMO.TITLE, LINKED_MEMO.EDIT_CONFIRM, async () => {
         setSelectedMemo(memo);
-        setMemoModalMode(MEMO_MODE.EDIT);
+        setMemoModalMode(MEMO_MODAL_MODE.EDIT);
         setIsMemoModalOpen(true);
       });
     } else {
       setSelectedMemo(memo);
-      setMemoModalMode(MEMO_MODE.EDIT);
+      setMemoModalMode(MEMO_MODAL_MODE.EDIT);
       setIsMemoModalOpen(true);
     }
   }
