@@ -7,7 +7,7 @@ export const MEMO_TYPE = {
   HOLIDAY: "holiday",
 };
 
-export const MEMO_MODE = {
+export const MEMO_MODAL_MODE = {
   CREATE: "create",
   EDIT: "edit",
 };

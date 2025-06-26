@@ -11,7 +11,7 @@ import { useMemoModalForm } from "../../hooks/useMemoModalForm";
 import { baseModalStyle } from "../../styles/modalStyle";
 import { formatDateYYYYMMDD } from "../../util/dateUtil";
 import { LoginExpiredError } from "../../util/error";
-import { MEMO_MODE } from "../../util/memoUtil";
+import { MEMO_MODAL_MODE } from "../../util/memoUtil";
 import Loading from "../common/Loading";
 import Palette from "../common/Palette";
 import DateTimeInput from "./DateTimeInput";
@@ -371,7 +371,7 @@ export default function MemoModal({
         {/* Footer */}
         <div className="h-[46px] modal-footer border-mapl-slate px-3 flex items-center">
           <div className="flex-1">
-            {mode === MEMO_MODE.EDIT && (
+            {mode === MEMO_MODAL_MODE.EDIT && (
               <button
                 className={`${footerButtonClass} bg-red-500 text-white`}
                 onClick={deleteMemo}
@@ -384,9 +384,9 @@ export default function MemoModal({
           <div className="flex items-center gap-2">
             <button
               className={`${footerButtonClass} bg-deep-green text-white`}
-              onClick={mode === MEMO_MODE.CREATE ? addDetailMemo : editMemo}
+              onClick={mode === MEMO_MODAL_MODE.CREATE ? addDetailMemo : editMemo}
             >
-              {mode === MEMO_MODE.CREATE ? "추가" : "수정"}
+              {mode === MEMO_MODAL_MODE.CREATE ? "추가" : "수정"}
             </button>
             <button className={footerButtonClass} onClick={closeModal}>
               닫기
