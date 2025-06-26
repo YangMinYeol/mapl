@@ -44,7 +44,10 @@ export function setDateByPeriod(period, selectedDate) {
       endDate = endOfYear(selectedDate);
       break;
   }
-  return { startDate: formatDateYYYYMMDD(startDate), endDate };
+  return {
+    startDate: formatDateYYYYMMDD(startDate),
+    endDate: formatDateYYYYMMDD(endDate),
+  };
 }
 
 // 미루기 위한 startDate와 endDate를 설정
