@@ -10,6 +10,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import AlertModal from "./components/common/AlertModal";
 import { useState, useEffect } from "react";
+import useCategoryStore from "./stores/useCategoryStore";
 
 function AppContent() {
   const location = useLocation();
@@ -39,6 +40,9 @@ export default function App() {
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
+  const resetCategories = useCategoryStore((state) => state.resetCategories);
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -49,8 +53,10 @@ export default function App() {
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
+      fetchCategories(user.id);
     } else {
       localStorage.removeItem("user");
+      resetCategories();
     }
   }, [user]);
 
