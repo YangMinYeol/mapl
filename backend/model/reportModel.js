@@ -40,15 +40,16 @@ async function getReportBoardList(page) {
 
 // 오류 보고 게시글 등록
 async function addReportWithImages({ userId, type, title, content, images }) {
+  const client = await db.connect();
   try {
-    await db.query("BEGIN");
+    await client.query("BEGIN");
 
     const insertReportQuery = `
       INSERT INTO report (user_id, type, title, content)
       VALUES ($1, $2, $3, $4)
       RETURNING id
     `;
-    const reportResult = await db.query(insertReportQuery, [
+    const reportResult = await client.query(insertReportQuery, [
       userId,
       type,
       title,
@@ -63,14 +64,16 @@ async function addReportWithImages({ userId, type, title, content, images }) {
       `;
 
       const imagePaths = images.map((file) => `/uploads/${file.filename}`);
-      await db.query(insertImageQuery, [reportId, ...imagePaths]);
+      await client.query(insertImageQuery, [reportId, ...imagePaths]);
     }
 
-    await db.query("COMMIT");
+    await client.query("COMMIT");
     return reportId;
   } catch (error) {
-    await db.query("ROLLBACK");
+    await client.query("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
   }
 }
 
@@ -90,8 +93,9 @@ async function updateReportWithImages({
   serverImages,
   newImages,
 }) {
+  const client = await db.connect();
   try {
-    await db.query("BEGIN");
+    await client.query("BEGIN");
 
     // 게시글 수정
     const updateReportQuery = `
@@ -99,11 +103,17 @@ async function updateReportWithImages({
       SET user_id = $1, type = $2, title = $3, content = $4
       WHERE id = $5
     `;
-    await db.query(updateReportQuery, [userId, type, title, content, reportId]);
+    await client.query(updateReportQuery, [
+      userId,
+      type,
+      title,
+      content,
+      reportId,
+    ]);
 
     // 기존 이미지 삭제 (남겨둔 서버 이미지 외 나머지 삭제)
     const selectQuery = `SELECT url FROM report_image WHERE report_id = $1`;
-    const existing = await db.query(selectQuery, [reportId]);
+    const existing = await client.query(selectQuery, [reportId]);
     const existingImages = existing.rows.map((row) => row.url);
 
     const imagesToDelete = existingImages.filter(
@@ -114,7 +124,7 @@ async function updateReportWithImages({
         DELETE FROM report_image 
         WHERE report_id = $1 AND url = ANY($2)
       `;
-      await db.query(deleteQuery, [reportId, imagesToDelete]);
+      await client.query(deleteQuery, [reportId, imagesToDelete]);
     }
 
     // 새 이미지 삽입
@@ -126,13 +136,15 @@ async function updateReportWithImages({
       const newImagePaths = newImages.map(
         (file) => `/uploads/${file.filename}`
       );
-      await db.query(insertQuery, [reportId, ...newImagePaths]);
+      await client.query(insertQuery, [reportId, ...newImagePaths]);
     }
 
-    await db.query("COMMIT");
+    await client.query("COMMIT");
   } catch (error) {
-    await db.query("ROLLBACK");
+    await client.query("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
   }
 }
 

@@ -40,15 +40,16 @@ async function getNoticeBoardList(page) {
 
 // 공지사항 게시글 등록
 async function addNoticeWithImages({ userId, title, content, images }) {
+  const client = await db.connect();
   try {
-    await db.query("BEGIN");
+    await client.query("BEGIN");
 
     const insertNoticeQuery = `
       INSERT INTO notice (user_id, title, content)
       VALUES ($1, $2, $3)
       RETURNING id
     `;
-    const noticeResult = await db.query(insertNoticeQuery, [
+    const noticeResult = await client.query(insertNoticeQuery, [
       userId,
       title,
       content,
@@ -62,14 +63,16 @@ async function addNoticeWithImages({ userId, title, content, images }) {
       `;
 
       const imagePaths = images.map((file) => `/uploads/${file.filename}`);
-      await db.query(insertImageQuery, [noticeId, ...imagePaths]);
+      await client.query(insertImageQuery, [noticeId, ...imagePaths]);
     }
 
-    await db.query("COMMIT");
+    await client.query("COMMIT");
     return noticeId;
   } catch (error) {
-    await db.query("ROLLBACK");
+    await client.query("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
   }
 }
 
@@ -82,8 +85,9 @@ async function updateNoticeWithImages({
   serverImages,
   newImages,
 }) {
+  const client = await db.connect();
   try {
-    await db.query("BEGIN");
+    await client.query("BEGIN");
 
     // 게시글 수정
     const updateNoticeQuery = `
@@ -91,11 +95,11 @@ async function updateNoticeWithImages({
       SET user_id = $1, title = $2, content = $3
       WHERE id = $4
     `;
-    await db.query(updateNoticeQuery, [userId, title, content, noticeId]);
+    await client.query(updateNoticeQuery, [userId, title, content, noticeId]);
 
     // 기존 이미지 삭제 (남겨둔 서버 이미지 외 나머지 삭제)
     const selectQuery = `SELECT url FROM notice_image WHERE notice_id = $1`;
-    const existing = await db.query(selectQuery, [noticeId]);
+    const existing = await client.query(selectQuery, [noticeId]);
     const existingImages = existing.rows.map((row) => row.url);
 
     const imagesToDelete = existingImages.filter(
@@ -106,7 +110,7 @@ async function updateNoticeWithImages({
         DELETE FROM notice_image 
         WHERE notice_id = $1 AND url = ANY($2)
       `;
-      await db.query(deleteQuery, [noticeId, imagesToDelete]);
+      await client.query(deleteQuery, [noticeId, imagesToDelete]);
     }
 
     // 새 이미지 삽입
@@ -118,13 +122,15 @@ async function updateNoticeWithImages({
       const newImagePaths = newImages.map(
         (file) => `/uploads/${file.filename}`
       );
-      await db.query(insertQuery, [noticeId, ...newImagePaths]);
+      await client.query(insertQuery, [noticeId, ...newImagePaths]);
     }
 
-    await db.query("COMMIT");
+    await client.query("COMMIT");
   } catch (error) {
-    await db.query("ROLLBACK");
+    await client.query("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
   }
 }
 
