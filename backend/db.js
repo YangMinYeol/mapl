@@ -1,8 +1,8 @@
 require("dotenv").config(); // .env 파일 로드
 
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
-const client = new Client({
+const pool = new Pool({
   host: process.env.PG_HOST,
   port: process.env.PG_PORT,
   database: process.env.PG_DATABASE,
@@ -10,9 +10,13 @@ const client = new Client({
   password: process.env.PG_PASSWORD,
 });
 
-client
+// 연결 테스트 (옵션)
+pool
   .connect()
-  .then(() => console.log("PostgreSQL 연결 성공"))
+  .then((client) => {
+    console.log("PostgreSQL 연결 성공");
+    client.release(); // 테스트 후 커넥션 반환
+  })
   .catch((err) => console.error("PostgreSQL 연결 오류:", err));
 
-module.exports = client;
+module.exports = pool;

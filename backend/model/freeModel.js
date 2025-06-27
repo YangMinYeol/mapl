@@ -40,15 +40,16 @@ async function getFreeBoardList(page) {
 
 // 자유게시판 게시글 등록
 async function addFreePostWithImages({ userId, title, content, images }) {
+  const client = await db.connect();
   try {
-    await db.query("BEGIN");
+    await client.query("BEGIN");
 
     const insertFreeQuery = `
       INSERT INTO free (user_id, title, content)
       VALUES ($1, $2, $3)
       RETURNING id
     `;
-    const freeResult = await db.query(insertFreeQuery, [
+    const freeResult = await client.query(insertFreeQuery, [
       userId,
       title,
       content,
@@ -62,14 +63,16 @@ async function addFreePostWithImages({ userId, title, content, images }) {
       `;
 
       const imagePaths = images.map((file) => `/uploads/${file.filename}`);
-      await db.query(insertImageQuery, [freeId, ...imagePaths]);
+      await client.query(insertImageQuery, [freeId, ...imagePaths]);
     }
 
-    await db.query("COMMIT");
+    await client.query("COMMIT");
     return freeId;
   } catch (error) {
-    await db.query("ROLLBACK");
+    await client.query("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
   }
 }
 
@@ -82,8 +85,9 @@ async function updateFreePostWithImages({
   serverImages,
   newImages,
 }) {
+  const client = await db.connect();
   try {
-    await db.query("BEGIN");
+    await client.query("BEGIN");
 
     // 게시글 수정
     const updateFreeQuery = `
@@ -91,11 +95,11 @@ async function updateFreePostWithImages({
       SET user_id = $1, title = $2, content = $3
       WHERE id = $4
     `;
-    await db.query(updateFreeQuery, [userId, title, content, freeId]);
+    await client.query(updateFreeQuery, [userId, title, content, freeId]);
 
     // 기존 이미지 삭제 (남겨둔 서버 이미지 외 나머지 삭제)
     const selectQuery = `SELECT url FROM free_image WHERE free_id = $1`;
-    const existing = await db.query(selectQuery, [freeId]);
+    const existing = await client.query(selectQuery, [freeId]);
     const existingImages = existing.rows.map((row) => row.url);
 
     const imagesToDelete = existingImages.filter(
@@ -106,7 +110,7 @@ async function updateFreePostWithImages({
         DELETE FROM free_image 
         WHERE free_id = $1 AND url = ANY($2)
       `;
-      await db.query(deleteQuery, [freeId, imagesToDelete]);
+      await client.query(deleteQuery, [freeId, imagesToDelete]);
     }
 
     // 새 이미지 삽입
@@ -118,13 +122,15 @@ async function updateFreePostWithImages({
       const newImagePaths = newImages.map(
         (file) => `/uploads/${file.filename}`
       );
-      await db.query(insertQuery, [freeId, ...newImagePaths]);
+      await client.query(insertQuery, [freeId, ...newImagePaths]);
     }
 
-    await db.query("COMMIT");
+    await client.query("COMMIT");
   } catch (error) {
-    await db.query("ROLLBACK");
+    await client.query("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
   }
 }
 

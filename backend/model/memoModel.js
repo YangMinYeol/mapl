@@ -69,8 +69,9 @@ async function getCalendarMemos(userId, currentDate) {
 
 // 메모 추가
 async function addMemo(memos) {
+  const client = await db.connect();
   try {
-    await db.query("BEGIN");
+    await client.query("BEGIN");
 
     const insertedMemos = [];
 
@@ -90,11 +91,13 @@ async function addMemo(memos) {
       }
     }
 
-    await db.query("COMMIT");
+    await client.query("COMMIT");
     return insertedMemos;
   } catch (error) {
-    await db.query("ROLLBACK");
+    await client.query("ROLLBACK");
     throw new Error("메모 추가 실패: " + error.message);
+  } finally {
+    client.release();
   }
 }
 
