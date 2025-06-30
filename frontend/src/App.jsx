@@ -1,16 +1,17 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { UserContext } from "./context/UserContext";
-import { ModalProvider } from "./context/ModalContext";
-import { ColorProvider } from "./context/ColorContext";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import MainPage from "./pages/MainPage";
-import BoardPage from "./pages/BoardPage";
-import Header from "./components/layout/Header";
-import Footer from "./components/layout/Footer";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import AlertModal from "./components/common/AlertModal";
-import { useState, useEffect } from "react";
+import Footer from "./components/layout/Footer";
+import Header from "./components/layout/Header";
+import { ColorProvider } from "./context/ColorContext";
+import { ModalProvider } from "./context/ModalContext";
+import { UserContext } from "./context/UserContext";
+import BoardPage from "./pages/BoardPage";
+import LoginPage from "./pages/LoginPage";
+import MainPage from "./pages/MainPage";
+import SignupPage from "./pages/SignupPage";
 import useCategoryStore from "./stores/useCategoryStore";
+import useAssetStore from "./stores/useAssetStore";
 
 function AppContent() {
   const location = useLocation();
@@ -43,6 +44,9 @@ export default function App() {
   const fetchCategories = useCategoryStore((state) => state.fetchCategories);
   const resetCategories = useCategoryStore((state) => state.resetCategories);
 
+  const fetchAsset = useAssetStore((state) => state.fetchAsset);
+  const resetAsset = useAssetStore((state) => state.resetAsset);
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -54,9 +58,11 @@ export default function App() {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
       fetchCategories(user.id);
+      fetchAsset(user.id);
     } else {
       localStorage.removeItem("user");
       resetCategories();
+      resetAsset();
     }
   }, [user]);
 
