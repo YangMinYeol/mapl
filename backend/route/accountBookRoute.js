@@ -6,4 +6,7 @@ const verifyToken = require("../middleware/authMiddleware");
 // 가계부 대시보드 목록
 router.get("/", verifyToken, accountBookController.getDashboardAccountBooks);
 
+// 가계부 항목 추가
+router.post("/", verifyToken, accountBookController.addItem);
+
 module.exports = router;

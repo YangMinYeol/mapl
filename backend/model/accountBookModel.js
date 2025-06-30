@@ -11,6 +11,7 @@ function mapAccountBookRow(row) {
     amount: row.amount,
     occurredAt: row.occurred_at,
     createdAt: row.created_at,
+    assetId: row.asset_id,
     // account_book_category
     categoryName: row.name,
     colorId: row.color_id,
@@ -60,6 +61,50 @@ async function getDashboardAccountBooks(userId, startDate, endDate) {
   return result.rows.map(mapAccountBookRow);
 }
 
+// 가계부 항목 추가
+async function addItem(
+  userId,
+  assetId,
+  type,
+  occurredAt,
+  categoryId,
+  content,
+  amount
+) {
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1. 가계부 기록 추가
+    await client.query(
+      `
+      INSERT INTO account_book(user_id, type, occurred_at, category_id, asset_id, content, amount)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `,
+      [userId, type, occurredAt, categoryId, assetId, content, amount]
+    );
+
+    // 2. 자산 balance 업데이트
+    const assetUpdateQuery = `
+      UPDATE asset
+      SET balance = balance ${type === "income" ? "+" : "-"} $1,
+          updated_at = NOW()
+      WHERE id = $2 AND user_id = $3
+    `;
+
+    await client.query(assetUpdateQuery, [amount, assetId, userId]);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   getDashboardAccountBooks,
+  addItem,
 };

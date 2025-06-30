@@ -18,6 +18,31 @@ async function getDashboardAccountBooks(req, res) {
   }
 }
 
+// 가계부 항목 추가
+async function addItem(req, res) {
+  const { userId, type, occurredAt, categoryId, assetId, content, amount } =
+    req.body;
+  try {
+    await accountBookModel.addItem(
+      userId,
+      assetId,
+      type,
+      occurredAt,
+      categoryId,
+      content,
+      amount
+    );
+
+    return res.status(200).json({ message: "가계부 항목이 추가되었습니다." });
+  } catch (error) {
+    console.error("가계부 항목 등록 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "가계부 항목 등록 중 문제가 발생하였습니다." });
+  }
+}
+
 module.exports = {
   getDashboardAccountBooks,
+  addItem,
 };

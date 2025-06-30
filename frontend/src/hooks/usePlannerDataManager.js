@@ -1,33 +1,52 @@
 import { useEffect, useState } from "react";
+import { fetchAccountBooks } from "../api/account-book";
 import { fetchCalendarMemos, fetchMemos } from "../api/memo";
 import { TABS } from "../constants/tab";
-import { formatDateYYYYMMDD } from "../util/dateUtil";
+import { formatDateYYYYMMDD, setDateByPeriod } from "../util/dateUtil";
 import { useErrorHandler } from "./useErrorHandler";
 
 export function usePlannerDataManager(
   user,
   activeTab,
   selectedDate,
-  currentDate
+  currentDate,
+  selectedPeriod
 ) {
   const [dashboardDatas, setDashboardDatas] = useState([]);
   const [calendarDatas, setCalendarDatas] = useState([]);
   const handleError = useErrorHandler();
 
-  // 선택된 날짜에 대한 대시보드 데이터 불러오기
+  // MEMO
   useEffect(() => {
-    if (user) {
-      loadDashboardDatas();
-    }
-  }, [user, selectedDate]);
+    if (!user || activeTab !== TABS.MEMO) return;
+    loadDashboardDatas();
+  }, [user, selectedDate, activeTab]);
+
+  // ACCOUNTBOOK
+  useEffect(() => {
+    if (
+      !user ||
+      activeTab !== TABS.ACCOUNTBOOK ||
+      !selectedDate ||
+      !selectedPeriod
+    )
+      return;
+    loadDashboardDatas();
+  }, [user, selectedDate, selectedPeriod, activeTab]);
 
   // 대시보드 목록 로드
   async function loadDashboardDatas() {
     try {
       let data = [];
+      const userId = user.id;
       if (activeTab === TABS.MEMO) {
-        data = await fetchMemos(user.id, selectedDate);
+        data = await fetchMemos(userId, selectedDate);
       } else if (activeTab === TABS.ACCOUNTBOOK) {
+        const { startDate, endDate } = setDateByPeriod(
+          selectedPeriod,
+          selectedDate
+        );
+        data = await fetchAccountBooks(userId, startDate, endDate);
       }
       setDashboardDatas(data);
     } catch (error) {
