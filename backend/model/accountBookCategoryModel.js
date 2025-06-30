@@ -7,7 +7,7 @@ function mapCategoryRow(row) {
     name: row.name,
     type: row.type,
     colorId: row.color_id,
-    colorHex: row.hex
+    colorHex: row.hex,
   };
 }
 
@@ -22,10 +22,16 @@ async function getCategoriesByUser(userId) {
       c.hex
     FROM account_book_category abc
     LEFT JOIN color c ON abc.color_id = c.id
-    WHERE user_id = $1;
+    WHERE abc.user_id = $1;
   `;
+
   const result = await db.query(query, [userId]);
-  return result.rows.map(mapCategoryRow);
+  const categories = result.rows.map(mapCategoryRow);
+
+  const income = categories.filter((cat) => cat.type === "income");
+  const expense = categories.filter((cat) => cat.type === "expense");
+
+  return { income, expense };
 }
 
 module.exports = {

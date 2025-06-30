@@ -24,3 +24,25 @@ export async function fetchAccountBooks(userId, startDate, endDate) {
   }
   return data;
 }
+
+// 가계부 데이터 추가
+export async function addAccountItem(accountItem) {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(accountItem),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
