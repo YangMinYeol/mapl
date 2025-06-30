@@ -140,3 +140,12 @@ export function formatDateByPeriod(date, periodName, isAccountBook) {
       return format(date, "yyyy년 MM월 dd일");
   }
 }
+
+/**
+ * date: "2025-06-27"
+ * time: "12:00"
+ * return: Date 객체 (ex: new Date("2025-06-27T12:00:00"))
+ */
+export function combineDateAndTime(date, time) {
+  return new Date(`${date}T${time}:00`);
+}
