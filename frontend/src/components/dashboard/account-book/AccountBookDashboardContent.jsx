@@ -35,7 +35,7 @@ export default function AccountBookDashboardContent({
       ).toLocaleString()}`}</div>
       <div className="h-10/12">
         {dashboardDatas.map((item) => (
-          <AccountBookDashboardItem item={item} />
+          <AccountBookDashboardItem key={item.id} item={item} />
         ))}
       </div>
       <div className="flex items-center text-base h-1/24">
