@@ -35,7 +35,7 @@ export function useAccountBookModalForm({
   }, [categories]);
 
   useEffect(() => {
-    if (mode === ACCOUNTBOOK_MODAL_MODE.CREATE) {
+    if (mode === ACCOUNTBOOK_MODAL_MODE.ADD) {
       setType(FILTER_TYPE_VALUE.INCOME);
       setDate(selectedDate);
       setTime("12:00");

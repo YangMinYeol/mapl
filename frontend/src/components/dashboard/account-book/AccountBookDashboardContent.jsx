@@ -1,10 +1,13 @@
 import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { deleteAccountBookItem } from "../../../api/account-book";
+import { useModal } from "../../../context/ModalContext";
+import { UserContext } from "../../../context/UserContext";
+import useAssetStore from "../../../stores/useAssetStore";
 import { ACCOUNTBOOK_MODAL_MODE } from "../../../util/accountBookUtil";
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
-import useAssetStore from "../../../stores/useAssetStore";
 
 export default function AccountBookDashboardContent({
   dashboardDatas,
@@ -12,20 +15,46 @@ export default function AccountBookDashboardContent({
   loadDashboardDatas,
   loadCalendarDatas,
 }) {
+  const { user } = useContext(UserContext);
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false);
   const [dashboardModalMode, setDashboardModalMode] = useState("");
+  const { openModal, openConfirm } = useModal();
 
   const asset = useAssetStore((state) => state.asset);
+  const updateAsset = useAssetStore((state) => state.updateAsset);
 
   // 모달 열기
   function openAccountBookModal() {
-    setDashboardModalMode(ACCOUNTBOOK_MODAL_MODE.CREATE);
+    setDashboardModalMode(ACCOUNTBOOK_MODAL_MODE.ADD);
     setIsDashboardModalOpen(true);
   }
 
   // 모달 닫기
   function closeAccountBookModal() {
     setIsDashboardModalOpen(false);
+  }
+
+  // 가계부 항목 삭제
+  function handleAccountItemDelete(item) {
+    try {
+      openConfirm(
+        "정말로 삭제하시겠습니까?",
+        "삭제한 항목은 다시 되돌릴 수 없습니다.",
+        async () => {
+          await deleteAccountBookItem(item.id);
+          await updateAsset(user.id);
+          await loadDashboardDatas();
+          await loadCalendarDatas();
+        }
+      );
+    } catch (error) {
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("메모 삭제 오류:", error);
+        openModal(error.message);
+      }
+    }
   }
 
   return (
@@ -35,7 +64,11 @@ export default function AccountBookDashboardContent({
       ).toLocaleString()}`}</div>
       <div className="h-10/12">
         {dashboardDatas.map((item) => (
-          <AccountBookDashboardItem key={item.id} item={item} />
+          <AccountBookDashboardItem
+            key={item.id}
+            item={item}
+            onDelete={handleAccountItemDelete}
+          />
         ))}
       </div>
       <div className="flex items-center text-base h-1/24">

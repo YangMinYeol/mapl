@@ -3,11 +3,10 @@ import { fetchAsset } from "../api/asset";
 
 const useAssetStore = create((set, get) => ({
   asset: null,
-  fetchAsset: async (userId) => {
-    const result = await fetchAsset(userId);
-    set({ asset: result });
+  updateAsset: async (userId) => {
+    const latestAsset = await fetchAsset(userId);
+    set({ asset: latestAsset });
   },
-  updateAsset: (newAsset) => set({ asset: newAsset }),
   resetAsset: () => set({ asset: null }),
 }));
 

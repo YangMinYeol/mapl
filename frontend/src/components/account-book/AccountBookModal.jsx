@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { addAccountItem } from "../../api/account-book";
-import { fetchAsset } from "../../api/asset";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useAccountBookModalForm } from "../../hooks/useAccountBookModalForm";
@@ -110,8 +109,7 @@ export default function AccountBookModal({
         amount,
       });
       // 가계부 추가 후 서버에서 최신 자산 정보 받아오기
-      const latestAsset = await fetchAsset(userId);
-      updateAsset(latestAsset);
+      updateAsset(userId);
       reloadAndClose();
     } catch (error) {
       handleAccountBookError(error, "add");
@@ -238,12 +236,12 @@ export default function AccountBookModal({
         <button
           className={`${footerButtonClass} bg-deep-green text-white`}
           onClick={
-            mode === ACCOUNTBOOK_MODAL_MODE.CREATE
+            mode === ACCOUNTBOOK_MODAL_MODE.ADD
               ? addAccountBook
               : editAccountBook
           }
         >
-          {mode === ACCOUNTBOOK_MODAL_MODE.CREATE ? "추가" : "수정"}
+          {mode === ACCOUNTBOOK_MODAL_MODE.ADD ? "추가" : "수정"}
         </button>
         <button className={footerButtonClass} onClick={onClose}>
           닫기

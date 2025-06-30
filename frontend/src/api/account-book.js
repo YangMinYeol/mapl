@@ -46,3 +46,25 @@ export async function addAccountItem(accountItem) {
     throw error;
   }
 }
+
+// 메모 삭제
+export async function deleteAccountBookItem(itemId) {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ itemId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
