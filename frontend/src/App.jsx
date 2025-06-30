@@ -44,7 +44,7 @@ export default function App() {
   const fetchCategories = useCategoryStore((state) => state.fetchCategories);
   const resetCategories = useCategoryStore((state) => state.resetCategories);
 
-  const fetchAsset = useAssetStore((state) => state.fetchAsset);
+  const updateAsset = useAssetStore((state) => state.updateAsset);
   const resetAsset = useAssetStore((state) => state.resetAsset);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function App() {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
       fetchCategories(user.id);
-      fetchAsset(user.id);
+      updateAsset(user.id);
     } else {
       localStorage.removeItem("user");
       resetCategories();

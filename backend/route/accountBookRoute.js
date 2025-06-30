@@ -9,4 +9,7 @@ router.get("/", verifyToken, accountBookController.getDashboardAccountBooks);
 // 가계부 항목 추가
 router.post("/", verifyToken, accountBookController.addItem);
 
+// 가계부 항목 삭제
+router.delete("/", verifyToken, accountBookController.deleteAccountBookItem);
+
 module.exports = router;

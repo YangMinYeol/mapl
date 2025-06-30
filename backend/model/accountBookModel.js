@@ -104,7 +104,53 @@ async function addItem(
   }
 }
 
+// 가계부 항목 삭제 (자산 반영 포함)
+async function deleteAccountBookItem(itemId) {
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1. 삭제 대상 가계부 항목 정보 조회
+    const selectQuery = `
+      SELECT id, user_id, asset_id, type, amount
+      FROM account_book
+      WHERE id = $1
+    `;
+    const { rows } = await client.query(selectQuery, [itemId]);
+    const item = rows[0];
+
+    if (!item) {
+      throw new Error("삭제할 항목을 찾을 수 없습니다.");
+    }
+
+    const { user_id, asset_id, type, amount } = item;
+
+    // 2. 자산 balance 되돌리기
+    const reverseOperator = type === "income" ? "-" : "+";
+    const updateAssetQuery = `
+      UPDATE asset
+      SET balance = balance ${reverseOperator} $1,
+          updated_at = NOW()
+      WHERE id = $2 AND user_id = $3
+    `;
+    await client.query(updateAssetQuery, [amount, asset_id, user_id]);
+
+    // 3. 가계부 항목 삭제
+    const deleteQuery = `DELETE FROM account_book WHERE id = $1`;
+    await client.query(deleteQuery, [itemId]);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   getDashboardAccountBooks,
   addItem,
+  deleteAccountBookItem,
 };
