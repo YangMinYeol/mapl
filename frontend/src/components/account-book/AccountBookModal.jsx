@@ -18,6 +18,8 @@ import Tab from "../common/Tab";
 import ModalLayout from "../common/modal/ModalLayout";
 import DateTimeInput from "../memo/DateTimeInput";
 
+const MAX_AMOUNT = 100000000;
+
 const modalSize = {
   width: "w-[400px]",
   height: "h-[430px]",
@@ -88,9 +90,12 @@ export default function AccountBookModal({
   };
 
   const handleAmountChange = (e) => {
-    const cleaned = e.target.value.replace(/\D/g, "");
-    setAmount(cleaned ? Number(cleaned) : 0);
-    setIsAmountError(false);
+    const inputValue = e.target.value;
+    const onlyNumbers = inputValue.replace(/\D/g, "");
+    const amountNumber = onlyNumbers ? Number(onlyNumbers) : 0;
+
+    setAmount(amountNumber);
+    setIsAmountError(amountNumber > MAX_AMOUNT);
   };
 
   function handleModalClick() {
@@ -100,6 +105,8 @@ export default function AccountBookModal({
 
   // 가계부 항목 추가
   async function addAccountBook() {
+    if (isAmountError) return;
+
     setIsLoading(true);
     const userId = user.id;
     try {
@@ -123,8 +130,9 @@ export default function AccountBookModal({
 
   // 가계부 항목 수정
   async function editAccountBook() {
+    if (isAmountError) return;
+
     setIsLoading(true);
-    console.log(date, time);
     try {
       await editAccountBookItem({
         itemId: item.id,
@@ -224,7 +232,7 @@ export default function AccountBookModal({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="지출/수입 내용"
-          maxLength={100}
+          maxLength={50}
         />
       </div>
     </>
@@ -243,11 +251,13 @@ export default function AccountBookModal({
           value={amount ? Number(amount).toLocaleString() : ""}
           onChange={handleAmountChange}
           placeholder="금액 입력"
-          maxLength={20}
+          maxLength={11}
         />
       </div>
       <div className="px-1 text-red-500">
-        {isAmountError && <span>금액을 입력해주세요.</span>}
+        {isAmountError && (
+          <span>100,000,000(1억) 이하의 금액만 입력 가능합니다.</span>
+        )}
       </div>
     </>
   );
