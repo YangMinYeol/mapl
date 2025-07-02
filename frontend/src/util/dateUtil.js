@@ -147,5 +147,29 @@ export function formatDateByPeriod(date, periodName, isAccountBook) {
  * return: Date 객체 (ex: new Date("2025-06-27T12:00:00"))
  */
 export function combineDateAndTime(date, time) {
-  return new Date(`${date}T${time}:00`);
+  const formatDate = formatDateYYYYMMDD(date);
+  return new Date(`${formatDate}T${time}:00`);
+}
+
+// Date 객체에서 date, time 문자열 추출하는 함수
+export function extractDateAndTime(dateInput) {
+  let dateObj;
+  if (dateInput instanceof Date) {
+    dateObj = dateInput;
+  } else {
+    dateObj = new Date(dateInput);
+  }
+
+  // 날짜 부분 (YYYY-MM-DD)
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const date = `${year}-${month}-${day}`;
+
+  // 시간 부분 (HH:mm)
+  const hours = String(dateObj.getHours()).padStart(2, "0");
+  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+  const time = `${hours}:${minutes}`;
+
+  return { date, time };
 }
