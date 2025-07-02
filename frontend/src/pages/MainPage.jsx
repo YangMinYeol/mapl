@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import Calendar from "../components/calendar/Calendar";
+import Loading from "../components/common/Loading";
 import Dashboard from "../components/dashboard/Dashboard";
 import { TABS } from "../constants/tab";
 import { useModal } from "../context/ModalContext";
 import { UserContext } from "../context/UserContext";
-import { formatDateYYYYMMDD } from "../util/dateUtil";
 import { usePlannerDataManager } from "../hooks/usePlannerDataManager";
+import { formatDateYYYYMMDD } from "../util/dateUtil";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -27,7 +28,14 @@ export default function MainPage() {
     calendarDatas,
     loadDashboardDatas,
     loadCalendarDatas,
-  } = usePlannerDataManager(user, activeTab, selectedDate, currentDate, selectedPeriod);
+    isLoading,
+  } = usePlannerDataManager(
+    user,
+    activeTab,
+    selectedDate,
+    currentDate,
+    selectedPeriod
+  );
 
   // 날짜 선택
   function handleSetSelectedDate(date) {
@@ -62,6 +70,7 @@ export default function MainPage() {
 
   return (
     <div>
+      {isLoading && <Loading />}
       <div className="flex flex-nowwrap h-[900px]">
         <div className="w-[70%] h-full min-w-[600px] calendar-container">
           <Calendar

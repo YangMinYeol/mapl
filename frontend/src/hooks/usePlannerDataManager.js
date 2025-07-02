@@ -14,11 +14,12 @@ export function usePlannerDataManager(
 ) {
   const [dashboardDatas, setDashboardDatas] = useState([]);
   const [calendarDatas, setCalendarDatas] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const handleError = useErrorHandler();
 
   // MEMO
   useEffect(() => {
-    if (!user || activeTab !== TABS.MEMO) return;
+    if (!user || activeTab !== TABS.MEMO || !selectedDate) return;
     loadDashboardDatas();
   }, [user, selectedDate, activeTab]);
 
@@ -36,6 +37,7 @@ export function usePlannerDataManager(
 
   // 대시보드 목록 로드
   async function loadDashboardDatas() {
+    setIsLoading(true);
     try {
       let data = [];
       const userId = user.id;
@@ -51,6 +53,8 @@ export function usePlannerDataManager(
       setDashboardDatas(data);
     } catch (error) {
       handleError(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -63,6 +67,7 @@ export function usePlannerDataManager(
 
   // 달력 목록 로드
   async function loadCalendarDatas() {
+    setIsLoading(true);
     try {
       let data = [];
       if (activeTab === TABS.MEMO) {
@@ -75,6 +80,8 @@ export function usePlannerDataManager(
       setCalendarDatas(data);
     } catch (error) {
       handleError(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -83,5 +90,6 @@ export function usePlannerDataManager(
     calendarDatas,
     loadDashboardDatas,
     loadCalendarDatas,
+    isLoading,
   };
 }
