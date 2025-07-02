@@ -1,7 +1,7 @@
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-regular-svg-icons";
 import IconButton from "../../common/IconButton";
 
-export default function AccountBookDashboardItem({ item, onDelete }) {
+export default function AccountBookDashboardItem({ item, onEdit, onDelete }) {
   const isExpense = item.type === "expense";
   const amountPrefix = isExpense ? "-" : "+";
   const amountColor = isExpense ? "text-red-500" : "text-blue-500";
@@ -14,7 +14,11 @@ export default function AccountBookDashboardItem({ item, onDelete }) {
       </div>
 
       <div className="flex justify-center ml-auto opacity-0 w-2/20 group-hover:opacity-100">
-        <IconButton icon={faPenToSquare} title="수정" />
+        <IconButton
+          icon={faPenToSquare}
+          title="수정"
+          onClick={() => onEdit(item)}
+        />
         <IconButton
           icon={faTrashCan}
           title="삭제"

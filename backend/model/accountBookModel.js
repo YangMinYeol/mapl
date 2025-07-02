@@ -62,7 +62,7 @@ async function getDashboardAccountBooks(userId, startDate, endDate) {
 }
 
 // 가계부 항목 추가
-async function addItem(
+async function addAccountBookItem(
   userId,
   assetId,
   type,
@@ -76,13 +76,15 @@ async function addItem(
   try {
     await client.query("BEGIN");
 
+    const date = new Date(occurredAt);
+
     // 1. 가계부 기록 추가
     await client.query(
       `
       INSERT INTO account_book(user_id, type, occurred_at, category_id, asset_id, content, amount)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       `,
-      [userId, type, occurredAt, categoryId, assetId, content, amount]
+      [userId, type, date, categoryId, assetId, content, amount]
     );
 
     // 2. 자산 balance 업데이트
@@ -94,6 +96,89 @@ async function addItem(
     `;
 
     await client.query(assetUpdateQuery, [amount, assetId, userId]);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+// 가계부 항목 수정 (자산 반영 포함)
+async function updateAccountBookItem(
+  itemId,
+  newType,
+  newOccurredAt,
+  newCategoryId,
+  newContent,
+  newAmount
+) {
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1. 기존 항목 정보 조회
+    const selectQuery = `
+      SELECT user_id, asset_id, type AS old_type, amount AS old_amount
+      FROM account_book
+      WHERE id = $1
+    `;
+    const { rows } = await client.query(selectQuery, [itemId]);
+    const existing = rows[0];
+
+    if (!existing) {
+      throw new Error("수정할 항목을 찾을 수 없습니다.");
+    }
+
+    const { user_id, asset_id, old_type, old_amount } = existing;
+
+    // 2. 자산 balance 되돌리기 (기존 항목 삭제하는 것처럼)
+    const reverseOperator = old_type === "income" ? "-" : "+";
+    await client.query(
+      `
+      UPDATE asset
+      SET balance = balance ${reverseOperator} $1,
+          updated_at = NOW()
+      WHERE id = $2 AND user_id = $3
+      `,
+      [old_amount, asset_id, user_id]
+    );
+
+    // 3. 자산 balance 재적용 (새 항목 추가하는 것처럼)
+    const applyOperator = newType === "income" ? "+" : "-";
+    await client.query(
+      `
+      UPDATE asset
+      SET balance = balance ${applyOperator} $1,
+          updated_at = NOW()
+      WHERE id = $2 AND user_id = $3
+      `,
+      [newAmount, asset_id, user_id]
+    );
+
+    // 4. 가계부 항목 수정
+    await client.query(
+      `
+      UPDATE account_book
+      SET type = $1,
+          occurred_at = $2,
+          category_id = $3,
+          content = $4,
+          amount = $5
+      WHERE id = $6
+      `,
+      [
+        newType,
+        new Date(newOccurredAt),
+        newCategoryId,
+        newContent,
+        newAmount,
+        itemId,
+      ]
+    );
 
     await client.query("COMMIT");
   } catch (error) {
@@ -151,6 +236,7 @@ async function deleteAccountBookItem(itemId) {
 
 module.exports = {
   getDashboardAccountBooks,
-  addItem,
+  addAccountBookItem,
+  updateAccountBookItem,
   deleteAccountBookItem,
 };

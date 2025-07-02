@@ -18,6 +18,7 @@ export default function AccountBookDashboardContent({
   const { user } = useContext(UserContext);
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false);
   const [dashboardModalMode, setDashboardModalMode] = useState("");
+  const [selectedItem, setselectedItem] = useState(null);
   const { openModal, openConfirm } = useModal();
 
   const asset = useAssetStore((state) => state.asset);
@@ -32,6 +33,13 @@ export default function AccountBookDashboardContent({
   // 모달 닫기
   function closeAccountBookModal() {
     setIsDashboardModalOpen(false);
+  }
+
+  // 가계부 항목 편집
+  function handleAccountItemEdit(item) {
+    setDashboardModalMode(ACCOUNTBOOK_MODAL_MODE.EDIT);
+    setIsDashboardModalOpen(true);
+    setselectedItem(item);
   }
 
   // 가계부 항목 삭제
@@ -51,7 +59,7 @@ export default function AccountBookDashboardContent({
       if (error instanceof LoginExpiredError) {
         handleLoginExpired(error.message);
       } else {
-        console.error("메모 삭제 오류:", error);
+        console.error("가계부 항목 삭제 오류:", error);
         openModal(error.message);
       }
     }
@@ -67,6 +75,7 @@ export default function AccountBookDashboardContent({
           <AccountBookDashboardItem
             key={item.id}
             item={item}
+            onEdit={handleAccountItemEdit}
             onDelete={handleAccountItemDelete}
           />
         ))}
@@ -94,6 +103,7 @@ export default function AccountBookDashboardContent({
         selectedDate={selectedDate}
         loadDashboardDatas={loadDashboardDatas}
         loadCalendarDatas={loadCalendarDatas}
+        item={selectedItem}
       />
     </div>
   );

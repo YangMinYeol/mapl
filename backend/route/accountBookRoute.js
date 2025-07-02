@@ -7,7 +7,10 @@ const verifyToken = require("../middleware/authMiddleware");
 router.get("/", verifyToken, accountBookController.getDashboardAccountBooks);
 
 // 가계부 항목 추가
-router.post("/", verifyToken, accountBookController.addItem);
+router.post("/", verifyToken, accountBookController.addAccountBookItem);
+
+// 가계부 항목 수정
+router.patch("/", verifyToken, accountBookController.updateAccountBookItem);
 
 // 가계부 항목 삭제
 router.delete("/", verifyToken, accountBookController.deleteAccountBookItem);

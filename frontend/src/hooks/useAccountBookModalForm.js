@@ -4,13 +4,9 @@ import {
   ACCOUNTBOOK_MODAL_MODE,
   FILTER_TYPE_VALUE,
 } from "../util/accountBookUtil";
+import { extractDateAndTime } from "../util/dateUtil";
 
-export function useAccountBookModalForm({
-  mode,
-  selectedDate,
-  isOpen,
-  accountBook,
-}) {
+export function useAccountBookModalForm({ mode, selectedDate, isOpen, item }) {
   const [type, setType] = useState(FILTER_TYPE_VALUE.INCOME);
   const [date, setDate] = useState(selectedDate);
   const [time, setTime] = useState("12:00");
@@ -43,7 +39,18 @@ export function useAccountBookModalForm({
       setContent("");
       setAmount(0);
       setIsAmountError(false);
-    } else if (mode === ACCOUNTBOOK_MODAL_MODE.EDIT && accountBook) {
+    } else if (mode === ACCOUNTBOOK_MODAL_MODE.EDIT && item) {
+      const { date: itemDate, time: itemTime } = extractDateAndTime(
+        item.occurredAt
+      );
+      const itemCategory = categories.find((c) => c.id === item.categoryId);
+      setDate(itemDate);
+      setTime(itemTime);
+      setType(item.type);
+      setCategory(itemCategory);
+      setContent(item.content);
+      setAmount(item.amount);
+      setIsAmountError(false);
     }
   }, [mode, isOpen]);
 
