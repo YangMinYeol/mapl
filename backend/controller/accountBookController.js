@@ -19,11 +19,11 @@ async function getDashboardAccountBooks(req, res) {
 }
 
 // 가계부 항목 추가
-async function addItem(req, res) {
+async function addAccountBookItem(req, res) {
   const { userId, type, occurredAt, categoryId, assetId, content, amount } =
     req.body;
   try {
-    await accountBookModel.addItem(
+    await accountBookModel.addAccountBookItem(
       userId,
       assetId,
       type,
@@ -39,6 +39,28 @@ async function addItem(req, res) {
     return res
       .status(500)
       .json({ message: "가계부 항목 등록 중 문제가 발생하였습니다." });
+  }
+}
+
+// 가계부 항목 수정
+async function updateAccountBookItem(req, res) {
+  const { itemId, type, occurredAt, categoryId, content, amount } = req.body;
+  try {
+    await accountBookModel.updateAccountBookItem(
+      itemId,
+      type,
+      occurredAt,
+      categoryId,
+      content,
+      amount
+    );
+
+    return res.status(200).json({ message: "가계부 항목이 수정되었습니다." });
+  } catch (error) {
+    console.error("가계부 수정 변경 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "가계부 항목 수정 중 문제가 발생하였습니다." });
   }
 }
 
@@ -59,6 +81,7 @@ async function deleteAccountBookItem(req, res) {
 
 module.exports = {
   getDashboardAccountBooks,
-  addItem,
+  addAccountBookItem,
+  updateAccountBookItem,
   deleteAccountBookItem,
 };

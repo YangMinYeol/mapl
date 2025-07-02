@@ -1,5 +1,8 @@
 import { useContext } from "react";
-import { addAccountItem } from "../../api/account-book";
+import {
+  addAccountBookItem,
+  editAccountBookItem,
+} from "../../api/account-book";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useAccountBookModalForm } from "../../hooks/useAccountBookModalForm";
@@ -39,6 +42,7 @@ export default function AccountBookModal({
   selectedDate,
   loadDashboardDatas,
   loadCalendarDatas,
+  item,
 }) {
   const {
     type,
@@ -62,7 +66,7 @@ export default function AccountBookModal({
     categories,
     isLoading,
     setIsLoading,
-  } = useAccountBookModalForm({ mode, selectedDate, isOpen });
+  } = useAccountBookModalForm({ mode, selectedDate, isOpen, item });
 
   const { openModal } = useModal();
   const { user } = useContext(UserContext);
@@ -74,7 +78,7 @@ export default function AccountBookModal({
   async function reloadAndClose() {
     await loadDashboardDatas();
     await loadCalendarDatas();
-    onClose();
+    closeModal();
   }
 
   const handleCategoryChange = (e) => {
@@ -99,7 +103,7 @@ export default function AccountBookModal({
     setIsLoading(true);
     const userId = user.id;
     try {
-      await addAccountItem({
+      await addAccountBookItem({
         userId: userId,
         assetId: asset.id,
         type,
@@ -108,7 +112,6 @@ export default function AccountBookModal({
         content,
         amount,
       });
-      // 가계부 추가 후 서버에서 최신 자산 정보 받아오기
       updateAsset(userId);
       reloadAndClose();
     } catch (error) {
@@ -118,21 +121,52 @@ export default function AccountBookModal({
     }
   }
 
-  function editAccountBook() {}
+  // 가계부 항목 수정
+  async function editAccountBook() {
+    setIsLoading(true);
+    console.log(date, time);
+    try {
+      await editAccountBookItem({
+        itemId: item.id,
+        type,
+        occurredAt: combineDateAndTime(date, time),
+        categoryId: category.id,
+        content,
+        amount,
+      });
+      updateAsset(user.id);
+      reloadAndClose();
+    } catch (error) {
+      handleAccountBookError(error, "edit");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   // 가계부 항목 에러 처리
   function handleAccountBookError(error, context) {
     if (error instanceof LoginExpiredError) {
-      onClose();
+      closeModal();
       handleLoginExpired(error.message);
     } else {
       console.error(
         `가계부 항목 ${context === "add" ? "추가" : "편집"} 오류:`,
         error
       );
-      onClose();
+      closeModal();
       openModal(error.message);
     }
+  }
+
+  // 모달 닫기
+  function closeModal() {
+    setType(FILTER_TYPE_VALUE.INCOME);
+    setDate(selectedDate);
+    setTime("12:00");
+    setCategory(null);
+    setContent("");
+    setAmount(0);
+    onClose();
   }
 
   /** 화면 */
@@ -272,7 +306,7 @@ export default function AccountBookModal({
     <ModalLayout
       title={"가계부"}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={closeModal}
       modalSize={modalSize}
       content={modalContent}
       footer={footer}

@@ -26,7 +26,7 @@ export async function fetchAccountBooks(userId, startDate, endDate) {
 }
 
 // 가계부 데이터 추가
-export async function addAccountItem(accountItem) {
+export async function addAccountBookItem(accountItem) {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
       method: "POST",
@@ -47,7 +47,29 @@ export async function addAccountItem(accountItem) {
   }
 }
 
-// 메모 삭제
+// 가계부 항목 수정
+export async function editAccountBookItem(accountItem) {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(accountItem),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// 가계부 항목 삭제
 export async function deleteAccountBookItem(itemId) {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
