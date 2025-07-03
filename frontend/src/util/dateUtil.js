@@ -1,12 +1,17 @@
 import {
+  differenceInCalendarWeeks,
   endOfMonth,
   endOfWeek,
   endOfYear,
   format,
+  getDay,
+  getMonth,
   getWeekOfMonth,
+  getYear,
   isAfter,
   isBefore,
   isEqual,
+  parseISO,
   startOfMonth,
   startOfWeek,
   startOfYear,
@@ -32,8 +37,8 @@ export function setDateByPeriod(period, selectedDate) {
       endDate = selectedDate;
       break;
     case "Week":
-      startDate = startOfWeek(selectedDate, { weekStartsOn: 0 });
-      endDate = endOfWeek(selectedDate, { weekStartsOn: 0 });
+      startDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
+      endDate = endOfWeek(selectedDate, { weekStartsOn: 1 });
       break;
     case "Month":
       startDate = startOfMonth(selectedDate);
@@ -172,4 +177,85 @@ export function extractDateAndTime(dateInput) {
   const time = `${hours}:${minutes}`;
 
   return { date, time };
+}
+
+// Week: 요일별
+export function groupByWeekday(dataList) {
+  const weekdayNames = [
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+    "일요일",
+  ];
+
+  const grouped = weekdayNames.reduce((acc, day) => {
+    acc[day] = [];
+    return acc;
+  }, {});
+
+  dataList.forEach((item) => {
+    const date = parseISO(item.occurredAt);
+    const day = getDay(date); // 0(일) ~ 6(토)
+
+    const weekdayIndex = (day + 6) % 7; // 월요일 시작 기준 인덱스 맞추기
+    const weekdayName = weekdayNames[weekdayIndex];
+
+    grouped[weekdayName].push(item);
+  });
+
+  return grouped;
+}
+
+// Month: 주차별 (달력 기준)
+export function groupByMonthWeek(datas) {
+  const grouped = {};
+
+  datas.forEach((item) => {
+    const date = parseISO(item.occurredAt);
+    const start = startOfMonth(date);
+    const weekDiff = differenceInCalendarWeeks(date, start, {
+      weekStartsOn: 1,
+    }); // 월요일 기준
+    const weekLabel = `${weekDiff + 1}주차`;
+
+    if (!grouped[weekLabel]) grouped[weekLabel] = [];
+    grouped[weekLabel].push(item);
+  });
+
+  return grouped;
+}
+
+// Year: 월별
+export function groupByMonth(datas) {
+  const grouped = {};
+
+  datas.forEach((item) => {
+    const date = parseISO(item.occurredAt);
+    const month = getMonth(date); // 0~11
+    const label = `${month + 1}월`;
+
+    if (!grouped[label]) grouped[label] = [];
+    grouped[label].push(item);
+  });
+
+  return grouped;
+}
+
+// Other: 연도별
+export function groupByYear(datas) {
+  const grouped = {};
+
+  datas.forEach((item) => {
+    const date = parseISO(item.occurredAt);
+    const year = getYear(date);
+    const label = `${year}년`;
+
+    if (!grouped[label]) grouped[label] = [];
+    grouped[label].push(item);
+  });
+
+  return grouped;
 }
