@@ -8,7 +8,8 @@ export function formatTimeTo12Hour(time) {
   const isAM = hour < 12;
   const period = isAM ? "오전" : "오후";
 
-  hour = hour % 12 || 12;
+  // 오전 0시는 그대로 0시로 출력, 오후 12시는 12시 유지
+  const displayHour = hour === 0 ? 0 : hour % 12 || 12;
 
-  return `${period} ${hour}:${minute}`;
+  return `${period} ${displayHour}:${minute}`;
 }
