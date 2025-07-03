@@ -5,15 +5,53 @@ import { deleteAccountBookItem } from "../../../api/account-book";
 import { useModal } from "../../../context/ModalContext";
 import { UserContext } from "../../../context/UserContext";
 import useAssetStore from "../../../stores/useAssetStore";
-import { ACCOUNTBOOK_MODAL_MODE } from "../../../util/accountBookUtil";
+import {
+  ACCOUNTBOOK_MODAL_MODE,
+  FILTER_TYPE_VALUE,
+} from "../../../util/accountBookUtil";
+import {
+  groupByMonth,
+  groupByMonthWeek,
+  groupByWeekday,
+  groupByYear,
+} from "../../../util/dateUtil";
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
+
+const { INCOME, EXPENSE, ALL } = FILTER_TYPE_VALUE;
+
+// 전체, 수입, 지출 각각 개수와 합계 계산
+function calcIncomeExpense(datas) {
+  return datas.reduce(
+    (acc, data) => {
+      const { type, amount } = data;
+      if (type === INCOME) {
+        acc[INCOME].amount += amount;
+        acc[INCOME].count += 1;
+        acc[ALL].amount += amount;
+        acc[ALL].count += 1;
+      } else if (type === EXPENSE) {
+        acc[EXPENSE].amount += amount;
+        acc[EXPENSE].count += 1;
+        acc[ALL].amount -= amount;
+        acc[ALL].count += 1;
+      }
+      return acc;
+    },
+    {
+      [INCOME]: { amount: 0, count: 0 },
+      [EXPENSE]: { amount: 0, count: 0 },
+      [ALL]: { amount: 0, count: 0 },
+    }
+  );
+}
 
 export default function AccountBookDashboardContent({
   dashboardDatas,
   selectedDate,
   loadDashboardDatas,
   loadCalendarDatas,
+  selectedPeriod,
 }) {
   const { user } = useContext(UserContext);
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false);
@@ -23,6 +61,23 @@ export default function AccountBookDashboardContent({
 
   const asset = useAssetStore((state) => state.asset);
   const updateAsset = useAssetStore((state) => state.updateAsset);
+  const accountSummary = calcIncomeExpense(dashboardDatas);
+  const sortedDatas = dashboardDatas.sort((a, b) => {
+    if (a.occurredAt < b.occurredAt) return -1;
+    if (a.occurredAt > b.occurredAt) return 1;
+  });
+
+  let groupedDatas = {};
+
+  if (selectedPeriod.name === "Week") {
+    groupedDatas = groupByWeekday(sortedDatas);
+  } else if (selectedPeriod.name === "Month") {
+    groupedDatas = groupByMonthWeek(sortedDatas);
+  } else if (selectedPeriod.name === "Year") {
+    groupedDatas = groupByMonth(sortedDatas);
+  } else if (selectedPeriod.name === "Other") {
+    groupedDatas = groupByYear(sortedDatas);
+  }
 
   // 모달 열기
   function openAccountBookModal() {
@@ -67,33 +122,70 @@ export default function AccountBookDashboardContent({
 
   return (
     <div className="h-[600px] border-b border-mapl-slate">
-      <div className="p-1 font-medium h-1/24 text-deep-green">{`자산 ${Number(
-        asset ? asset.balance : 0
-      ).toLocaleString()}`}</div>
-      <div className="h-10/12">
-        {dashboardDatas.map((item) => (
-          <AccountBookDashboardItem
-            key={item.id}
-            item={item}
-            onEdit={handleAccountItemEdit}
-            onDelete={handleAccountItemDelete}
-          />
-        ))}
+      <div className="flex items-center text-center border-b border-mapl-slate h-2/18">
+        <div className="w-1/3">
+          <div>전체 ({accountSummary[ALL].count})</div>
+          <div className="font-semibold">
+            {Number(accountSummary[ALL].amount).toLocaleString()}원
+          </div>
+        </div>
+        <div className="w-1/3">
+          <div>수입 ({accountSummary[INCOME].count})</div>
+          <div className="font-semibold text-blue-500">
+            +{Number(accountSummary[INCOME].amount).toLocaleString()}원
+          </div>
+        </div>
+        <div className="w-1/3">
+          <div>지출 ({accountSummary[EXPENSE].count})</div>
+          <div className="font-semibold text-red-500">
+            -{Number(accountSummary[EXPENSE].amount).toLocaleString()}원
+          </div>
+        </div>
       </div>
-      <div className="flex items-center text-base h-1/24">
-        <div className="w-1/2 p-1">전체 내역 n건</div>
-        <div className="w-1/2 p-1">합계</div>
+      <div className="flex items-center font-semibold text-center border-b border-mapl-slate h-1/18">
+        <div className="w-[125px] shrink-0">분류</div>
+        <div className="w-8/20">내용</div>
+        <div className="w-7/20"> 금액</div>
       </div>
-      <div className="flex items-center p-2 h-1/12">
-        <input
-          className="px-1 border rounded outline-none border-mapl-black w-15/16"
-          maxLength={100}
-        />
+      <div className="overflow-auto border-b h- dashboard-main-content h-14/18 border-mapl-slate">
+        {selectedPeriod.name === "Day"
+          ? sortedDatas.map((item) => (
+              <AccountBookDashboardItem
+                key={item.id}
+                item={item}
+                onEdit={handleAccountItemEdit}
+                onDelete={handleAccountItemDelete}
+              />
+            ))
+          : Object.entries(groupedDatas).map(
+              ([groupTitle, items]) =>
+                items.length > 0 && (
+                  <div key={groupTitle}>
+                    <div className="px-4 py-2 font-semibold text-left bg-mapl-slate/20 text-mapl-dark">
+                      {groupTitle}
+                    </div>
+                    {items.map((item) => (
+                      <AccountBookDashboardItem
+                        key={item.id}
+                        item={item}
+                        onEdit={handleAccountItemEdit}
+                        onDelete={handleAccountItemDelete}
+                      />
+                    ))}
+                  </div>
+                )
+            )}
+      </div>
+
+      <div className="flex items-center justify-between px-2 h-1/18">
+        <div>
+          {`자산 ${Number(asset ? asset.balance : 0).toLocaleString()}원`}
+        </div>
         <button
           className="cursor-pointer w-1/16"
           onClick={openAccountBookModal}
         >
-          <FontAwesomeIcon color="#173836" icon={faCirclePlus} size="xl" />
+          <FontAwesomeIcon color="#173836" icon={faCirclePlus} size="2xl" />
         </button>
       </div>
       <AccountBookModal

@@ -34,6 +34,7 @@ export default function AccountBookDashboard({
         selectedDate={selectedDate}
         loadDashboardDatas={loadDashboardDatas}
         loadCalendarDatas={loadCalendarDatas}
+        selectedPeriod={selectedPeriod}
       />
     </>
   );
