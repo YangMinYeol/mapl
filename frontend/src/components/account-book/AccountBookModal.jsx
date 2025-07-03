@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import {
   addAccountBookItem,
+  deleteAccountBookItem,
   editAccountBookItem,
 } from "../../api/account-book";
 import { useModal } from "../../context/ModalContext";
@@ -151,6 +152,22 @@ export default function AccountBookModal({
     }
   }
 
+  // 가계부 항목 삭제
+  async function deleteAccountBook() {
+    try {
+      await deleteAccountBookItem(item.id);
+      updateAsset(user.id);
+      reloadAndClose();
+    } catch (error) {
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("가계부 항목 삭제 오류:", error);
+        openModal(error.message);
+      }
+    }
+  }
+
   // 가계부 항목 에러 처리
   function handleAccountBookError(error, context) {
     if (error instanceof LoginExpiredError) {
@@ -270,7 +287,10 @@ export default function AccountBookModal({
     <div className="flex items-center w-full">
       <div className="flex-1">
         {mode === ACCOUNTBOOK_MODAL_MODE.EDIT && (
-          <button className={`${footerButtonClass} bg-red-500 text-white`}>
+          <button
+            className={`${footerButtonClass} bg-red-500 text-white`}
+            onClick={deleteAccountBook}
+          >
             삭제
           </button>
         )}
