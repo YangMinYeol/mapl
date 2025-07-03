@@ -49,7 +49,7 @@ async function getDashboardAccountBooks(userId, startDate, endDate) {
       ab.created_at,
       abc.name,
       abc.color_id,
-      c.hex AS color_hex
+      c.hex
     FROM account_book ab
     JOIN account_book_category abc ON ab.category_id = abc.id
     LEFT JOIN color c ON abc.color_id = c.id
