@@ -5,65 +5,63 @@ import Dashboard from "../components/dashboard/Dashboard";
 import { TABS } from "../constants/tab";
 import { useModal } from "../context/ModalContext";
 import { UserContext } from "../context/UserContext";
-import { usePlannerDataManager } from "../hooks/usePlannerDataManager";
+import { useAccountBookDataManager } from "../hooks/useAccountBookDataManager";
+import { useMemoDataManager } from "../hooks/useMemoDataManager";
 import { formatDateYYYYMMDD } from "../util/dateUtil";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function MainPage() {
-  const date = new Date();
+function getTabData(activeTab, managers) {
+  return activeTab === TABS.MEMO ? managers.memo : managers.accountBook;
+}
 
-  const [activeTab, setActiveTab] = useState(TABS.ACCOUNTBOOK);
+export default function MainPage() {
+  const today = new Date();
+
+  const [activeTab, setActiveTab] = useState(TABS.MEMO);
   const [periods, setPeriods] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState({});
-
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(formatDateYYYYMMDD(date));
+  const [currentDate, setCurrentDate] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(formatDateYYYYMMDD(today));
 
   const { openModal } = useModal();
   const { user } = useContext(UserContext);
+
+  // 각 탭별 데이터 매니저
+  const memo = useMemoDataManager(user, selectedDate, currentDate);
+  const accountBook = useAccountBookDataManager(
+    user,
+    selectedDate,
+    currentDate,
+    selectedPeriod
+  );
 
   const {
     dashboardDatas,
     calendarDatas,
     loadDashboardDatas,
     loadCalendarDatas,
-    isLoading,
-  } = usePlannerDataManager(
-    user,
-    activeTab,
-    selectedDate,
-    currentDate,
-    selectedPeriod
-  );
+  } = getTabData(activeTab, { memo, accountBook });
 
-  // 날짜 선택
-  function handleSetSelectedDate(date) {
+  const isLoading = memo.isLoading || accountBook.isLoading;
+
+  const handleSetSelectedDate = (date) => {
     setSelectedDate(formatDateYYYYMMDD(date));
-  }
+  };
 
-  // 기한 목록 불러오기
   useEffect(() => {
     fetchPeriodType();
   }, []);
 
-  // 기한 목록 불러오기
   async function fetchPeriodType() {
     try {
-      const response = await fetch(`${API_URL}/api/period`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(`${API_URL}/api/period`);
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
+      if (!response.ok) throw new Error(data.message);
       setPeriods(data);
       setSelectedPeriod(data[0]);
     } catch (error) {
-      console.error("기한 목록 불러오기 오류:", error);
+      console.error("기한 목록 오류:", error);
       openModal(error.message);
     }
   }
@@ -71,7 +69,7 @@ export default function MainPage() {
   return (
     <div>
       {isLoading && <Loading />}
-      <div className="flex flex-nowwrap h-[900px]">
+      <div className="flex flex-nowrap h-[900px]">
         <div className="w-[70%] h-full min-w-[600px] calendar-container">
           <Calendar
             calendarDatas={calendarDatas}
