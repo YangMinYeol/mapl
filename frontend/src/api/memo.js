@@ -2,7 +2,7 @@ import { fetchWithAuth } from "../api/auth";
 const API_URL = import.meta.env.VITE_API_URL;
 
 // 메모 목록 불러오기
-export async function fetchMemos(userId, selectedDate) {
+export async function fetchDashboardMemos(userId, selectedDate) {
   try {
     const response = await fetchWithAuth(
       `${API_URL}/api/memo/?userId=${userId}&selectedDate=${selectedDate}`,
