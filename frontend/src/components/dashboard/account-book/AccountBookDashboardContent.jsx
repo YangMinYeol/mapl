@@ -52,6 +52,7 @@ export default function AccountBookDashboardContent({
   loadDashboardDatas,
   loadCalendarDatas,
   selectedPeriod,
+  filterType,
 }) {
   const { user } = useContext(UserContext);
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false);
@@ -61,8 +62,15 @@ export default function AccountBookDashboardContent({
 
   const asset = useAssetStore((state) => state.asset);
   const updateAsset = useAssetStore((state) => state.updateAsset);
-  const accountSummary = calcIncomeExpense(dashboardDatas);
-  const sortedDatas = dashboardDatas.sort((a, b) => {
+
+  const filteredDatas =
+    filterType === FILTER_TYPE_VALUE.ALL
+      ? dashboardDatas
+      : dashboardDatas.filter((data) => data.type === filterType);
+
+  const accountSummary = calcIncomeExpense(filteredDatas);
+
+  const sortedDatas = filteredDatas.sort((a, b) => {
     if (a.occurredAt < b.occurredAt) return -1;
     if (a.occurredAt > b.occurredAt) return 1;
   });
