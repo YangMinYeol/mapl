@@ -35,6 +35,7 @@ export default function AccountBookDashboard({
         loadDashboardDatas={loadDashboardDatas}
         loadCalendarDatas={loadCalendarDatas}
         selectedPeriod={selectedPeriod}
+        filterType={filterType}
       />
     </>
   );
