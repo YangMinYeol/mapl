@@ -36,14 +36,16 @@ export function getWeekDates(currentDate) {
 }
 
 // 날짜 텍스트 색상을 결정하는 함수
-export function getDateTextColor(date, currentDate, holidays=[]) {
+export function getDateTextColor(date, currentDate, holidays = []) {
   const day = getDay(date);
   const isOtherMonth = !isSameMonth(date, currentDate);
   const dateStr = format(date, "yyyyMMdd");
 
   const isHoliday = holidays.some((holiday) => {
     const { locdate, isHoliday } = holiday;
-    return locdate?.toString() === dateStr && isHoliday;
+    return (
+      locdate?.toString() === dateStr && isHoliday === "Y"
+    );
   });
 
   if (day === 0 || isHoliday) {
