@@ -1,23 +1,24 @@
 import { format, isSameDay, isToday } from "date-fns";
+import { useEffect, useState } from "react";
+import { fetchMultipleMonthsHolidays } from "../../api/holiday";
+import { LINKED_MEMO } from "../../constants/messages";
+import { useModal } from "../../context/ModalContext";
 import {
   getDateKey,
   getDateTextColor,
   getTagMaxCount,
   getWeekDates,
 } from "../../util/calendarUtil";
+import { formatHolidayDate } from "../../util/dateUtil";
 import {
+  MEMO_MODAL_MODE,
+  MEMO_TYPE,
   separateDailyAndRangeMemos,
   sortMemos,
-  MEMO_TYPE,
 } from "../../util/memoUtil";
-import MemoTag from "./MemoTag";
-import MemoModal from "../memo/MemoModal";
 import Loading from "../common/Loading";
-import { useEffect, useState } from "react";
-import { useModal } from "../../context/ModalContext";
-import { fetchMultipleMonthsHolidays } from "../../api/holiday";
-import { formatHolidayDate } from "../../util/dateUtil";
-import { LINKED_MEMO } from "../../constants/messages";
+import MemoModal from "../memo/MemoModal";
+import MemoTag from "./MemoTag";
 
 // 날짜별 메모 할당
 function buildMemoLevelMap(weeks, calendarDatas, tagMaxCount, holidays) {
@@ -268,11 +269,11 @@ export default function CalendarDate({
           setSelectedMemo(null);
         }}
         selectedDate={selectedDate}
-        mode="edit"
+        mode={MEMO_MODAL_MODE.EDIT}
         memo={selectedMemo}
-        selectedPeriod={{ id: 1, name: "Day" }}
         loadDashboardDatas={loadDashboardDatas}
         loadCalendarDatas={loadCalendarDatas}
+        selectedPeriod={periods[0]}
       />
     </div>
   );

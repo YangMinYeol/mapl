@@ -43,7 +43,7 @@ export default function MainPage() {
     loadCalendarDatas,
   } = getTabData(activeTab, { memo, accountBook });
 
-  const isLoading = memo.isLoading || accountBook.isLoading;
+  const isLoading = memo.isLoading || accountBook.isLoading || periods.length === 0;
 
   const handleSetSelectedDate = (date) => {
     setSelectedDate(formatDateYYYYMMDD(date));
@@ -68,35 +68,40 @@ export default function MainPage() {
 
   return (
     <div>
-      {isLoading && <Loading />}
       <div className="flex flex-nowrap h-[900px]">
-        <div className="w-[70%] h-full min-w-[600px] calendar-container">
-          <Calendar
-            calendarDatas={calendarDatas}
-            loadDashboardDatas={loadDashboardDatas}
-            loadCalendarDatas={loadCalendarDatas}
-            currentDate={currentDate}
-            setCurrentDate={setCurrentDate}
-            selectedDate={selectedDate}
-            setSelectedDate={handleSetSelectedDate}
-            periods={periods}
-            setSelectedPeriod={setSelectedPeriod}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-        </div>
-        <div className="w-[30%] h-full min-w-[300px] dashboard-container">
-          <Dashboard
-            activeTab={activeTab}
-            dashboardDatas={dashboardDatas}
-            loadDashboardDatas={loadDashboardDatas}
-            loadCalendarDatas={loadCalendarDatas}
-            selectedDate={selectedDate}
-            periods={periods}
-            selectedPeriod={selectedPeriod}
-            setSelectedPeriod={setSelectedPeriod}
-          />
-        </div>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <div className="w-[70%] h-full min-w-[600px] calendar-container">
+              <Calendar
+                calendarDatas={calendarDatas}
+                loadDashboardDatas={loadDashboardDatas}
+                loadCalendarDatas={loadCalendarDatas}
+                currentDate={currentDate}
+                setCurrentDate={setCurrentDate}
+                selectedDate={selectedDate}
+                setSelectedDate={handleSetSelectedDate}
+                periods={periods}
+                setSelectedPeriod={setSelectedPeriod}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+              />
+            </div>
+            <div className="w-[30%] h-full min-w-[300px] dashboard-container">
+              <Dashboard
+                activeTab={activeTab}
+                dashboardDatas={dashboardDatas}
+                loadDashboardDatas={loadDashboardDatas}
+                loadCalendarDatas={loadCalendarDatas}
+                selectedDate={selectedDate}
+                periods={periods}
+                selectedPeriod={selectedPeriod}
+                setSelectedPeriod={setSelectedPeriod}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
