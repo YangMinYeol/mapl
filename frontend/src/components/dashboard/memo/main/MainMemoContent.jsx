@@ -11,7 +11,6 @@ import {
   toggleLinkedMemosCompletion,
   toggleMemoCompletion,
 } from "../../../../api/memo";
-import { MEMO_MODAL_MODE } from "../../../../util/memoUtil";
 import { LINKED_MEMO } from "../../../../constants/messages";
 import { useModal } from "../../../../context/ModalContext";
 import { UserContext } from "../../../../context/UserContext";
@@ -23,9 +22,9 @@ import {
 } from "../../../../util/dateUtil";
 import { LoginExpiredError } from "../../../../util/error";
 import {
-  dailyMemoObjectToArray,
+  MEMO_MODAL_MODE, dailyMemoObjectToArray,
   separateDailyAndRangeMemos,
-  sortMemos,
+  sortMemos
 } from "../../../../util/memoUtil";
 import MemoModal from "../../../memo/MemoModal";
 import MainMemoItem from "./MainMemoItem";
@@ -47,7 +46,7 @@ export default function MainMemoContent({
   const { user } = useContext(UserContext);
   const handleLoginExpired = useLoginExpiredHandler();
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
-  const [memoModalMode, setMemoModalMode] = useState("");
+  const [memoModalMode, setMemoModalMode] = useState(MEMO_MODAL_MODE.CREATE);
   const [selectedMemo, setSelectedMemo] = useState(null);
 
   // 메모 정렬
