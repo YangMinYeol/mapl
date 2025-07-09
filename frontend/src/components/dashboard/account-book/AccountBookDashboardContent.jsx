@@ -7,7 +7,7 @@ import { UserContext } from "../../../context/UserContext";
 import useAssetStore from "../../../stores/useAssetStore";
 import {
   ACCOUNTBOOK_MODAL_MODE,
-  FILTER_TYPE_VALUE,
+  ACCOUNT_TYPE,
 } from "../../../util/accountBookUtil";
 import {
   groupByMonth,
@@ -18,7 +18,7 @@ import {
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
 
-const { INCOME, EXPENSE, ALL } = FILTER_TYPE_VALUE;
+const { INCOME, EXPENSE, ALL } = ACCOUNT_TYPE;
 
 // 전체, 수입, 지출 각각 개수와 합계 계산
 function calcIncomeExpense(datas) {
@@ -64,7 +64,7 @@ export default function AccountBookDashboardContent({
   const updateAsset = useAssetStore((state) => state.updateAsset);
 
   const filteredDatas =
-    filterType === FILTER_TYPE_VALUE.ALL
+    filterType === ACCOUNT_TYPE.ALL
       ? dashboardDatas
       : dashboardDatas.filter((data) => data.type === filterType);
 
@@ -96,6 +96,7 @@ export default function AccountBookDashboardContent({
   // 모달 닫기
   function closeAccountBookModal() {
     setIsDashboardModalOpen(false);
+    setselectedItem(null);
   }
 
   // 가계부 항목 편집
