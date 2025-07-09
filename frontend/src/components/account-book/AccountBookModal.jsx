@@ -10,8 +10,8 @@ import { useAccountBookModalForm } from "../../hooks/useAccountBookModalForm";
 import useAssetStore from "../../stores/useAssetStore";
 import {
   ACCOUNTBOOK_MODAL_MODE,
-  FILTER_TYPE,
-  FILTER_TYPE_VALUE,
+  ACCOUNT_TYPE_FILTER,
+  ACCOUNT_TYPE,
 } from "../../util/accountBookUtil";
 import { combineDateAndTime } from "../../util/dateUtil";
 import { LoginExpiredError } from "../../util/error";
@@ -185,7 +185,7 @@ export default function AccountBookModal({
 
   // 모달 닫기
   function closeModal() {
-    setType(FILTER_TYPE_VALUE.INCOME);
+    setType(ACCOUNT_TYPE.INCOME);
     setDate(selectedDate);
     setTime("12:00");
     setCategory(null);
@@ -318,8 +318,8 @@ export default function AccountBookModal({
     <div>
       <div className="py-2">
         <Tab
-          options={FILTER_TYPE.filter(
-            (item) => item.value !== FILTER_TYPE_VALUE.ALL
+          options={ACCOUNT_TYPE_FILTER.filter(
+            (item) => item.value !== ACCOUNT_TYPE.ALL
           )}
           selected={type}
           onSelect={setType}

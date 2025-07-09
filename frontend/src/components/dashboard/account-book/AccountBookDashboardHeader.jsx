@@ -1,4 +1,4 @@
-import { FILTER_TYPE } from "../../../util/accountBookUtil";
+import { ACCOUNT_TYPE_FILTER } from "../../../util/accountBookUtil";
 import { formatDateByPeriod } from "../../../util/dateUtil";
 import Tab from "../../common/Tab";
 
@@ -13,7 +13,7 @@ export default function AccountBookDashboardHeader({
   return (
     <div className="flex justify-between px-2 py-2 font-medium border-b border-mapl-slate h-[40px]">
       <Tab
-        options={FILTER_TYPE}
+        options={ACCOUNT_TYPE_FILTER}
         selected={filterType}
         onSelect={setFilterType}
       />

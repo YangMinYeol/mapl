@@ -2,7 +2,7 @@ import { useState } from "react";
 import PeriodSelector from "../PeriodSelector";
 import AccountBookDashboardContent from "./AccountBookDashboardContent";
 import AccountBookDashboardHeader from "./AccountBookDashboardHeader";
-import { FILTER_TYPE_VALUE } from "../../../util/accountBookUtil";
+import { ACCOUNT_TYPE } from "../../../util/accountBookUtil";
 
 export default function AccountBookDashboard({
   dashboardDatas,
@@ -13,7 +13,7 @@ export default function AccountBookDashboard({
   selectedPeriod,
   setSelectedPeriod,
 }) {
-  const [filterType, setFilterType] = useState(FILTER_TYPE_VALUE.ALL);
+  const [filterType, setFilterType] = useState(ACCOUNT_TYPE.ALL);
 
   return (
     <>

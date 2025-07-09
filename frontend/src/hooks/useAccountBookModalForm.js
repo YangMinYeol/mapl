@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import useCategoryStore from "../stores/useCategoryStore";
 import {
   ACCOUNTBOOK_MODAL_MODE,
-  FILTER_TYPE_VALUE,
+  ACCOUNT_TYPE,
 } from "../util/accountBookUtil";
 import { extractDateAndTime } from "../util/dateUtil";
 
 export function useAccountBookModalForm({ mode, selectedDate, isOpen, item }) {
-  const [type, setType] = useState(FILTER_TYPE_VALUE.INCOME);
+  const [type, setType] = useState(ACCOUNT_TYPE.INCOME);
   const [date, setDate] = useState(selectedDate);
   const [time, setTime] = useState("12:00");
   const [category, setCategory] = useState();
@@ -22,7 +22,7 @@ export function useAccountBookModalForm({ mode, selectedDate, isOpen, item }) {
   const { incomeCategories, expenseCategories } = useCategoryStore();
 
   const categories =
-    type === FILTER_TYPE_VALUE.INCOME ? incomeCategories : expenseCategories;
+    type === ACCOUNT_TYPE.INCOME ? incomeCategories : expenseCategories;
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -32,7 +32,7 @@ export function useAccountBookModalForm({ mode, selectedDate, isOpen, item }) {
 
   useEffect(() => {
     if (mode === ACCOUNTBOOK_MODAL_MODE.ADD) {
-      setType(FILTER_TYPE_VALUE.INCOME);
+      setType(ACCOUNT_TYPE.INCOME);
       setDate(selectedDate);
       setTime("12:00");
       setCategory(categories[0]);
