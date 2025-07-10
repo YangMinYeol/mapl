@@ -43,9 +43,7 @@ export function getDateTextColor(date, currentDate, holidays = []) {
 
   const isHoliday = holidays.some((holiday) => {
     const { locdate, isHoliday } = holiday;
-    return (
-      locdate?.toString() === dateStr && isHoliday === "Y"
-    );
+    return locdate?.toString() === dateStr && isHoliday === "Y";
   });
 
   if (day === 0 || isHoliday) {
@@ -89,4 +87,15 @@ export function getTagMaxCount(weeks) {
   if (weeks.length === 4) return 8;
   if (weeks.length === 5) return 6;
   return 5;
+}
+
+// 날짜 클릭 핸들러
+export function handleDefaultDateClick(
+  date,
+  setSelectedDate,
+  setSelectedPeriod,
+  periods
+) {
+  setSelectedDate(date);
+  setSelectedPeriod(periods[0]);
 }
