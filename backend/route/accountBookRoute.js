@@ -6,6 +6,13 @@ const verifyToken = require("../middleware/authMiddleware");
 // 가계부 대시보드 목록
 router.get("/", verifyToken, accountBookController.getDashboardAccountBooks);
 
+// 달력 가계부 목록
+router.get(
+  "/calendar",
+  verifyToken,
+  accountBookController.getCalendarAccountBooks
+);
+
 // 가계부 항목 추가
 router.post("/", verifyToken, accountBookController.addAccountBookItem);
 
