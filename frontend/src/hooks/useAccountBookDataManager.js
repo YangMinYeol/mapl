@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import {
+  fetchCalendarAccountBooks,
+  fetchDashboardAccountBooks,
+} from "../api/account-book";
+import { formatDateYYYYMMDD, setDateByPeriod } from "../util/dateUtil";
 import { useErrorHandler } from "./useErrorHandler";
-import { fetchDashboardAccountBooks } from "../api/account-book";
-import { setDateByPeriod } from "../util/dateUtil";
 
 export function useAccountBookDataManager(
   user,
@@ -49,6 +52,11 @@ export function useAccountBookDataManager(
   async function loadCalendarDatas() {
     setIsLoading(true);
     try {
+      const data = await fetchCalendarAccountBooks(
+        user.id,
+        formatDateYYYYMMDD(currentDate)
+      );
+      setCalendarDatas(data);
     } catch (error) {
       handleError(error);
     } finally {
