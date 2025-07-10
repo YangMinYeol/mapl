@@ -1,11 +1,5 @@
+import { TAG_TYPE } from "../constants/tag";
 import { getDateKey } from "./calendarUtil";
-
-export const MEMO_TYPE = {
-  DAILY: "daily",
-  RANGE: "range",
-  MORE: "more",
-  HOLIDAY: "holiday",
-};
 
 export const MEMO_MODAL_MODE = {
   CREATE: "create",
@@ -44,10 +38,8 @@ export function sortMemos(memos, isDaily) {
   return memos.sort((a, b) => {
     if (isDaily) {
       // 1. 공휴일 우선
-      if (a.type === MEMO_TYPE.HOLIDAY && b.type !== MEMO_TYPE.HOLIDAY)
-        return -1;
-      if (a.type !== MEMO_TYPE.HOLIDAY && b.type === MEMO_TYPE.HOLIDAY)
-        return 1;
+      if (a.type === TAG_TYPE.HOLIDAY && b.type !== TAG_TYPE.HOLIDAY) return -1;
+      if (a.type !== TAG_TYPE.HOLIDAY && b.type === TAG_TYPE.HOLIDAY) return 1;
 
       // 2. AllDay가 우선
       if (a.allday && !b.allday) return -1;
