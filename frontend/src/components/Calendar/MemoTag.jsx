@@ -1,15 +1,15 @@
 import { isSameDay } from "date-fns";
-import { MEMO_TYPE } from "../../util/memoUtil";
+import { TAG_TYPE } from "../../constants/tag";
 import Tooltip from "../common/Tooltip";
 
 function getMemoTagClass(memo, date) {
   if (!memo) return "";
 
-  if (memo.type === MEMO_TYPE.MORE) {
+  if (memo.type === TAG_TYPE.MORE) {
     return "mx-1 text-gray-500 rounded";
   }
 
-  if (memo.type === MEMO_TYPE.HOLIDAY) {
+  if (memo.type === TAG_TYPE.HOLIDAY) {
     return "mx-1 text-white rounded";
   }
 
@@ -28,8 +28,8 @@ function getMemoTagClass(memo, date) {
 export default function MemoTag({ memo, date, onClick }) {
   const shouldShow =
     memo?.content &&
-    (memo.type === MEMO_TYPE.MORE ||
-      memo.type === MEMO_TYPE.HOLIDAY ||
+    (memo.type === TAG_TYPE.MORE ||
+      memo.type === TAG_TYPE.HOLIDAY ||
       isSameDay(date, new Date(memo.startDate)) ||
       date.getDay() === 0);
 
@@ -54,7 +54,7 @@ export default function MemoTag({ memo, date, onClick }) {
   );
 
   return memo &&
-    (memo.type === MEMO_TYPE.DAILY || memo.type === MEMO_TYPE.RANGE) ? (
+    (memo.type === TAG_TYPE.DAILY || memo.type === TAG_TYPE.RANGE) ? (
     <Tooltip memo={memo}>{memoTag}</Tooltip>
   ) : (
     memoTag
