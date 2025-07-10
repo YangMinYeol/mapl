@@ -59,8 +59,8 @@ async function getCalendarMemos(userId, currentDate) {
     FROM memo
     JOIN color ON memo.color_id = color.id
     WHERE memo.user_id = $1
-    AND memo.start_date <= $3
-    AND memo.end_date >= $2
+      AND memo.end_date >= $2
+      AND memo.start_date <= $3
   `;
 
   const result = await db.query(query, [userId, startDate, endDate]);
