@@ -43,7 +43,8 @@ export default function MainPage() {
     loadCalendarDatas,
   } = getTabData(activeTab, { memo, accountBook });
 
-  const isLoading = memo.isLoading || accountBook.isLoading || periods.length === 0;
+  const isLoading =
+    memo.isLoading || accountBook.isLoading || periods.length === 0;
 
   const handleSetSelectedDate = (date) => {
     setSelectedDate(formatDateYYYYMMDD(date));
