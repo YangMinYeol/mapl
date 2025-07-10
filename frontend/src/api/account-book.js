@@ -25,6 +25,24 @@ export async function fetchDashboardAccountBooks(userId, startDate, endDate) {
   return data;
 }
 
+// 달력 표기용 가계부 목록 불러오기
+export async function fetchCalendarAccountBooks(userId, currentDate) {
+  try {
+    const response = await fetchWithAuth(
+      `${API_URL}/api/account-book/calendar?userId=${userId}&currentDate=${currentDate}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 // 가계부 데이터 추가
 export async function addAccountBookItem(accountItem) {
   try {

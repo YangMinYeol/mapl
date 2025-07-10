@@ -1,4 +1,19 @@
 const db = require("../db");
+const {
+  subMonths,
+  addMonths,
+  startOfMonth,
+  endOfMonth,
+  format,
+  addDays,
+} = require("date-fns");
+
+// 하루 더한 yyyy-MM-dd 문자열 반환
+function getNextDateString(dateStr) {
+  const date = new Date(dateStr);
+  const nextDate = addDays(date, 1);
+  return format(nextDate, "yyyy-MM-dd");
+}
 
 function mapAccountBookRow(row) {
   return {
@@ -20,6 +35,7 @@ function mapAccountBookRow(row) {
   };
 }
 
+// 대시보드용 가계부 조회 (종료일은 exclusive)
 async function getDashboardAccountBooks(userId, startDate, endDate) {
   const conditions = ["ab.user_id = $1"];
   const params = [userId];
@@ -31,8 +47,9 @@ async function getDashboardAccountBooks(userId, startDate, endDate) {
   }
 
   if (endDate) {
-    conditions.push(`ab.occurred_at::date <= $${paramIndex++}`);
-    params.push(endDate);
+    const endDateExclusive = getNextDateString(endDate);
+    conditions.push(`ab.occurred_at::date < $${paramIndex++}`);
+    params.push(endDateExclusive);
   }
 
   const whereClause = `WHERE ${conditions.join(" AND ")}`;
@@ -58,6 +75,42 @@ async function getDashboardAccountBooks(userId, startDate, endDate) {
   `;
 
   const result = await db.query(query, params);
+  return result.rows.map(mapAccountBookRow);
+}
+
+// 달력용 가계부 목록 조회
+async function getCalendarAccountBooks(userId, currentDate) {
+  const prevMonthStart = startOfMonth(subMonths(currentDate, 1));
+  const nextMonthEnd = endOfMonth(addMonths(currentDate, 1));
+
+  const startDate = format(prevMonthStart, "yyyy-MM-dd");
+  const endDate = format(nextMonthEnd, "yyyy-MM-dd");
+
+  const endDateExclusive = getNextDateString(endDate);
+
+  const query = `
+    SELECT
+      ab.id,
+      ab.user_id,
+      ab.category_id,
+      ab.type,
+      ab.content,
+      ab.amount,
+      ab.occurred_at,
+      ab.created_at,
+      abc.name,
+      abc.color_id,
+      c.hex
+    FROM account_book ab
+    JOIN account_book_category abc ON ab.category_id = abc.id
+    LEFT JOIN color c ON abc.color_id = c.id
+    WHERE ab.user_id = $1
+      AND ab.occurred_at >= $2
+      AND ab.occurred_at < $3
+    ORDER BY ab.occurred_at DESC;
+  `;
+
+  const result = await db.query(query, [userId, startDate, endDateExclusive]);
   return result.rows.map(mapAccountBookRow);
 }
 
@@ -236,6 +289,7 @@ async function deleteAccountBookItem(itemId) {
 
 module.exports = {
   getDashboardAccountBooks,
+  getCalendarAccountBooks,
   addAccountBookItem,
   updateAccountBookItem,
   deleteAccountBookItem,
