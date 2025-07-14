@@ -1,8 +1,10 @@
-import CalendarHeader from "./CalendarHeader";
-import CalendarDays from "./CalendarDays";
-import CalendarDate from "./CalendarDate";
-import { useMemo } from "react";
 import { addMonths, setMonth, setYear } from "date-fns";
+import { useMemo } from "react";
+import { TABS } from "../../constants/tab";
+import AccountBookCalendarDate from "./AccountBookCalendarDate";
+import CalendarDays from "./CalendarDays";
+import CalendarHeader from "./CalendarHeader";
+import MemoCalendarDate from "./MemoCalendarDate";
 
 export default function Calendar({
   calendarDatas,
@@ -15,7 +17,7 @@ export default function Calendar({
   periods,
   setSelectedPeriod,
   setActiveTab,
-  activeTab
+  activeTab,
 }) {
   const today = useMemo(() => new Date(), []);
 
@@ -24,7 +26,7 @@ export default function Calendar({
     setCurrentDate((prevDate) => addMonths(prevDate, month));
   }
 
-  // 연,월을 선택한 숫자로 한번에 이동
+  // 연도와 월을 선택한 숫자로 한번에 이동
   function handleYearMonth(selectedYear, selectedMonth) {
     setCurrentDate((prevDate) => {
       let newDate = setYear(prevDate, selectedYear);
@@ -50,16 +52,29 @@ export default function Calendar({
         activeTab={activeTab}
       />
       <CalendarDays />
-      <CalendarDate
-        currentDate={currentDate}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        calendarDatas={calendarDatas}
-        loadDashboardDatas={loadDashboardDatas}
-        loadCalendarDatas={loadCalendarDatas}
-        periods={periods}
-        setSelectedPeriod={setSelectedPeriod}
-      />
+      {activeTab === TABS.MEMO ? (
+        <MemoCalendarDate
+          currentDate={currentDate}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          calendarDatas={calendarDatas}
+          loadDashboardDatas={loadDashboardDatas}
+          loadCalendarDatas={loadCalendarDatas}
+          periods={periods}
+          setSelectedPeriod={setSelectedPeriod}
+        />
+      ) : (
+        <AccountBookCalendarDate
+          currentDate={currentDate}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          calendarDatas={calendarDatas}
+          loadDashboardDatas={loadDashboardDatas}
+          loadCalendarDatas={loadCalendarDatas}
+          periods={periods}
+          setSelectedPeriod={setSelectedPeriod}
+        />
+      )}
     </div>
   );
 }

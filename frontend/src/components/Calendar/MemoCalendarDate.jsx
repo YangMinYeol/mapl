@@ -1,21 +1,21 @@
 import { useState } from "react";
+import { LINKED_MEMO } from "../../constants/messages";
+import { TAG_TYPE } from "../../constants/tag";
+import { useModal } from "../../context/ModalContext";
 import useHolidayData from "../../hooks/useHolidayData";
-import { generateAccountBookTagMap } from "../../util/accountBookTagUtil";
-import {
-  ACCOUNTBOOK_MODAL_MODE,
-  ACCOUNT_TYPE,
-} from "../../util/accountBookUtil";
 import {
   getTagMaxCount,
   getWeekDates,
   handleDateClick,
 } from "../../util/calendarUtil";
-import AccountBookModal from "../account-book/AccountBookModal";
+import { buildMemoLevelMap } from "../../util/memoTagUtil";
+import { MEMO_MODAL_MODE } from "../../util/memoUtil";
 import Loading from "../common/Loading";
-import AccountBookTag from "./AccountBookTag";
+import MemoModal from "../memo/MemoModal";
 import CalendarDate from "./CalendarDate";
+import MemoTag from "./MemoTag";
 
-export default function AccountBookCalendarDate({
+export default function MemoCalendarDate({
   currentDate,
   selectedDate,
   setSelectedDate,
@@ -29,20 +29,23 @@ export default function AccountBookCalendarDate({
   const tagMaxCount = getTagMaxCount(weeks);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { openConfirm } = useModal();
 
   const { holidays, isLoading } = useHolidayData(currentDate);
-  const tagMap = generateAccountBookTagMap(
-    weeks,
-    calendarDatas,
-    holidays,
-    tagMaxCount
-  );
+  const tagMap = buildMemoLevelMap(weeks, calendarDatas, tagMaxCount, holidays);
 
-  function handleTagClick(tag) {
-    const type = tag.type;
-    if (type !== ACCOUNT_TYPE.EXPENSE && type !== ACCOUNT_TYPE.INCOME) return;
-    setSelectedItem(tag);
-    setIsModalOpen(true);
+  function handleTagClick(memo) {
+    if (memo.type === TAG_TYPE.MORE || memo.type === TAG_TYPE.HOLIDAY) return;
+
+    if (memo.isLinked) {
+      openConfirm(LINKED_MEMO.TITLE, LINKED_MEMO.EDIT_CONFIRM, () => {
+        setSelectedItem(memo);
+        setIsModalOpen(true);
+      });
+    } else {
+      setSelectedItem(memo);
+      setIsModalOpen(true);
+    }
   }
 
   if (isLoading) return <Loading />;
@@ -59,14 +62,15 @@ export default function AccountBookCalendarDate({
         handleDateClick(date, setSelectedDate, setSelectedPeriod, periods)
       }
       onTagClick={handleTagClick}
-      TagComponent={AccountBookTag}
-      ModalComponent={AccountBookModal}
+      TagComponent={MemoTag}
+      ModalComponent={MemoModal}
       modalProps={{
         selectedDate,
-        item: selectedItem,
-        mode: ACCOUNTBOOK_MODAL_MODE.EDIT,
+        memo: selectedItem,
+        mode: MEMO_MODAL_MODE.EDIT,
         loadDashboardDatas,
         loadCalendarDatas,
+        selectedPeriod: periods[0],
       }}
       isModalOpen={isModalOpen}
       closeModal={() => {

@@ -90,7 +90,7 @@ export function getTagMaxCount(weeks) {
 }
 
 // 날짜 클릭 핸들러
-export function handleDefaultDateClick(
+export function handleDateClick(
   date,
   setSelectedDate,
   setSelectedPeriod,
