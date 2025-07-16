@@ -37,6 +37,13 @@ async function createUser(userData) {
       createdUserId,
       0,
     ]);
+
+    // 3. account_book_category 테이블에 income, expense 초기값 추가
+    await client.query(
+      `INSERT INTO account_book_category(user_id, type, name, color_id, is_default, sort_order)
+      VALUES 
+        ($1, 'income', '기타', 10, true, 0),
+        ($1, 'expense', '기타', 10, true, 0)`, [createdUserId]);
     await client.query("COMMIT");
     return createdUserId;
   } catch (error) {
