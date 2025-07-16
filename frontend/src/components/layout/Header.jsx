@@ -1,7 +1,8 @@
-import Logo from "../common/Logo";
-import { UserContext } from "../../context/UserContext";
 import { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { UserContext } from "../../context/UserContext";
+import Logo from "../common/Logo";
+import UserDropDown from "./UserDropDown";
 
 export default function Header() {
   const { user, setUser } = useContext(UserContext);
@@ -23,35 +24,13 @@ export default function Header() {
     setUser(null);
   }
 
-  const isBoardPage = location.pathname === "/board";
-
   return (
     <header className="py-3 bg-deep-green min-w-[910px]">
       <div className="flex justify-between px-8">
         <Logo height="h-12" useWhiteLogo={true} />
         <div className="flex items-center text-white">
           {user ? (
-            <div className="flex gap-2">
-              <span>{user.name} 님</span>
-              <span>|</span>
-              <Link
-                to="/login"
-                onClick={handleLogout}
-                className="hover:underline"
-              >
-                로그아웃
-              </Link>
-              <span>|</span>
-              {isBoardPage ? (
-                <Link to="/" className="hover:underline">
-                  홈으로
-                </Link>
-              ) : (
-                <Link to="/board" className="hover:underline">
-                  게시판
-                </Link>
-              )}
-            </div>
+            <UserDropDown user={user} handleLogout={handleLogout} />
           ) : (
             <Link to="/login" className="hover:underline">
               로그인

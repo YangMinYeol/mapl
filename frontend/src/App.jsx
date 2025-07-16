@@ -10,8 +10,9 @@ import BoardPage from "./pages/BoardPage";
 import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage";
 import SignupPage from "./pages/SignupPage";
-import useCategoryStore from "./stores/useCategoryStore";
+import UserPage from "./pages/UserPage";
 import useAssetStore from "./stores/useAssetStore";
+import useCategoryStore from "./stores/useCategoryStore";
 
 function AppContent() {
   const location = useLocation();
@@ -28,6 +29,7 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/board" element={<BoardPage />} />
+          <Route path="/user/*" element={<UserPage />} />
         </Routes>
       </div>
       {!hideHeaderFooter && <Footer />}
