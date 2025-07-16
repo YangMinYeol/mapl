@@ -8,6 +8,8 @@ function mapCategoryRow(row) {
     type: row.type,
     colorId: row.color_id,
     colorHex: row.hex,
+    isDefault: row.is_default,
+    sortOrder: row.sort_order,
   };
 }
 
