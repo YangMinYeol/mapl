@@ -21,6 +21,8 @@ async function getCategoriesByUser(userId) {
       abc.name,
       abc.type,
       abc.color_id,
+      abc.is_default,
+      abc.sort_order,
       c.hex
     FROM account_book_category abc
     LEFT JOIN color c ON abc.color_id = c.id
