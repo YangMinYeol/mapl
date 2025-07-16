@@ -5,8 +5,8 @@ export const ACCOUNTBOOK_MODAL_MODE = {
 
 export const ACCOUNT_TYPE_FILTER = [
   { label: "전체", value: "all" },
-  { label: "수입", value: "income" },
   { label: "지출", value: "expense" },
+  { label: "수입", value: "income" },
 ];
 
 export const ACCOUNT_TYPE = {
