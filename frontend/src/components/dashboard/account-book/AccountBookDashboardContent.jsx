@@ -15,6 +15,7 @@ import {
   groupByWeekday,
   groupByYear,
 } from "../../../util/dateUtil";
+import { DEFAULT_COLOR } from "../../../util/util";
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
 
@@ -194,7 +195,11 @@ export default function AccountBookDashboardContent({
           className="cursor-pointer w-1/16"
           onClick={openAccountBookModal}
         >
-          <FontAwesomeIcon color="#173836" icon={faCirclePlus} size="2xl" />
+          <FontAwesomeIcon
+            color={DEFAULT_COLOR}
+            icon={faCirclePlus}
+            size="2xl"
+          />
         </button>
       </div>
       <AccountBookModal
