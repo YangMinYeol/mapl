@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import AccountBookCategory from "../components/account-book/AccountBookCategory";
+import AccountBookCategory from "../components/account-book-category/AccountBookCategory";
 import UserSidebar from "../components/user/UserSidebar";
 import { UserContext } from "../context/UserContext";
 import { MENU_KEYS, getSelectedItemByPath } from "../util/userUtil";

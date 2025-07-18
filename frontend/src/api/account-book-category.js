@@ -22,3 +22,28 @@ export async function fetchAccountBookCategories(userId) {
     throw error;
   }
 }
+
+// 가계부 카테고리 추가
+export async function addAccountBookCategory(categoryItem) {
+  try {
+    const response = await fetchWithAuth(
+      `${API_URL}/api/account-book-category/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(categoryItem),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}

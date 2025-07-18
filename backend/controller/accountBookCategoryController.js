@@ -14,6 +14,28 @@ async function getCategoriesByUser(req, res) {
   }
 }
 
+// 가계부 항목 추가
+async function addAccountBookCategory(req, res) {
+  const { userId, name, type, colorId } = req.body;
+  try {
+    await accountBookCategoryModel.addAccountBookCategory(
+      userId,
+      name,
+      type,
+      colorId
+    );
+    return res
+      .status(200)
+      .json({ message: "가계부 카테고리가 추가되었습니다." });
+  } catch (error) {
+    console.error("가계부 카테고리 추가 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "가계부 카테고리 추가 중 문제가 발생하였습니다." });
+  }
+}
+
 module.exports = {
   getCategoriesByUser,
+  addAccountBookCategory,
 };
