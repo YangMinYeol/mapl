@@ -22,19 +22,16 @@ export function useMemoDataManager(user, selectedDate, currentDate) {
   }, [user, currentDate]);
 
   async function loadDashboardDatas() {
-    setIsLoading(true);
     try {
       const data = await fetchDashboardMemos(user.id, selectedDate);
       setDashboardDatas(data);
     } catch (error) {
       handleError(error);
     } finally {
-      setIsLoading(false);
     }
   }
 
   async function loadCalendarDatas() {
-    setIsLoading(true);
     try {
       const data = await fetchCalendarMemos(
         user.id,
@@ -44,7 +41,6 @@ export function useMemoDataManager(user, selectedDate, currentDate) {
     } catch (error) {
       handleError(error);
     } finally {
-      setIsLoading(false);
     }
   }
 

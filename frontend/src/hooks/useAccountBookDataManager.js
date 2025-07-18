@@ -30,7 +30,6 @@ export function useAccountBookDataManager(
   }, [user, currentDate]);
 
   async function loadDashboardDatas() {
-    setIsLoading(true);
     try {
       const { startDate, endDate } = setDateByPeriod(
         selectedPeriod,
@@ -45,12 +44,10 @@ export function useAccountBookDataManager(
     } catch (error) {
       handleError(error);
     } finally {
-      setIsLoading(false);
     }
   }
 
   async function loadCalendarDatas() {
-    setIsLoading(true);
     try {
       const data = await fetchCalendarAccountBooks(
         user.id,
@@ -60,7 +57,6 @@ export function useAccountBookDataManager(
     } catch (error) {
       handleError(error);
     } finally {
-      setIsLoading(false);
     }
   }
 
