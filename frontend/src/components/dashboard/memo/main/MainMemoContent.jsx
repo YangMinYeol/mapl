@@ -22,10 +22,12 @@ import {
 } from "../../../../util/dateUtil";
 import { LoginExpiredError } from "../../../../util/error";
 import {
-  MEMO_MODAL_MODE, dailyMemoObjectToArray,
+  MEMO_MODAL_MODE,
+  dailyMemoObjectToArray,
   separateDailyAndRangeMemos,
-  sortMemos
+  sortMemos,
 } from "../../../../util/memoUtil";
+import { DEFAULT_COLOR } from "../../../../util/util";
 import MemoModal from "../../../memo/MemoModal";
 import MainMemoItem from "./MainMemoItem";
 
@@ -39,7 +41,6 @@ export default function MainMemoContent({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const memoInputRef = useRef(null);
-  const deepGreen = { color: "#173836" };
   const navigate = useNavigate();
   const [memoText, setMemoText] = useState("");
   const { openModal, openConfirm } = useModal();
@@ -272,7 +273,7 @@ export default function MainMemoContent({
           onMouseLeave={handleMouseLeave}
           onClick={handleAddMemo}
         >
-          <FontAwesomeIcon style={deepGreen} icon={getIcon()} size="xl" />
+          <FontAwesomeIcon color={DEFAULT_COLOR} icon={getIcon()} size="xl" />
         </button>
       </div>
       <MemoModal

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useColors } from "../context/ColorContext";
 import { setDateByPeriod } from "../util/dateUtil";
+import { DEFAULT_COLOR } from "../util/util";
 
 export function useMemoModalForm({
   mode,
@@ -30,7 +31,7 @@ export function useMemoModalForm({
   // 팔레트
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState(10);
-  const [selectedColor, setSelectedColor] = useState("#173836");
+  const [selectedColor, setSelectedColor] = useState(DEFAULT_COLOR);
   const colors = useColors();
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export function useMemoModalForm({
       setAllDay(true);
       setContent("");
       setSelectedColorId(10);
-      setSelectedColor("#173836");
+      setSelectedColor(DEFAULT_COLOR);
     } else if (mode === "edit" && memo) {
       setStartDate(memo.startDate);
       setEndDate(memo.endDate);

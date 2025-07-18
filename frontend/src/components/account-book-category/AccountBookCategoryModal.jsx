@@ -6,6 +6,7 @@ import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
 import { LoginExpiredError } from "../../util/error";
 import Palette from "../common/Palette";
 import ModalLayout from "../common/modal/ModalLayout";
+import { DEFAULT_COLOR } from "../../util/util";
 
 export default function AccountBookCategoryModal({
   title,
@@ -19,7 +20,7 @@ export default function AccountBookCategoryModal({
   const { user } = useContext(UserContext);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState(10);
-  const [selectedColor, setSelectedColor] = useState("#173836");
+  const [selectedColor, setSelectedColor] = useState(DEFAULT_COLOR);
   const [categoryName, setCategoryName] = useState("");
   const [isCategoryNameError, setIsCategoryNameError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,7 +74,7 @@ export default function AccountBookCategoryModal({
   // 폼 초기화
   const resetForm = () => {
     setCategoryName("");
-    setSelectedColor("#173836");
+    setSelectedColor(DEFAULT_COLOR);
     setSelectedColorId(10);
     setIsCategoryNameError(false);
   };
