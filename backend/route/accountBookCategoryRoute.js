@@ -13,6 +13,9 @@ router.post(
   accountBookCategoryController.addAccountBookCategory
 );
 
+// 가계부 카테고리 수정
+router.patch("/", verifyToken, accountBookCategoryController.updateAccountBookCategory);
+
 // 가계부 카테고리 삭제
 router.delete(
   "/:categoryId",
