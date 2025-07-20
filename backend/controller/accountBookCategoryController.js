@@ -35,6 +35,22 @@ async function addAccountBookCategory(req, res) {
   }
 }
 
+// 가계부 카테고리 수정
+async function updateAccountBookCategory(req, res) {
+  const { id, name, colorId } = req.body;
+  try {
+    await accountBookCategoryModel.updateAccountBookCategory(id, name, colorId);
+    return res
+      .status(200)
+      .json({ message: "가계부 카테고리가 수정되었습니다." });
+  } catch (error) {
+    console.error("가계부 카테고리 수정 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "가계부 카테고리 수정 중 문제가 발생하였습니다." });
+  }
+}
+
 // 가계부 카테고리 삭제
 async function deleteAccountBookCategory(req, res) {
   const { categoryId } = req.params;
@@ -54,5 +70,6 @@ async function deleteAccountBookCategory(req, res) {
 module.exports = {
   getCategoriesByUser,
   addAccountBookCategory,
+  updateAccountBookCategory,
   deleteAccountBookCategory,
 };

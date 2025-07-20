@@ -1,8 +1,15 @@
 import { deleteAccountBookCategory } from "../../api/account-book-category";
 import { useModal } from "../../context/ModalContext";
+import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
 import { LoginExpiredError } from "../../util/error";
 
-export function AccountBookCategoryItem({ category, reload }) {
+export function AccountBookCategoryItem({
+  category,
+  reload,
+  setIsModalOpen,
+  setMode,
+  setSelectedItem,
+}) {
   const { id, name, colorHex, isDefault } = category;
   const { openModal, openConfirm } = useModal();
 
@@ -27,6 +34,13 @@ export function AccountBookCategoryItem({ category, reload }) {
     );
   };
 
+  // 가계부 카테고리 수정
+  const openEditModal = () => {
+    setSelectedItem(category);
+    setMode(ACCOUNTBOOK_MODAL_MODE.EDIT);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="flex items-center justify-between flex-shrink-0 px-4 py-3 transition border rounded border-mapl-slate hover:bg-gray-50">
       <div className="flex items-center gap-3">
@@ -49,7 +63,12 @@ export function AccountBookCategoryItem({ category, reload }) {
             <span>|</span>
           </>
         )}
-        <button className="cursor-pointer hover:text-green-900">수정</button>
+        <button
+          className="cursor-pointer hover:text-green-900"
+          onClick={openEditModal}
+        >
+          수정
+        </button>
       </div>
     </div>
   );

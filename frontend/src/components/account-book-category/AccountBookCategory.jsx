@@ -6,8 +6,8 @@ import {
   ACCOUNT_TYPE_FILTER,
 } from "../../util/accountBookUtil";
 import Tab from "../common/Tab";
-import AccountBookCategoryModal from "./AccountBookCategoryModal";
 import { AccountBookCategoryItem } from "./AccountBookCategoryItem";
+import AccountBookCategoryModal from "./AccountBookCategoryModal";
 
 const tabOptions = ACCOUNT_TYPE_FILTER.filter(
   (item) => item.value !== ACCOUNT_TYPE.ALL
@@ -40,7 +40,14 @@ export default function AccountBookCategory() {
       />
       <div className="py-5 space-y-2">
         {categories.map((category) => (
-          <AccountBookCategoryItem category={category} key={category.id} reload={reload}/>
+          <AccountBookCategoryItem
+            category={category}
+            key={category.id}
+            reload={reload}
+            setIsModalOpen={setIsModalOpen}
+            setMode={setMode}
+            setSelectedItem={setSelectedItem}
+          />
         ))}
       </div>
 
@@ -59,7 +66,7 @@ export default function AccountBookCategory() {
       <AccountBookCategoryModal
         title="가계부 카테고리"
         mode={mode}
-        item={selectedItem}
+        selectedItem={selectedItem}
         type={selectedTab}
         isOpen={isModalOpen}
         onClose={closeModal}

@@ -75,6 +75,20 @@ async function getNextSortOrder(userId, type) {
   return (maxSortOrder !== null ? maxSortOrder : 0) + 1;
 }
 
+// 가계부 카테고리 수정
+async function updateAccountBookCategory(id, name, colorId) {
+  const query = `
+    UPDATE account_book_category
+    SET 
+      name = $1,
+      color_id = $2
+    WHERE id = $3
+  `;
+
+  const result = await db.query(query, [name, colorId, id]);
+  return result.rows[0];
+}
+
 // 가계부 카테고리 삭제
 async function deleteAccountBookCategory(categoryId) {
   const query = `DELETE FROM account_book_category WHERE id = $1`;
@@ -84,5 +98,6 @@ async function deleteAccountBookCategory(categoryId) {
 module.exports = {
   getCategoriesByUser,
   addAccountBookCategory,
+  updateAccountBookCategory,
   deleteAccountBookCategory,
 };

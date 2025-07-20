@@ -1,12 +1,15 @@
-import { useContext, useState } from "react";
-import { addAccountBookCategory } from "../../api/account-book-category";
+import { useContext, useEffect, useState } from "react";
+import {
+  addAccountBookCategory,
+  updateAccountBookCategory,
+} from "../../api/account-book-category";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
 import { LoginExpiredError } from "../../util/error";
+import { DEFAULT_COLOR } from "../../util/util";
 import Palette from "../common/Palette";
 import ModalLayout from "../common/modal/ModalLayout";
-import { DEFAULT_COLOR } from "../../util/util";
 
 export default function AccountBookCategoryModal({
   title,
@@ -15,6 +18,7 @@ export default function AccountBookCategoryModal({
   mode,
   type,
   onSuccess,
+  selectedItem,
 }) {
   const modalSize = { width: "w-[350px]", height: "h-[210px]" };
   const { user } = useContext(UserContext);
@@ -25,6 +29,15 @@ export default function AccountBookCategoryModal({
   const [isCategoryNameError, setIsCategoryNameError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { openModal } = useModal();
+  const isEdit = mode === ACCOUNTBOOK_MODAL_MODE.EDIT;
+
+  useEffect(() => {
+    if (isEdit && selectedItem) {
+      setCategoryName(selectedItem.name);
+      setSelectedColor(selectedItem.colorHex);
+      setSelectedColorId(selectedItem.colorId);
+    }
+  }, [mode, selectedItem]);
 
   // 가계부 카테고리 항목 추가
   async function addNewCategory() {
@@ -42,6 +55,28 @@ export default function AccountBookCategoryModal({
       });
     } catch (error) {
       handleAccountBookCategoryError(error, ACCOUNTBOOK_MODAL_MODE.ADD);
+    } finally {
+      setIsLoading(false);
+      onSuccess();
+      closeModal();
+    }
+  }
+
+  // 가계부 카테고리 항목 수정
+  async function updateCategory() {
+    try {
+      if (categoryName.trim() === "") {
+        setIsCategoryNameError(true);
+        return;
+      }
+      setIsLoading(true);
+      await updateAccountBookCategory({
+        id: selectedItem.id,
+        name: categoryName,
+        colorId: selectedColorId,
+      });
+    } catch (error) {
+      handleAccountBookCategoryError(error, ACCOUNTBOOK_MODAL_MODE.EDIT);
     } finally {
       setIsLoading(false);
       onSuccess();
@@ -140,9 +175,9 @@ export default function AccountBookCategoryModal({
       <div className="flex items-center gap-2">
         <button
           className={`${footerButtonClass} bg-deep-green text-white`}
-          onClick={addNewCategory}
+          onClick={isEdit ? updateCategory : addNewCategory}
         >
-          {mode === ACCOUNTBOOK_MODAL_MODE.ADD ? "추가" : "수정"}
+          {isEdit ? "수정" : "추가"}
         </button>
         <button className={footerButtonClass} onClick={closeModal}>
           닫기
