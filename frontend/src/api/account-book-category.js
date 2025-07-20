@@ -47,3 +47,27 @@ export async function addAccountBookCategory(categoryItem) {
     throw error;
   }
 }
+
+// 가계부 카테고리 삭제
+export async function deleteAccountBookCategory(categoryId) {
+  try {
+    const response = await fetchWithAuth(
+      `${API_URL}/api/account-book-category/${categoryId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
