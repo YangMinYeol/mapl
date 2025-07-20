@@ -75,7 +75,14 @@ async function getNextSortOrder(userId, type) {
   return (maxSortOrder !== null ? maxSortOrder : 0) + 1;
 }
 
+// 가계부 카테고리 삭제
+async function deleteAccountBookCategory(categoryId) {
+  const query = `DELETE FROM account_book_category WHERE id = $1`;
+  return db.query(query, [categoryId]);
+}
+
 module.exports = {
   getCategoriesByUser,
   addAccountBookCategory,
+  deleteAccountBookCategory,
 };
