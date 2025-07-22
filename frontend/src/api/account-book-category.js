@@ -96,3 +96,28 @@ export async function deleteAccountBookCategory(categoryId) {
     throw error;
   }
 }
+
+// 가계부 카테고리 재정렬
+export async function reorderAccountBookCategory(reorderList) {
+  try {
+    const response = await fetchWithAuth(
+      `${API_URL}/api/account-book-category/reorder`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reorderList),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}

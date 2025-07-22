@@ -67,9 +67,26 @@ async function deleteAccountBookCategory(req, res) {
   }
 }
 
+// 가계부 카테고리 재정렬
+async function reorderAccountBookCategory(req, res) {
+  const reorderList = req.body;
+  try {
+    await accountBookCategoryModel.reorderAccountBookCategory(reorderList);
+    return res
+      .status(200)
+      .json({ message: "가계부 카테고리가 재정렬되었습니다." });
+  } catch (error) {
+    console.error("가계부 카테고리 재정렬 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "가계부 카테고리 재정렬 중 문제가 발생하였습니다." });
+  }
+}
+
 module.exports = {
   getCategoriesByUser,
   addAccountBookCategory,
   updateAccountBookCategory,
   deleteAccountBookCategory,
+  reorderAccountBookCategory,
 };
