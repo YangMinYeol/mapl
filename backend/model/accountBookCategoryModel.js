@@ -27,7 +27,8 @@ async function getCategoriesByUser(userId) {
       c.hex
     FROM account_book_category abc
     LEFT JOIN color c ON abc.color_id = c.id
-    WHERE abc.user_id = $1;
+    WHERE abc.user_id = $1
+    ORDER BY sort_order;
   `;
 
   const result = await db.query(query, [userId]);
@@ -95,9 +96,32 @@ async function deleteAccountBookCategory(categoryId) {
   return db.query(query, [categoryId]);
 }
 
+// 가계부 카테고리 재정렬
+async function reorderAccountBookCategory(reorderList) {
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const query = `
+      UPDATE account_book_category
+      SET sort_order = $1
+      WHERE id = $2;
+    `;
+    for (const { id, sortOrder } of reorderList) {
+      await client.query(query, [sortOrder, id]);
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw new Error("카테고리 정렬 실패: " + error.message);
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   getCategoriesByUser,
   addAccountBookCategory,
   updateAccountBookCategory,
   deleteAccountBookCategory,
+  reorderAccountBookCategory,
 };

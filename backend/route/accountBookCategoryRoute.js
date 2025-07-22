@@ -14,13 +14,24 @@ router.post(
 );
 
 // 가계부 카테고리 수정
-router.patch("/", verifyToken, accountBookCategoryController.updateAccountBookCategory);
+router.patch(
+  "/",
+  verifyToken,
+  accountBookCategoryController.updateAccountBookCategory
+);
 
 // 가계부 카테고리 삭제
 router.delete(
   "/:categoryId",
   verifyToken,
   accountBookCategoryController.deleteAccountBookCategory
+);
+
+// 가계부 카테고리 재정렬
+router.patch(
+  "/reorder",
+  verifyToken,
+  accountBookCategoryController.reorderAccountBookCategory
 );
 
 module.exports = router;
