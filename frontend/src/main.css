@@ -29,3 +29,9 @@ code {
   background-color: #173836;
   border-radius: 10px;
 }
+
+/* Recharts PieChart focus outline 제거 */
+.recharts-sector:focus,
+.recharts-surface:focus {
+  outline: none;
+}

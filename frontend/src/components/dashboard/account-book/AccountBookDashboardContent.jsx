@@ -19,6 +19,7 @@ import { LoginExpiredError } from "../../../util/error";
 import { DEFAULT_COLOR } from "../../../util/util";
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
+import { AccountBookPieChart } from "./AccountBookPieChart";
 
 const { INCOME, EXPENSE, ALL } = ACCOUNT_TYPE;
 
@@ -203,6 +204,9 @@ export default function AccountBookDashboardContent({
           />
         </button>
       </div>
+
+      <AccountBookPieChart dashboardDatas={dashboardDatas} />
+
       <AccountBookModal
         isOpen={isDashboardModalOpen}
         onClose={closeAccountBookModal}
