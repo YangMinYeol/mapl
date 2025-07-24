@@ -1,19 +1,15 @@
-export default function Button({
-  text,
-  onClick,
-  width = "w-96",
-  isOutline = false,
-}) {
+export default function Button({ text, onClick, color = "default" }) {
+  const base =
+    "h-14 mx-3 text-base font-semibold rounded w-36 hover:cursor-pointer";
+  const colorClass =
+    color === "green"
+      ? "text-white bg-deep-green"
+      : color === "red"
+      ? "text-white bg-red-500"
+      : "text-[#666] border border-mapl-slate";
+
   return (
-    <button
-      onClick={onClick}
-      className={`
-        h-12 mb-2 font-semibold border cursor-pointer ${width}  ${
-        isOutline
-          ? "border-deep-green text-deep-green bg-white"
-          : "text-white bg-deep-green"
-      }`}
-    >
+    <button className={`${base} ${colorClass}`} onClick={onClick} type="button">
       {text}
     </button>
   );
