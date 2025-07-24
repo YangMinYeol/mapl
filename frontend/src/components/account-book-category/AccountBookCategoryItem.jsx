@@ -6,6 +6,8 @@ import { deleteAccountBookCategory } from "../../api/account-book-category";
 import { useModal } from "../../context/ModalContext";
 import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
 import { LoginExpiredError } from "../../util/error";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 export function AccountBookCategoryItem({
   category,
@@ -15,8 +17,9 @@ export function AccountBookCategoryItem({
   setSelectedItem,
   dragOverlay = false,
 }) {
-  const { id, name, colorHex, isDefault } = category;
+  const { id, name, colorHex, type, isDefault } = category;
   const { openModal, openConfirm } = useModal();
+  const { user } = useContext(UserContext);
 
   // 드래그 중 오버레이 아이템일 때는 useSortable 훅 사용하지 않음
   if (dragOverlay) {
@@ -47,10 +50,10 @@ export function AccountBookCategoryItem({
   const deleteCategory = () => {
     openConfirm(
       "정말로 삭제하시겠습니까?",
-      "삭제한 항목은 다시 되돌릴 수 없습니다.",
+      "삭제 시 해당 카테고리에 속한 모든 항목은 '기타' 카테고리로 이동됩니다.",
       async () => {
         try {
-          await deleteAccountBookCategory(id);
+          await deleteAccountBookCategory(user.id, type, id);
           reload();
         } catch (error) {
           if (error instanceof LoginExpiredError) {

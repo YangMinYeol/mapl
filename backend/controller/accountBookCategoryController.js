@@ -54,8 +54,9 @@ async function updateAccountBookCategory(req, res) {
 // 가계부 카테고리 삭제
 async function deleteAccountBookCategory(req, res) {
   const { categoryId } = req.params;
+  const {userId, type} = req.query;
   try {
-    await accountBookCategoryModel.deleteAccountBookCategory(categoryId);
+    await accountBookCategoryModel.deleteAccountBookCategory(userId, type, categoryId);
     return res
       .status(200)
       .json({ message: "가계부 카테고리가 삭제되었습니다." });

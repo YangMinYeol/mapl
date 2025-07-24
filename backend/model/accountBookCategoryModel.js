@@ -91,9 +91,53 @@ async function updateAccountBookCategory(id, name, colorId) {
 }
 
 // 가계부 카테고리 삭제
-async function deleteAccountBookCategory(categoryId) {
-  const query = `DELETE FROM account_book_category WHERE id = $1`;
-  return db.query(query, [categoryId]);
+async function deleteAccountBookCategory(userId, type, categoryId) {
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+
+    await moveItemsToDefaultCategoryOnDelete(client, userId, type, categoryId);
+
+    const deleteQuery = `DELETE FROM account_book_category WHERE id = $1`;
+    await client.query(deleteQuery, [categoryId]);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+// 가계부 카테고리 삭제 시 포함 항목들 모두 default 데이터로 이동
+async function moveItemsToDefaultCategoryOnDelete(
+  client,
+  userId,
+  type,
+  categoryId
+) {
+  // 기본 카테고리 조회
+  const findDefaultCategoryQuery = `
+    SELECT id FROM account_book_category
+    WHERE user_id = $1 AND type = $2 AND is_default = true
+    LIMIT 1
+  `;
+  const { rows } = await client.query(findDefaultCategoryQuery, [userId, type]);
+
+  if (rows.length === 0) {
+    throw new Error("기본 카테고리가 존재하지 않아 항목을 이동할 수 없습니다.");
+  }
+
+  const defaultCategoryId = rows[0].id;
+
+  // account_book 항목의 categoryId를 기본 카테고리로 변경
+  const updateQuery = `
+    UPDATE account_book
+    SET category_id = $1
+    WHERE category_id = $2
+  `;
+  await client.query(updateQuery, [defaultCategoryId, categoryId]);
 }
 
 // 가계부 카테고리 재정렬

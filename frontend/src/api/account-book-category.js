@@ -72,19 +72,21 @@ export async function updateAccountBookCategory(categoryItem) {
     throw error;
   }
 }
-
 // 가계부 카테고리 삭제
-export async function deleteAccountBookCategory(categoryId) {
+export async function deleteAccountBookCategory(userId, type, categoryId) {
   try {
-    const response = await fetchWithAuth(
-      `${API_URL}/api/account-book-category/${categoryId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    console.log("accessToken:", localStorage.getItem("accessToken"));
+    // URL 생성 및 쿼리 파라미터 추가
+    const url = new URL(`${API_URL}/api/account-book-category/${categoryId}`);
+    url.searchParams.append("userId", userId);
+    url.searchParams.append("type", type);
+
+    const response = await fetchWithAuth(url.toString(), {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     const data = await response.json();
 
