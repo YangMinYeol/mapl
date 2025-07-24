@@ -1,8 +1,27 @@
 const db = require("../db");
 
+function mapUserRow(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    password: row.password,
+    email: row.email,
+    zipcode: row.zipcode,
+    address: row.address,
+    detailAddress: row.detail_address,
+    role: row.role,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 // 유저 정보 가져오기
-function getUserInfo(userId) {
-  return db.query(`SELECT * FROM users WHERE user_id = $1`, [userId]);
+async function getUserInfo(userId) {
+  const result = await db.query(`SELECT * FROM users WHERE user_id = $1`, [
+    userId,
+  ]);
+  return result.rows.map(mapUserRow);
 }
 
 // 아이디, 이메일 중복확인
@@ -43,7 +62,9 @@ async function createUser(userData) {
       `INSERT INTO account_book_category(user_id, type, name, color_id, is_default, sort_order)
       VALUES 
         ($1, 'income', '기타', 10, true, 0),
-        ($1, 'expense', '기타', 10, true, 0)`, [createdUserId]);
+        ($1, 'expense', '기타', 10, true, 0)`,
+      [createdUserId]
+    );
     await client.query("COMMIT");
     return createdUserId;
   } catch (error) {
