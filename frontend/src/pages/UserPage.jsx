@@ -1,12 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AccountBookCategory from "../components/account-book-category/AccountBookCategory";
 import UserSidebar from "../components/user/UserSidebar";
-import { UserContext } from "../context/UserContext";
 import { MENU_KEYS, getSelectedItemByPath } from "../util/userUtil";
 
 export default function UserPage() {
-  const { user } = useContext(UserContext);
   const pathName = useLocation().pathname;
   const navigate = useNavigate();
 
@@ -32,7 +30,7 @@ export default function UserPage() {
 
   return (
     <div className="flex min-[900px] h-[900px] justify-center py-10 gap-5">
-      <UserSidebar user={user} selectedItem={selectedItem} />
+      <UserSidebar selectedItem={selectedItem} />
       <div
         className="w-[620px] h-fit px-5 rounded-xl"
         style={{

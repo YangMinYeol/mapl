@@ -1,8 +1,11 @@
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { menuGroups } from "../../constants/menuGroups";
+import { UserContext } from "../../context/UserContext";
 import useAssetStore from "../../stores/useAssetStore";
 
-export default function UserSidebar({ user, selectedItem }) {
+export default function UserSidebar({ selectedItem }) {
+  const { user } = useContext(UserContext);
   const asset = useAssetStore((state) => state.asset);
   const navigate = useNavigate();
 
