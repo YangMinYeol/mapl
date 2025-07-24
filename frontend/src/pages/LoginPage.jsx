@@ -1,10 +1,9 @@
-import { useState, useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "../components/common/Logo";
 import FloatingLabelInput from "../components/common/FloatingLabelInput";
-import Button from "../components/common/Button";
-import { UserContext } from "../context/UserContext";
+import Logo from "../components/common/Logo";
 import { useModal } from "../context/ModalContext";
+import { UserContext } from "../context/UserContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -56,7 +55,7 @@ export default function LoginPage() {
         },
         body: JSON.stringify({ userId, password }),
       });
-      
+
       // 로그인 성공 시 UserContext와 localStorage에 저장
       const data = await response.json();
       if (!response.ok) {
@@ -119,5 +118,21 @@ export default function LoginPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function Button({ text, onClick, width = "w-96", isOutline = false }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        h-12 mb-2 font-semibold border cursor-pointer ${width}  ${
+        isOutline
+          ? "border-deep-green text-deep-green bg-white"
+          : "text-white bg-deep-green"
+      }`}
+    >
+      {text}
+    </button>
   );
 }
