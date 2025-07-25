@@ -15,11 +15,11 @@ async function login(req, res) {
   try {
     const result = await userModel.getUserInfo(userId);
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return res.status(401).json({ message: LOGIN_FAIL_MESSAGE });
     }
 
-    const user = result.rows[0];
+    const user = result[0];
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -127,4 +127,33 @@ async function refreshToken(req, res) {
   }
 }
 
-module.exports = { login, checkUserIdOrEmail, signup, refreshToken };
+// 비밀번호 확인
+async function verifyPassword(req, res) {
+  const { password } = req.body;
+  const userId = req.user.userId;
+  try {
+    const user = await userModel.getUserInfo(userId);
+    const isPasswordValid = await bcrypt.compare(password, user[0].password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        type: "INVALID_PASSWORD",
+        message: "비밀번호를 확인해주세요.",
+      });
+    }
+    return res.status(200).json({ message: "비밀번호 검증이 완료되었습니다." });
+  } catch (error) {
+    console.error("비밀번호 검증 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "비밀번호 검증중 문제가 발생하였습니다." });
+  }
+}
+
+module.exports = {
+  login,
+  checkUserIdOrEmail,
+  signup,
+  refreshToken,
+  verifyPassword,
+};
