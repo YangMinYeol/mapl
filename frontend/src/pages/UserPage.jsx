@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AccountBookCategory from "../components/account-book-category/AccountBookCategory";
+import { PasswordCheck } from "../components/user/PasswordCheck";
 import UserSidebar from "../components/user/UserSidebar";
 import { MENU_KEYS, getSelectedItemByPath } from "../util/userUtil";
 
@@ -22,6 +23,7 @@ export default function UserPage() {
   let content;
   switch (selectedItem.key) {
     case MENU_KEYS.PROFILE:
+      content = <PasswordCheck />;
       break;
     case MENU_KEYS.ACCOUNTBOOK_CATEGORY:
       content = <AccountBookCategory />;
@@ -37,10 +39,10 @@ export default function UserPage() {
           boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <div className="py-5 text-2xl border-b border-mapl-slate">
+        <div className="pt-5 pb-3 text-2xl border-b border-mapl-slate">
           {selectedItem.label}
         </div>
-        <div className="py-5">{content}</div>
+        <div className="py-3">{content}</div>
       </div>
     </div>
   );
