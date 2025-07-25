@@ -14,7 +14,6 @@ export function useAccountBookDataManager(
 ) {
   const [dashboardDatas, setDashboardDatas] = useState([]);
   const [calendarDatas, setCalendarDatas] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const handleError = useErrorHandler();
 
   // 대시보드 데이터 로드
@@ -43,7 +42,6 @@ export function useAccountBookDataManager(
       setDashboardDatas(data);
     } catch (error) {
       handleError(error);
-    } finally {
     }
   }
 
@@ -56,7 +54,6 @@ export function useAccountBookDataManager(
       setCalendarDatas(data);
     } catch (error) {
       handleError(error);
-    } finally {
     }
   }
 
@@ -65,6 +62,5 @@ export function useAccountBookDataManager(
     calendarDatas,
     loadDashboardDatas,
     loadCalendarDatas,
-    isLoading,
   };
 }
