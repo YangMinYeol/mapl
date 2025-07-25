@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../model/userModel");
 
-// 상수화
 const SALT_ROUNDS = 10;
 const TOKEN_EXPIRATION = "1h";
 const REFRESH_TOKEN_EXPIRATION = "1d";

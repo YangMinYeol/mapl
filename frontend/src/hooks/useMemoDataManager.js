@@ -6,7 +6,6 @@ import { useErrorHandler } from "./useErrorHandler";
 export function useMemoDataManager(user, selectedDate, currentDate) {
   const [dashboardDatas, setDashboardDatas] = useState([]);
   const [calendarDatas, setCalendarDatas] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const handleError = useErrorHandler();
 
   // 대시보드 데이터 로드
@@ -27,7 +26,6 @@ export function useMemoDataManager(user, selectedDate, currentDate) {
       setDashboardDatas(data);
     } catch (error) {
       handleError(error);
-    } finally {
     }
   }
 
@@ -40,7 +38,6 @@ export function useMemoDataManager(user, selectedDate, currentDate) {
       setCalendarDatas(data);
     } catch (error) {
       handleError(error);
-    } finally {
     }
   }
 
@@ -49,6 +46,5 @@ export function useMemoDataManager(user, selectedDate, currentDate) {
     calendarDatas,
     loadDashboardDatas,
     loadCalendarDatas,
-    isLoading,
   };
 }

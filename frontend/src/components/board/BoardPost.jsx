@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BOARD_TYPE, POST_FORM_MODE } from "../../constants/board";
 import { REPORT_TYPE_MAP } from "../../constants/report";
 import SelectArrow from "../common/SelectArrow";
+import Button from "../common/Button";
 import { deleteReport, submitReport } from "../../api/report";
 import { deleteNotice, submitNotice } from "../../api/notice";
 import { deleteFreePost, submitFreePost } from "../../api/free";
@@ -372,23 +373,6 @@ function FormRow({ label, children, isTextarea = false }) {
       </label>
       <div className="w-full">{children}</div>
     </div>
-  );
-}
-
-function Button({ text, onClick, color = "default" }) {
-  const base =
-    "h-14 mx-3 text-base font-semibold rounded w-36 hover:cursor-pointer";
-  const colorClass =
-    color === "green"
-      ? "text-white bg-deep-green"
-      : color === "red"
-      ? "text-white bg-red-500"
-      : "text-[#666] border border-mapl-slate";
-
-  return (
-    <button className={`${base} ${colorClass}`} onClick={onClick} type="button">
-      {text}
-    </button>
   );
 }
 
