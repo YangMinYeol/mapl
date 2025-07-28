@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BOARD_TYPE, POST_FORM_MODE } from "../../constants/board";
 import { REPORT_TYPE_MAP } from "../../constants/report";
 import SelectArrow from "../common/SelectArrow";
-import Button from "../common/Button";
+import ColorButton from "../common/ColorButton";
 import { deleteReport, submitReport } from "../../api/report";
 import { deleteNotice, submitNotice } from "../../api/notice";
 import { deleteFreePost, submitFreePost } from "../../api/free";
@@ -335,25 +335,33 @@ export default function BoardPost({
           <>
             {isWriter ? (
               <>
-                <Button text="편집" onClick={handleEditPost} color="green" />
-                <Button text="목록" onClick={onClose} />
-                <Button text="삭제" onClick={handleDeletePost} color="red" />
+                <ColorButton
+                  text="편집"
+                  onClick={handleEditPost}
+                  color="green"
+                />
+                <ColorButton text="목록" onClick={onClose} />
+                <ColorButton
+                  text="삭제"
+                  onClick={handleDeletePost}
+                  color="red"
+                />
               </>
             ) : (
-              <Button text="목록" onClick={onClose} />
+              <ColorButton text="목록" onClick={onClose} />
             )}
           </>
         )}
         {formMode === POST_FORM_MODE.CREATE && (
           <>
-            <Button text="목록" onClick={onClose} />
-            <Button text="등록" onClick={handleSubmitPost} color="green" />
+            <ColorButton text="목록" onClick={onClose} />
+            <ColorButton text="등록" onClick={handleSubmitPost} color="green" />
           </>
         )}
         {formMode === POST_FORM_MODE.EDIT && (
           <>
-            <Button text="취소" onClick={handleEditCancelPost} />
-            <Button text="등록" onClick={handleSubmitPost} color="green" />
+            <ColorButton text="취소" onClick={handleEditCancelPost} />
+            <ColorButton text="등록" onClick={handleSubmitPost} color="green" />
           </>
         )}
       </div>

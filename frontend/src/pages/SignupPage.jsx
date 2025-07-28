@@ -1,10 +1,10 @@
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import Logo from "../components/common/Logo";
 import FloatingLabelInput from "../components/common/FloatingLabelInput";
-import Button from "../components/common/Button";
 import { useReducer, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
+import { PrimaryButton } from "../components/common/PrimaryButton";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -253,7 +253,7 @@ export default function SignupPage() {
                   width="w-64"
                   ref={(el) => (inputRefs.current[key] = el)}
                 />
-                <Button
+                <PrimaryButton
                   text="우편번호 찾기"
                   width="w-32"
                   onClick={handleAddressSearch}
@@ -277,7 +277,7 @@ export default function SignupPage() {
             );
           }
         })}
-        <Button text="회원가입" onClick={handleSubmit} />
+        <PrimaryButton text="회원가입" onClick={handleSubmit} />
       </section>
     </div>
   );
