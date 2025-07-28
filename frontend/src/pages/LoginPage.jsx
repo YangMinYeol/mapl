@@ -4,6 +4,7 @@ import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Logo from "../components/common/Logo";
 import { useModal } from "../context/ModalContext";
 import { UserContext } from "../context/UserContext";
+import { PrimaryButton } from "../components/common/PrimaryButton";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -113,26 +114,14 @@ export default function LoginPage() {
           <Link to="/test">비밀번호 찾기</Link>
         </div>
         <div className="flex flex-col">
-          <Button text="로그인" onClick={handleLogin} />
-          <Button text="회원가입" onClick={handleSignup} isOutline={true} />
+          <PrimaryButton text="로그인" onClick={handleLogin} />
+          <PrimaryButton
+            text="회원가입"
+            onClick={handleSignup}
+            isOutline={true}
+          />
         </div>
       </section>
     </div>
-  );
-}
-
-function Button({ text, onClick, width = "w-96", isOutline = false }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        h-12 mb-2 font-semibold border cursor-pointer ${width}  ${
-        isOutline
-          ? "border-deep-green text-deep-green bg-white"
-          : "text-white bg-deep-green"
-      }`}
-    >
-      {text}
-    </button>
   );
 }

@@ -1,4 +1,4 @@
-export default function Button({ text, onClick, color = "default" }) {
+export default function ColorButton({ text, onClick, color = "default" }) {
   const base =
     "h-14 mx-3 text-base font-semibold rounded w-36 hover:cursor-pointer";
   const colorClass =
