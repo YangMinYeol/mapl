@@ -1,34 +1,12 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import AccountBookCategory from "../components/account-book-category/AccountBookCategory";
 import { PasswordCheck } from "../components/user/PasswordCheck";
 import UserSidebar from "../components/user/UserSidebar";
-import { MENU_KEYS, getSelectedItemByPath } from "../util/userUtil";
+import { getSelectedItemByPath } from "../util/userUtil";
 
 export default function UserPage() {
   const pathName = useLocation().pathname;
-  const navigate = useNavigate();
-
-  const initialItem = getSelectedItemByPath(pathName);
-  const [selectedItem, setSelectedItem] = useState(initialItem);
-
-  useEffect(() => {
-    const item = getSelectedItemByPath(pathName);
-    setSelectedItem(item);
-    if (item.to !== pathName) {
-      navigate(item.to, { replace: true });
-    }
-  }, [pathName, navigate]);
-
-  let content;
-  switch (selectedItem.key) {
-    case MENU_KEYS.PROFILE:
-      content = <PasswordCheck />;
-      break;
-    case MENU_KEYS.ACCOUNTBOOK_CATEGORY:
-      content = <AccountBookCategory />;
-      break;
-  }
+  const selectedItem = getSelectedItemByPath(pathName);
 
   return (
     <div className="flex min-[900px] h-[900px] justify-center py-10 gap-5">
@@ -42,7 +20,15 @@ export default function UserPage() {
         <div className="pt-5 pb-3 text-2xl border-b border-mapl-slate">
           {selectedItem.label}
         </div>
-        <div className="py-3">{content}</div>
+        <div className="py-3">
+          <Routes>
+            <Route path="profile" element={<PasswordCheck />} />
+            <Route
+              path="accountbook/category"
+              element={<AccountBookCategory />}
+            />
+          </Routes>
+        </div>
       </div>
     </div>
   );
