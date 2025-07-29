@@ -18,4 +18,7 @@ router.post("/refresh", userController.refreshToken);
 // 비밀번호 검증
 router.post("/verify-password", verifyToken, userController.verifyPassword);
 
+// 회원탈퇴
+router.delete("/me", verifyToken, userController.deleteAccount);
+
 module.exports = router;

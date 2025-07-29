@@ -75,4 +75,15 @@ async function createUser(userData) {
   }
 }
 
-module.exports = { getUserInfo, checkUserIdOrEmailExist, createUser };
+// 회원삭제
+async function deleteAccount(id) {
+  const query = `DELETE FROM users WHERE id= $1`;
+  return db.query(query, [id]);
+}
+
+module.exports = {
+  getUserInfo,
+  checkUserIdOrEmailExist,
+  createUser,
+  deleteAccount,
+};

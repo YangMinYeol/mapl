@@ -1,10 +1,15 @@
 import { useContext, useState } from "react";
 import { useDaumPostcodePopup } from "react-daum-postcode";
+import { useNavigate } from "react-router-dom";
+import { deleteAccount } from "../../api/user";
+import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
+import { LoginExpiredError } from "../../util/error";
 import ColorButton from "../common/ColorButton";
 
 export function ProfileEdit() {
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
   const open = useDaumPostcodePopup();
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -12,6 +17,7 @@ export function ProfileEdit() {
   const [zipcode, setZipcode] = useState(user.zipcode);
   const [address, setAddress] = useState(user.address);
   const [detailAddress, setDetailAddress] = useState(user.detailAddress);
+  const { openModal, openConfirm } = useModal();
 
   // 우편번호 찾기
   const handleAddressSearch = () => {
@@ -22,6 +28,31 @@ export function ProfileEdit() {
       },
       onError: (error) => console.error("Daum Postcode API Error:", error),
     });
+  };
+
+  // 회원 탈퇴
+  const handleDeleteAccount = () => {
+    openConfirm(
+      "정말로 삭제하시겠습니까?",
+      "삭제한 계정에 대한 정보는 복구할 수 없습니다. 해당 계정으로 입력한 모든 정보가 삭제됩니다.",
+      async () => {
+        try {
+          await deleteAccount();
+          // 로그아웃
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("user");
+          setUser(null);
+          navigate("/login");
+        } catch (error) {
+          if (error instanceof LoginExpiredError) {
+            handleLoginExpired(error.message);
+          } else {
+            console.error("회원 탈퇴 오류:", error);
+            openModal(error.message);
+          }
+        }
+      }
+    );
   };
 
   return (
@@ -114,7 +145,7 @@ export function ProfileEdit() {
 
       <div className="border-t border-mapl-slate"></div>
       <div className="flex justify-center pt-5 pb-3">
-        <ColorButton text="탈퇴하기" onClick />
+        <ColorButton text="탈퇴하기" onClick={handleDeleteAccount} />
         <ColorButton text="회원정보수정" color="green" onClick />
       </div>
     </div>
