@@ -1,15 +1,17 @@
 import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { verifyPassword } from "../../api/user";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
-import Button from "../common/Button";
+import ColorButton from "../common/ColorButton";
 
 export function PasswordCheck() {
   const { user } = useContext(UserContext);
   const [password, setPassword] = useState("");
   const { openModal } = useModal();
   const handleError = useErrorHandler();
+  const navigate = useNavigate();
 
   const handlePasswordCheck = async () => {
     if (!password) {
@@ -18,6 +20,7 @@ export function PasswordCheck() {
     }
     try {
       await verifyPassword(password);
+      navigate("/user/profile/edit");
     } catch (error) {
       handleError(error);
     }
@@ -58,7 +61,11 @@ export function PasswordCheck() {
         </div>
         <div className="border-t border-mapl-slate"></div>
         <div className="flex justify-center pt-5 pb-3">
-          <Button text="확인" color="green" onClick={handlePasswordCheck} />
+          <ColorButton
+            text="확인"
+            color="green"
+            onClick={handlePasswordCheck}
+          />
         </div>
       </div>
     </div>

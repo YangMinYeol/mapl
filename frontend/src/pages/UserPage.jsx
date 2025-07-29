@@ -3,6 +3,7 @@ import AccountBookCategory from "../components/account-book-category/AccountBook
 import { PasswordCheck } from "../components/user/PasswordCheck";
 import UserSidebar from "../components/user/UserSidebar";
 import { getSelectedItemByPath } from "../util/userUtil";
+import { ProfileEdit } from "../components/user/ProfileEdit";
 
 export default function UserPage() {
   const pathName = useLocation().pathname;
@@ -23,6 +24,7 @@ export default function UserPage() {
         <div className="py-3">
           <Routes>
             <Route path="profile" element={<PasswordCheck />} />
+            <Route path="profile/edit" element={<ProfileEdit />} />
             <Route
               path="accountbook/category"
               element={<AccountBookCategory />}
