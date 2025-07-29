@@ -152,10 +152,25 @@ async function verifyPassword(req, res) {
   }
 }
 
+// 회원탈퇴
+async function deleteAccount(req, res) {
+  try {
+    const id = req.user.id;
+    await userModel.deleteAccount(id);
+    return res.status(200).json({ message: "회원탈퇴가 완료되었습니다." });
+  } catch (error) {
+    console.error("회원탈퇴 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "회원탈퇴중 문제가 발생하였습니다." });
+  }
+}
+
 module.exports = {
   login,
   checkUserIdOrEmail,
   signup,
   refreshToken,
   verifyPassword,
+  deleteAccount,
 };

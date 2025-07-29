@@ -5,13 +5,16 @@ const API_URL = import.meta.env.VITE_API_URL;
 // 비밀번호 검증
 export async function verifyPassword(password) {
   try {
-    const response = await fetchWithAuth(`${API_URL}/api/user/verify-password`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ password }),
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/api/user/verify-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      }
+    );
 
     const data = await response.json();
 
@@ -21,5 +24,16 @@ export async function verifyPassword(password) {
     return data;
   } catch (error) {
     throw error;
+  }
+}
+
+// 회원 탈퇴
+export async function deleteAccount() {
+  const response = await fetchWithAuth(`${API_URL}/api/user/me`, {
+    method: "DELETE",
+  });
+  await response.json();
+  if (!response.ok) {
+    throw new Error(data.message);
   }
 }
