@@ -25,11 +25,14 @@ async function login(req, res) {
       return res.status(401).json({ message: LOGIN_FAIL_MESSAGE });
     }
 
-    const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: TOKEN_EXPIRATION,
-    });
+    const accessToken = jwt.sign(
+      { id: user.id, userId: user.userId },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: TOKEN_EXPIRATION }
+    );
+
     const refreshToken = jwt.sign(
-      { userId },
+      { id: user.id, userId: user.userId },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRATION }
     );
