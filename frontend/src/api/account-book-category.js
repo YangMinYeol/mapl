@@ -75,7 +75,6 @@ export async function updateAccountBookCategory(categoryItem) {
 // 가계부 카테고리 삭제
 export async function deleteAccountBookCategory(userId, type, categoryId) {
   try {
-    console.log("accessToken:", localStorage.getItem("accessToken"));
     // URL 생성 및 쿼리 파라미터 추가
     const url = new URL(`${API_URL}/api/account-book-category/${categoryId}`);
     url.searchParams.append("userId", userId);
