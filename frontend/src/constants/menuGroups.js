@@ -1,4 +1,4 @@
-import { MENU_KEYS } from "../util/userUtil";
+import { MENU_KEYS } from "./menuKeys";
 
 export const menuGroups = [
   {
