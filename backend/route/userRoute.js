@@ -21,4 +21,7 @@ router.post("/verify-password", verifyToken, userController.verifyPassword);
 // 회원탈퇴
 router.delete("/me", verifyToken, userController.deleteAccount);
 
+// 회원 정보 수정
+router.patch("/me", verifyToken, userController.updateProfile);
+
 module.exports = router;

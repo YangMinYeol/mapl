@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import { useNavigate } from "react-router-dom";
-import { deleteAccount } from "../../api/user";
+import { checkDuplicate, deleteAccount, updateProfile } from "../../api/user";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { LoginExpiredError } from "../../util/error";
+import { EMAIL_REGEX, PASSWORD_REGEX } from "../../util/userUtil";
 import ColorButton from "../common/ColorButton";
 
 export function ProfileEdit() {
@@ -19,6 +20,14 @@ export function ProfileEdit() {
   const [detailAddress, setDetailAddress] = useState(user.detailAddress);
   const { openModal, openConfirm } = useModal();
 
+  // 로그아웃
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/login");
+  };
+
   // 우편번호 찾기
   const handleAddressSearch = () => {
     open({
@@ -30,6 +39,78 @@ export function ProfileEdit() {
     });
   };
 
+  const validateProfileFields = () => {
+    const errors = {};
+
+    if (!password) {
+      errors.password = "비밀번호를 입력해주세요.";
+    } else if (!PASSWORD_REGEX.test(password)) {
+      errors.password =
+        "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~15자여야 합니다.";
+    }
+
+    if (!passwordConfirm) {
+      errors.passwordConfirm = "비밀번호 확인을 입력해주세요.";
+    } else if (password !== passwordConfirm) {
+      errors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
+    }
+
+    if (!email) {
+      errors.email = "이메일을 입력해주세요.";
+    } else if (!EMAIL_REGEX.test(email)) {
+      errors.email = "올바른 이메일 형식이 아닙니다.";
+    }
+
+    if (!zipcode) {
+      errors.zipcode = "우편번호를 입력해주세요.";
+    }
+
+    if (!address) {
+      errors.address = "주소를 입력해주세요.";
+    }
+
+    return errors;
+  };
+
+  // 회원정보수정
+  const handleProfileUpdate = async () => {
+    try {
+      const errors = validateProfileFields();
+
+      if (Object.keys(errors).length > 0) {
+        const firstKey = Object.keys(errors)[0];
+        openModal(errors[firstKey]);
+        return;
+      }
+
+      const { isDuplicate, error } = await checkDuplicate("email", email);
+      if (error) {
+        openModal(error);
+        return;
+      }
+
+      if (isDuplicate) {
+        openModal("이미 사용 중인 이메일입니다.");
+        return;
+      }
+
+      await updateProfile({ password, email, zipcode, address, detailAddress });
+
+      openModal(
+        "회원정보 수정이 완료되었습니다!",
+        logout,
+        "다시 로그인 해주세요."
+      );
+    } catch (error) {
+      if (error instanceof LoginExpiredError) {
+        handleLoginExpired(error.message);
+      } else {
+        console.error("회원 정보 수정 오류:", error);
+        openModal(error.message);
+      }
+    }
+  };
+
   // 회원 탈퇴
   const handleDeleteAccount = () => {
     openConfirm(
@@ -38,11 +119,7 @@ export function ProfileEdit() {
       async () => {
         try {
           await deleteAccount();
-          // 로그아웃
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("user");
-          setUser(null);
-          navigate("/login");
+          logout();
         } catch (error) {
           if (error instanceof LoginExpiredError) {
             handleLoginExpired(error.message);
@@ -146,7 +223,11 @@ export function ProfileEdit() {
       <div className="border-t border-mapl-slate"></div>
       <div className="flex justify-center pt-5 pb-3">
         <ColorButton text="탈퇴하기" onClick={handleDeleteAccount} />
-        <ColorButton text="회원정보수정" color="green" onClick />
+        <ColorButton
+          text="회원정보수정"
+          color="green"
+          onClick={handleProfileUpdate}
+        />
       </div>
     </div>
   );
