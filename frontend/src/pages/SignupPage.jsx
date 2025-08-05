@@ -1,10 +1,17 @@
-import { useDaumPostcodePopup } from "react-daum-postcode";
-import Logo from "../components/common/Logo";
-import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import { useReducer, useRef } from "react";
+import { useDaumPostcodePopup } from "react-daum-postcode";
 import { useNavigate } from "react-router-dom";
-import { useModal } from "../context/ModalContext";
+import { checkDuplicate } from "../api/user";
+import FloatingLabelInput from "../components/common/FloatingLabelInput";
+import Logo from "../components/common/Logo";
 import { PrimaryButton } from "../components/common/PrimaryButton";
+import { useModal } from "../context/ModalContext";
+import {
+  EMAIL_REGEX,
+  NAME_REGEX,
+  PASSWORD_REGEX,
+  USERID_REGEX,
+} from "../util/userUtil";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -90,27 +97,15 @@ export default function SignupPage() {
   function validateField(key, value) {
     switch (key) {
       case "name":
-        return value.length >= 2 &&
-          value.length <= 5 &&
-          /^[가-힣]+$/.test(value)
-          ? ""
-          : errorMessages.name;
+        return NAME_REGEX.test(value) ? "" : errorMessages.name;
       case "userId":
-        return /^[a-zA-Z][a-z0-9A-Z]{7,15}$/.test(value)
-          ? ""
-          : errorMessages.userId;
+        return USERID_REGEX.test(value) ? "" : errorMessages.userId;
       case "password":
-        return /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=.-])(?=.*[0-9]).{8,15}$/.test(
-          value
-        )
-          ? ""
-          : errorMessages.password;
+        return PASSWORD_REGEX.test(value) ? "" : errorMessages.password;
       case "passwordConfirm":
         return value === state.password ? "" : errorMessages.passwordConfirm;
       case "email":
-        return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
-          ? ""
-          : errorMessages.email;
+        return EMAIL_REGEX.test(value) ? "" : errorMessages.email;
       default:
         return "";
     }
@@ -159,31 +154,6 @@ export default function SignupPage() {
 
     // 회원가입 요청
     sendSignupData();
-  }
-
-  // 아이디/이메일 중복 확인
-  async function checkDuplicate(field, value) {
-    try {
-      const response = await fetch(`${API_URL}/api/user/check-duplicate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ field, value }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
-      return { isDuplicate: data.isDuplicate, error: null };
-    } catch (error) {
-      console.error(`${field} 중복 확인 에러: `, error);
-      return {
-        isDuplicate: null,
-        error: error.message,
-      };
-    }
   }
 
   // 회원가입 요청
