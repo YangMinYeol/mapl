@@ -166,6 +166,31 @@ async function deleteAccount(req, res) {
   }
 }
 
+// 회원 정보 수정
+async function updateProfile(req, res) {
+  try {
+    const id = req.user.id;
+    const { password, email, zipcode, address, detailAddress } = req.body;
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    await userModel.updateProfile({
+      id,
+      password: hashedPassword,
+      email,
+      zipcode,
+      address,
+      detailAddress,
+    });
+    return res
+      .status(200)
+      .json({ message: "회원 정보 수정이 완료되었습니다." });
+  } catch (error) {
+    console.error("회원 정보 수정 오류:", error);
+    return res
+      .status(500)
+      .json({ message: "회원 정보 수정중 문제가 발생하였습니다." });
+  }
+}
+
 module.exports = {
   login,
   checkUserIdOrEmail,
@@ -173,4 +198,5 @@ module.exports = {
   refreshToken,
   verifyPassword,
   deleteAccount,
+  updateProfile,
 };

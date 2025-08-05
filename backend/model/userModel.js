@@ -81,9 +81,34 @@ async function deleteAccount(id) {
   return db.query(query, [id]);
 }
 
+// 회원 정보 수정
+async function updateProfile({
+  id,
+  password,
+  email,
+  zipcode,
+  address,
+  detailAddress,
+}) {
+  const query = `
+    UPDATE users
+    SET password = $1, email = $2, zipcode = $3, address = $4, detail_address = $5
+    WHERE id = $6
+  `;
+  return db.query(query, [
+    password,
+    email,
+    zipcode,
+    address,
+    detailAddress,
+    id,
+  ]);
+}
+
 module.exports = {
   getUserInfo,
   checkUserIdOrEmailExist,
   createUser,
   deleteAccount,
+  updateProfile,
 };
