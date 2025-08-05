@@ -43,6 +43,7 @@ export default function BoardPost({
   const isReadOnly = formMode === POST_FORM_MODE.VIEW;
   const isWriter = user?.id === post?.userId;
   const isReport = boardType === BOARD_TYPE.REPORT;
+  const isAdmin = user.role === "admin";
 
   useEffect(() => {
     if (post) {
@@ -173,7 +174,7 @@ export default function BoardPost({
       "한번 삭제한 게시글은 되돌릴 수 없습니다.",
       async () => {
         try {
-          if (!isWriter) return;
+          if (!isWriter && !isAdmin) return;
           const id = post.id;
           switch (boardType) {
             case BOARD_TYPE.NOTICE:
@@ -333,22 +334,12 @@ export default function BoardPost({
       <div className="flex items-center justify-center mt-7">
         {formMode === POST_FORM_MODE.VIEW && (
           <>
-            {isWriter ? (
-              <>
-                <ColorButton
-                  text="편집"
-                  onClick={handleEditPost}
-                  color="green"
-                />
-                <ColorButton text="목록" onClick={onClose} />
-                <ColorButton
-                  text="삭제"
-                  onClick={handleDeletePost}
-                  color="red"
-                />
-              </>
-            ) : (
-              <ColorButton text="목록" onClick={onClose} />
+            {isWriter && (
+              <ColorButton text="편집" onClick={handleEditPost} color="green" />
+            )}
+            <ColorButton text="목록" onClick={onClose} />
+            {(isWriter || isAdmin) && (
+              <ColorButton text="삭제" onClick={handleDeletePost} color="red" />
             )}
           </>
         )}
