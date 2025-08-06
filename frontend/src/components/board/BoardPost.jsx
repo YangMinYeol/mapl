@@ -1,13 +1,13 @@
 import { faCamera, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
-import { BOARD_TYPE, POST_FORM_MODE } from "../../constants/board";
-import { REPORT_TYPE_MAP } from "../../constants/report";
-import SelectArrow from "../common/SelectArrow";
-import ColorButton from "../common/ColorButton";
-import { deleteReport, submitReport } from "../../api/report";
-import { deleteNotice, submitNotice } from "../../api/notice";
 import { deleteFreePost, submitFreePost } from "../../api/free";
+import { deleteNotice, submitNotice } from "../../api/notice";
+import { deleteReport, submitReport, updateStatus } from "../../api/report";
+import { BOARD_TYPE, POST_FORM_MODE } from "../../constants/board";
+import { REPORT_TYPE_MAP, STATUS_LABEL_MAP } from "../../constants/report";
+import ColorButton from "../common/ColorButton";
+import SelectArrow from "../common/SelectArrow";
 
 const MAX_TITLE_LENGTH = 50;
 const MAX_LENGTH = 2000;
@@ -34,6 +34,7 @@ export default function BoardPost({
 }) {
   const fileInputRef = useRef(null);
   const typeRef = useRef(null);
+  const statusRef = useRef(null);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -51,8 +52,15 @@ export default function BoardPost({
       setContent(post.content || "");
       setServerImages(post.images || []);
       setNewImages([]);
+
       if (isReport) {
-        typeRef.current.value = post.type || Object.keys(REPORT_TYPE_MAP)[0];
+        if (typeRef.current) {
+          typeRef.current.value = post.type || Object.keys(REPORT_TYPE_MAP)[0];
+        }
+        if (statusRef.current) {
+          statusRef.current.value =
+            post.status || Object.keys(STATUS_LABEL_MAP)[0];
+        }
       }
     }
   }, [formMode, post]);
@@ -206,15 +214,54 @@ export default function BoardPost({
     setFormMode(POST_FORM_MODE.VIEW);
   }
 
+  // 게시글 진행상태 변경
+  const handleUpdateStatus = async () => {
+    try {
+      await updateStatus(post.id, statusRef.current.value);
+      openModal("변경이 완료되었습니다.");
+    } catch (error) {
+      openModal(error.message || "게시글 진행상태 변경중 오류");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex flex-col p-5">
       <div className="border-b border-mapl-slate">
+        {isReport && isReadOnly && isAdmin && (
+          <FormRow label="진행상태">
+            <div className="flex w-full gap-2">
+              <div className="relative flex-grow h-12">
+                <select
+                  ref={statusRef}
+                  className="w-full h-full px-3 pr-10 border rounded appearance-none border-mapl-slate hover:cursor-pointer"
+                  defaultValue={Object.keys(STATUS_LABEL_MAP)[0]}
+                >
+                  {Object.entries(STATUS_LABEL_MAP).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <SelectArrow />
+              </div>
+              <div className="h-12">
+                <button
+                  className="h-full py-3 text-white rounded cursor-pointer px-7 bg-deep-green"
+                  onClick={handleUpdateStatus}
+                >
+                  변경
+                </button>
+              </div>
+            </div>
+          </FormRow>
+        )}
         {isReport && (
           <FormRow label="유형">
-            <div className="relative w-full">
+            <div className="relative w-full h-12">
               <select
                 ref={typeRef}
-                className="w-full h-full p-3 pr-10 border rounded appearance-none border-mapl-slate hover:cursor-pointer"
+                className="w-full h-full px-3 pr-10 border rounded appearance-none border-mapl-slate hover:cursor-pointer"
                 defaultValue={Object.keys(REPORT_TYPE_MAP)[0]}
                 disabled={isReadOnly}
               >
@@ -232,7 +279,7 @@ export default function BoardPost({
         <FormRow label="제목">
           <input
             type="text"
-            className="w-full p-3 border rounded border-mapl-slate"
+            className="w-full h-12 px-3 border rounded border-mapl-slate"
             placeholder="제목을 입력해주세요."
             value={title}
             onChange={(e) => {
@@ -246,7 +293,7 @@ export default function BoardPost({
 
         <FormRow label="내용" isTextarea>
           <textarea
-            className="w-full p-3 border rounded border-mapl-slate h-[450px] resize-none"
+            className="w-full p-3 border rounded border-mapl-slate h-[400px] resize-none"
             placeholder="내용을 자세히 작성할수록 개선에 도움이됩니다."
             value={content}
             onChange={(e) => {
