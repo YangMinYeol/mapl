@@ -27,4 +27,7 @@ router.put(
   reportController.updateReport
 );
 
+// 진행 상태 변경
+router.patch("/:id/status", verifyToken, reportController.updateStatus);
+
 module.exports = router;

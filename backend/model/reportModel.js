@@ -148,9 +148,20 @@ async function updateReportWithImages({
   }
 }
 
+// 진행 상태 변경
+async function updateStatus(id, status) {
+  const query = `
+    UPDATE report
+    SET status = $1
+    WHERE id = $2
+  `;
+  return db.query(query, [status, id]);
+}
+
 module.exports = {
   getReportBoardList,
   addReportWithImages,
   deleteReport,
   updateReportWithImages,
+  updateStatus,
 };

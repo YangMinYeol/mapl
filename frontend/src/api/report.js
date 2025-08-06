@@ -87,3 +87,18 @@ export async function deleteReport(id) {
     throw error;
   }
 }
+
+// 진행상태 변경
+export async function updateStatus(id, newStatus) {
+  const response = await fetchWithAuth(`${API_URL}/api/report/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ status: newStatus }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message);
+  }
+}

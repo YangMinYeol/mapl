@@ -87,9 +87,25 @@ async function updateReport(req, res) {
   }
 }
 
+// 진행 상태 변경
+async function updateStatus(req, res) {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    await reportModel.updateStatus(id, status);
+
+    res.json({ message: "진행상태가 변경되었습니다." });
+  } catch (error) {
+    console.error("진행상태 변경 중 오류:", error);
+    res.status(500).json({ message: "진행상태 변경 중 오류 발생" });
+  }
+}
+
 module.exports = {
   getReportBoardList,
   addReport,
   deleteReport,
   updateReport,
+  updateStatus,
 };
