@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { checkDuplicate, deleteAccount, updateProfile } from "../../api/user";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
-import { LoginExpiredError } from "../../util/error";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { EMAIL_REGEX, PASSWORD_REGEX } from "../../util/userUtil";
 import ColorButton from "../common/ColorButton";
 
@@ -19,6 +19,7 @@ export function ProfileEdit() {
   const [address, setAddress] = useState(user.address);
   const [detailAddress, setDetailAddress] = useState(user.detailAddress);
   const { openModal, openConfirm } = useModal();
+  const handleError = useErrorHandler();
 
   // 로그아웃
   const logout = () => {
@@ -102,12 +103,7 @@ export function ProfileEdit() {
         "다시 로그인 해주세요."
       );
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("회원 정보 수정 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   };
 
@@ -121,12 +117,7 @@ export function ProfileEdit() {
           await deleteAccount();
           logout();
         } catch (error) {
-          if (error instanceof LoginExpiredError) {
-            handleLoginExpired(error.message);
-          } else {
-            console.error("회원 탈퇴 오류:", error);
-            openModal(error.message);
-          }
+          handleError(error);
         }
       }
     );

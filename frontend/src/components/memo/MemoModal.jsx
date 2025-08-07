@@ -6,7 +6,7 @@ import Modal from "react-modal";
 import { addMemo, deleteLinkedMemos, updateMemo } from "../../api/memo";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
-import { useLoginExpiredHandler } from "../../hooks/useLoginExpiredHandler";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { useMemoModalForm } from "../../hooks/useMemoModalForm";
 import { baseModalStyle } from "../../styles/modalStyle";
 import { formatDateYYYYMMDD } from "../../util/dateUtil";
@@ -62,7 +62,7 @@ export default function MemoModal({
     setSelectedColor,
   } = useMemoModalForm({ mode, memo, selectedDate, isOpen, selectedPeriod });
 
-  const handleLoginExpired = useLoginExpiredHandler();
+  const handleError = useErrorHandler();
   const { openModal } = useModal();
   const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,9 +126,7 @@ export default function MemoModal({
             ? null
             : formatDateYYYYMMDD(startDate),
         endDate:
-          selectedPeriod.name === "Other"
-            ? null
-            : formatDateYYYYMMDD(endDate),
+          selectedPeriod.name === "Other" ? null : formatDateYYYYMMDD(endDate),
         startTime: allDay ? null : startTime,
         endTime: allDay ? null : endTime,
         allDay,
@@ -150,12 +148,7 @@ export default function MemoModal({
       await deleteLinkedMemos(memo.link);
       await reloadAndClose();
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 삭제 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 
@@ -384,7 +377,9 @@ export default function MemoModal({
           <div className="flex items-center gap-2">
             <button
               className={`${footerButtonClass} bg-deep-green text-white`}
-              onClick={mode === MEMO_MODAL_MODE.CREATE ? addDetailMemo : editMemo}
+              onClick={
+                mode === MEMO_MODAL_MODE.CREATE ? addDetailMemo : editMemo
+              }
             >
               {mode === MEMO_MODAL_MODE.CREATE ? "추가" : "수정"}
             </button>

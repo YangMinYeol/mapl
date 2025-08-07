@@ -6,6 +6,7 @@ import { deleteNotice, submitNotice } from "../../api/notice";
 import { deleteReport, submitReport, updateStatus } from "../../api/report";
 import { BOARD_TYPE, POST_FORM_MODE } from "../../constants/board";
 import { REPORT_TYPE_MAP, STATUS_LABEL_MAP } from "../../constants/report";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 import ColorButton from "../common/ColorButton";
 import SelectArrow from "../common/SelectArrow";
 
@@ -45,6 +46,7 @@ export default function BoardPost({
   const isWriter = user?.id === post?.userId;
   const isReport = boardType === BOARD_TYPE.REPORT;
   const isAdmin = user.role === "admin";
+  const handleError = useErrorHandler();
 
   useEffect(() => {
     if (post) {
@@ -170,8 +172,7 @@ export default function BoardPost({
       }
       onClose();
     } catch (error) {
-      openModal(error.message || "등록 중 오류가 발생했습니다.");
-      console.error(error);
+      handleError(error);
     }
   }
 
@@ -197,8 +198,7 @@ export default function BoardPost({
           }
           onClose();
         } catch (error) {
-          openModal(error.message || "삭제 중 오류가 발생했습니다.");
-          console.error(error);
+          handleError(error);
         }
       }
     );
@@ -220,8 +220,7 @@ export default function BoardPost({
       await updateStatus(post.id, statusRef.current.value);
       openModal("변경이 완료되었습니다.");
     } catch (error) {
-      openModal(error.message || "게시글 진행상태 변경중 오류");
-      console.error(error);
+      handleError(error);
     }
   };
 
