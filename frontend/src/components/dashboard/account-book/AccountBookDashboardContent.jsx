@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import { deleteAccountBookItem } from "../../../api/account-book";
 import { useModal } from "../../../context/ModalContext";
 import { UserContext } from "../../../context/UserContext";
+import { useErrorHandler } from "../../../hooks/useErrorHandler";
 import useAssetStore from "../../../stores/useAssetStore";
 import {
   ACCOUNTBOOK_MODAL_MODE,
@@ -15,7 +16,6 @@ import {
   groupByWeekday,
   groupByYear,
 } from "../../../util/dateUtil";
-import { LoginExpiredError } from "../../../util/error";
 import { DEFAULT_COLOR } from "../../../util/util";
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
@@ -61,7 +61,8 @@ export default function AccountBookDashboardContent({
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false);
   const [dashboardModalMode, setDashboardModalMode] = useState("");
   const [selectedItem, setselectedItem] = useState(null);
-  const { openModal, openConfirm } = useModal();
+  const { openConfirm } = useModal();
+  const handleError = useErrorHandler();
 
   const asset = useAssetStore((state) => state.asset);
   const updateAsset = useAssetStore((state) => state.updateAsset);
@@ -123,12 +124,7 @@ export default function AccountBookDashboardContent({
         }
       );
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("가계부 항목 삭제 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 

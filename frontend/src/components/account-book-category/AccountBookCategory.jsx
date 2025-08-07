@@ -17,10 +17,10 @@ import {
   ACCOUNT_TYPE,
   ACCOUNT_TYPE_FILTER,
 } from "../../util/accountBookUtil";
-import { LoginExpiredError } from "../../util/error";
 import Tab from "../common/Tab";
 import { AccountBookCategoryItem } from "./AccountBookCategoryItem";
 import AccountBookCategoryModal from "./AccountBookCategoryModal";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 
 const tabOptions = ACCOUNT_TYPE_FILTER.filter(
   (item) => item.value !== ACCOUNT_TYPE.ALL
@@ -34,7 +34,7 @@ export default function AccountBookCategory() {
   const { categories, disabled, reload } = useAccountBookCategory(selectedTab);
   const [categoryItems, setCategoryItems] = useState([]);
   const [activeId, setActiveId] = useState(null);
-  const { openModal } = useModal();
+  const handleError = useErrorHandler();
 
   useEffect(() => {
     setCategoryItems(categories.map((c) => c.id));
@@ -74,12 +74,7 @@ export default function AccountBookCategory() {
       }
       setActiveId(null);
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("가계부 카테고리 정렬 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   };
 

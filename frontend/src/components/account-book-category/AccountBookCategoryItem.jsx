@@ -2,12 +2,12 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useContext } from "react";
 import { deleteAccountBookCategory } from "../../api/account-book-category";
 import { useModal } from "../../context/ModalContext";
-import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
-import { LoginExpiredError } from "../../util/error";
-import { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
+import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
 
 export function AccountBookCategoryItem({
   category,
@@ -18,8 +18,9 @@ export function AccountBookCategoryItem({
   dragOverlay = false,
 }) {
   const { id, name, colorHex, type, isDefault } = category;
-  const { openModal, openConfirm } = useModal();
+  const { openConfirm } = useModal();
   const { user } = useContext(UserContext);
+  const handleError = useErrorHandler();
 
   // 드래그 중 오버레이 아이템일 때는 useSortable 훅 사용하지 않음
   if (dragOverlay) {
@@ -56,12 +57,7 @@ export function AccountBookCategoryItem({
           await deleteAccountBookCategory(user.id, type, id);
           reload();
         } catch (error) {
-          if (error instanceof LoginExpiredError) {
-            handleLoginExpired(error.message);
-          } else {
-            console.error("가계부 카테고리 항목 삭제 오류:", error);
-            openModal(error.message);
-          }
+          handleError(error);
         }
       }
     );
