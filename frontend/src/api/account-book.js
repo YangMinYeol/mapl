@@ -27,84 +27,72 @@ export async function fetchDashboardAccountBooks(userId, startDate, endDate) {
 
 // 달력 표기용 가계부 목록 불러오기
 export async function fetchCalendarAccountBooks(userId, currentDate) {
-  try {
-    const response = await fetchWithAuth(
-      `${API_URL}/api/account-book/calendar?userId=${userId}&currentDate=${currentDate}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    return await response.json();
-  } catch (error) {
-    throw error;
+  const response = await fetchWithAuth(
+    `${API_URL}/api/account-book/calendar?userId=${userId}&currentDate=${currentDate}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  const data = response.json();
+  if (!response.ok) {
+    throw new Error(data.message);
   }
+  return data;
 }
 
 // 가계부 데이터 추가
 export async function addAccountBookItem(accountItem) {
-  try {
-    const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(accountItem),
-    });
+  const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(accountItem),
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
-    return data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(data.message);
   }
+  return data;
 }
 
 // 가계부 항목 수정
 export async function editAccountBookItem(accountItem) {
-  try {
-    const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(accountItem),
-    });
+  const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(accountItem),
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
-    return data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(data.message);
   }
+  return data;
 }
 
 // 가계부 항목 삭제
 export async function deleteAccountBookItem(itemId) {
-  try {
-    const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ itemId }),
-    });
+  const response = await fetchWithAuth(`${API_URL}/api/account-book/`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ itemId }),
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
-    return data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(data.message);
   }
+  return data;
 }
