@@ -58,6 +58,7 @@ export default function BoardPage() {
 
   // 탭 클릭
   function handleTabClick(tab) {
+    if (activeBoard === tab.key) return;
     setActiveBoard(tab.key);
     setScreenMode(BOARD_SCREEN_MODE.LIST);
     setFormMode(null);
