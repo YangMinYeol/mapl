@@ -5,7 +5,7 @@ import Logo from "../common/Logo";
 import UserDropDown from "./UserDropDown";
 
 export default function Header() {
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, logout } = useContext(UserContext);
 
   // 유저 정보 및 토큰 확인
   useEffect(() => {
@@ -17,20 +17,13 @@ export default function Header() {
     }
   }, [setUser]);
 
-  // 로그아웃
-  function handleLogout() {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    setUser(null);
-  }
-
   return (
     <header className="py-3 bg-deep-green min-w-[910px]">
       <div className="flex justify-between px-8">
         <Logo height="h-12" useWhiteLogo={true} />
         <div className="flex items-center text-white">
           {user ? (
-            <UserDropDown user={user} handleLogout={handleLogout} />
+            <UserDropDown user={user} handleLogout={logout} />
           ) : (
             <Link to="/login" className="hover:underline">
               로그인
