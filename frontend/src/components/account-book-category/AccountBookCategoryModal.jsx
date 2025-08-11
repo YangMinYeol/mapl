@@ -98,10 +98,10 @@ export default function AccountBookCategoryModal({
   };
 
   // 모달 닫기
-  const closeModal = () => {
+  function closeModal() {
     resetForm();
     onClose();
-  };
+  }
 
   const content = (
     <div>
