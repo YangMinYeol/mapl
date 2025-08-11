@@ -4,17 +4,16 @@ import {
   deleteAccountBookItem,
   editAccountBookItem,
 } from "../../api/account-book";
-import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useAccountBookModalForm } from "../../hooks/useAccountBookModalForm";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 import useAssetStore from "../../stores/useAssetStore";
 import {
   ACCOUNTBOOK_MODAL_MODE,
-  ACCOUNT_TYPE_FILTER,
   ACCOUNT_TYPE,
+  ACCOUNT_TYPE_FILTER,
 } from "../../util/accountBookUtil";
 import { combineDateAndTime } from "../../util/dateUtil";
-import { LoginExpiredError } from "../../util/error";
 import Tab from "../common/Tab";
 import ModalLayout from "../common/modal/ModalLayout";
 import DateTimeInput from "../memo/DateTimeInput";
@@ -71,11 +70,11 @@ export default function AccountBookModal({
     setIsLoading,
   } = useAccountBookModalForm({ mode, selectedDate, isOpen, item });
 
-  const { openModal } = useModal();
   const { user } = useContext(UserContext);
 
   const asset = useAssetStore((state) => state.asset);
   const updateAsset = useAssetStore((state) => state.updateAsset);
+  const handleError = useErrorHandler(closeModal);
 
   // 메모 목록 최신화 및 모달 닫기
   async function reloadAndClose() {
@@ -123,7 +122,7 @@ export default function AccountBookModal({
       updateAsset(userId);
       reloadAndClose();
     } catch (error) {
-      handleAccountBookError(error, "add");
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +145,7 @@ export default function AccountBookModal({
       updateAsset(user.id);
       reloadAndClose();
     } catch (error) {
-      handleAccountBookError(error, "edit");
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
     }
@@ -159,27 +158,7 @@ export default function AccountBookModal({
       updateAsset(user.id);
       reloadAndClose();
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("가계부 항목 삭제 오류:", error);
-        openModal(error.message);
-      }
-    }
-  }
-
-  // 가계부 항목 에러 처리
-  function handleAccountBookError(error, context) {
-    if (error instanceof LoginExpiredError) {
-      closeModal();
-      handleLoginExpired(error.message);
-    } else {
-      console.error(
-        `가계부 항목 ${context === "add" ? "추가" : "편집"} 오류:`,
-        error
-      );
-      closeModal();
-      openModal(error.message);
+      handleError(error);
     }
   }
 

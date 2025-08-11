@@ -90,7 +90,6 @@ export default function BoardPage() {
             <NoticeBoard
               currentPage={currentPage}
               setTotalCount={setTotalCount}
-              openModal={openModal}
               onPostClick={handleViewPost}
             />
           );
@@ -99,7 +98,6 @@ export default function BoardPage() {
             <FreeBoard
               currentPage={currentPage}
               setTotalCount={setTotalCount}
-              openModal={openModal}
               onPostClick={handleViewPost}
             />
           );
@@ -108,7 +106,6 @@ export default function BoardPage() {
             <ReportBoard
               currentPage={currentPage}
               setTotalCount={setTotalCount}
-              openModal={openModal}
               onPostClick={handleViewPost}
             />
           );

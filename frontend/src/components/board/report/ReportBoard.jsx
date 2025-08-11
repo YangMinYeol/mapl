@@ -3,14 +3,15 @@ import { fetchReportBoard } from "../../../api/report";
 import { REPORT_TYPE_MAP, STATUS_LABEL_MAP } from "../../../constants/report";
 import { formatDateYYYYMMDD } from "../../../util/dateUtil";
 import BoardList from "../BoardList";
+import { useErrorHandler } from "../../../hooks/useErrorHandler";
 
 export default function ReportBoard({
   currentPage,
   setTotalCount,
-  openModal,
   onPostClick,
 }) {
   const [posts, setPosts] = useState([]);
+  const handleError = useErrorHandler();
 
   useEffect(() => {
     async function loadPost() {
@@ -19,8 +20,7 @@ export default function ReportBoard({
         setPosts(data.posts);
         setTotalCount(data.totalCount);
       } catch (error) {
-        console.error(error);
-        openModal(error.message);
+        handleError(error);
       }
     }
 

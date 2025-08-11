@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import BoardList from "../BoardList";
 import { fetchFreeBoard } from "../../../api/free";
+import { useErrorHandler } from "../../../hooks/useErrorHandler";
 import { formatDateYYYYMMDD } from "../../../util/dateUtil";
+import BoardList from "../BoardList";
 
-export default function FreeBoard({currentPage, setTotalCount, openModal, onPostClick}) {
+export default function FreeBoard({ currentPage, setTotalCount, onPostClick }) {
   const [posts, setPosts] = useState([]);
+  const handleError = useErrorHandler();
 
   useEffect(() => {
     async function loadPost() {
@@ -13,8 +15,7 @@ export default function FreeBoard({currentPage, setTotalCount, openModal, onPost
         setPosts(data.posts);
         setTotalCount(data.totalCount);
       } catch (error) {
-        console.error(error);
-        openModal(error.message);
+        handleError(error);
       }
     }
     loadPost();

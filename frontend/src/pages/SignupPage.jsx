@@ -6,6 +6,7 @@ import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Logo from "../components/common/Logo";
 import { PrimaryButton } from "../components/common/PrimaryButton";
 import { useModal } from "../context/ModalContext";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 import {
   EMAIL_REGEX,
   NAME_REGEX,
@@ -63,6 +64,7 @@ export default function SignupPage() {
   const inputRefs = useRef({});
   const open = useDaumPostcodePopup();
   const navigate = useNavigate();
+  const handleError = useErrorHandler();
 
   function handleChange(e) {
     const { id, value } = e.target;
@@ -183,8 +185,7 @@ export default function SignupPage() {
         navigate("/login");
       }, 1000);
     } catch (error) {
-      console.error("회원가입 오류:", error);
-      openModal(error.message);
+      handleError(error);
     }
   }
 

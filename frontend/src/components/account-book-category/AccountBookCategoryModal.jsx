@@ -5,8 +5,8 @@ import {
 } from "../../api/account-book-category";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
-import { LoginExpiredError } from "../../util/error";
 import { DEFAULT_COLOR } from "../../util/util";
 import Palette from "../common/Palette";
 import ModalLayout from "../common/modal/ModalLayout";
@@ -28,8 +28,8 @@ export default function AccountBookCategoryModal({
   const [categoryName, setCategoryName] = useState("");
   const [isCategoryNameError, setIsCategoryNameError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { openModal } = useModal();
   const isEdit = mode === ACCOUNTBOOK_MODAL_MODE.EDIT;
+  const handleError = useErrorHandler(closeModal);
 
   useEffect(() => {
     if (isEdit && selectedItem) {
@@ -54,7 +54,7 @@ export default function AccountBookCategoryModal({
         colorId: selectedColorId,
       });
     } catch (error) {
-      handleAccountBookCategoryError(error, ACCOUNTBOOK_MODAL_MODE.ADD);
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
       onSuccess();
@@ -76,28 +76,11 @@ export default function AccountBookCategoryModal({
         colorId: selectedColorId,
       });
     } catch (error) {
-      handleAccountBookCategoryError(error, ACCOUNTBOOK_MODAL_MODE.EDIT);
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
       onSuccess();
       closeModal();
-    }
-  }
-
-  // 가계부 항목 에러 처리
-  function handleAccountBookCategoryError(error, context) {
-    if (error instanceof LoginExpiredError) {
-      closeModal();
-      handleLoginExpired(error.message);
-    } else {
-      console.error(
-        `가계부 카테고리 ${
-          context === ACCOUNTBOOK_MODAL_MODE.ADD ? "추가" : "수정"
-        } 오류:`,
-        error
-      );
-      closeModal();
-      openModal(error.message);
     }
   }
 

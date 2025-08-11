@@ -3,9 +3,9 @@ import Calendar from "../components/calendar/Calendar";
 import Loading from "../components/common/Loading";
 import Dashboard from "../components/dashboard/Dashboard";
 import { TABS } from "../constants/tab";
-import { useModal } from "../context/ModalContext";
 import { UserContext } from "../context/UserContext";
 import { useAccountBookDataManager } from "../hooks/useAccountBookDataManager";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 import { useMemoDataManager } from "../hooks/useMemoDataManager";
 import { formatDateYYYYMMDD } from "../util/dateUtil";
 
@@ -24,8 +24,8 @@ export default function MainPage() {
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(formatDateYYYYMMDD(today));
 
-  const { openModal } = useModal();
   const { user } = useContext(UserContext);
+  const handleError = useErrorHandler();
 
   // 각 탭별 데이터 매니저
   const memo = useMemoDataManager(user, selectedDate, currentDate);
@@ -62,8 +62,7 @@ export default function MainPage() {
       setPeriods(data);
       setSelectedPeriod(data[0]);
     } catch (error) {
-      console.error("기한 목록 오류:", error);
-      openModal(error.message);
+      handleError(error);
     }
   }
 

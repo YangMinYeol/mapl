@@ -1,13 +1,13 @@
-import Modal from "react-modal";
-import { baseModalStyle } from "../../styles/modalStyle";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
+import Modal from "react-modal";
 import { fetchLinkedMemos, unlinkMemo } from "../../api/memo";
-import { useModal } from "../../context/ModalContext";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
+import { baseModalStyle } from "../../styles/modalStyle";
+import { sortMemos } from "../../util/memoUtil";
 import Loading from "../common/Loading";
 import LinkMemoItem from "./LinkMemoItem";
-import { sortMemos } from "../../util/memoUtil";
 
 export default function LinkModal({
   isOpen,
@@ -17,8 +17,8 @@ export default function LinkModal({
   loadCalendarDatas,
 }) {
   const [linkedMemos, setLinkedMemos] = useState([]);
-  const { openModal } = useModal();
   const [isLoading, setIsLoading] = useState(false);
+  const handleError = useErrorHandler(closeModal);
 
   useEffect(() => {
     Modal.setAppElement("#root");
@@ -41,9 +41,7 @@ export default function LinkModal({
       const sortedLinkedMemos = sortMemos(linkedMemos, false);
       setLinkedMemos(sortedLinkedMemos);
     } catch (error) {
-      console.error("링크된 메모 목록 불러오기 오류:", error);
-      closeModal();
-      openModal(error.message);
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
     }
@@ -59,9 +57,7 @@ export default function LinkModal({
       loadCalendarDatas();
       closeModal();
     } catch (error) {
-      console.error("메모 링크 해제 오류:", error);
-      closeModal();
-      openModal(error.message);
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
     }

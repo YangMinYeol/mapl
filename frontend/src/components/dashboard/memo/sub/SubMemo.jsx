@@ -2,9 +2,8 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { addMemo } from "../../../../api/memo";
 import { useModal } from "../../../../context/ModalContext";
 import { UserContext } from "../../../../context/UserContext";
-import { useLoginExpiredHandler } from "../../../../hooks/useLoginExpiredHandler";
+import { useErrorHandler } from "../../../../hooks/useErrorHandler";
 import { setDateByPeriod } from "../../../../util/dateUtil";
-import { LoginExpiredError } from "../../../../util/error";
 import SubMemoContent from "./SubMemoContent";
 import SubMemoHeader from "./SubMemoHeader";
 
@@ -19,7 +18,7 @@ export default function SubMemo({
 }) {
   const { openConfirm, openModal } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
-  const handleLoginExpired = useLoginExpiredHandler();
+  const handleError = useErrorHandler();
   const { user } = useContext(UserContext);
   const isBucketList = useMemo(
     () => selectedPeriod.name === "Other",
@@ -98,12 +97,7 @@ export default function SubMemo({
       await loadCalendarDatas();
       setCheckedIds([]);
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 추가 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 
@@ -135,12 +129,7 @@ export default function SubMemo({
       await loadCalendarDatas();
       setCheckedIds([]);
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 추가 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 

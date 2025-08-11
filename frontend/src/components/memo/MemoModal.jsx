@@ -4,13 +4,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useState } from "react";
 import Modal from "react-modal";
 import { addMemo, deleteLinkedMemos, updateMemo } from "../../api/memo";
-import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { useMemoModalForm } from "../../hooks/useMemoModalForm";
 import { baseModalStyle } from "../../styles/modalStyle";
 import { formatDateYYYYMMDD } from "../../util/dateUtil";
-import { LoginExpiredError } from "../../util/error";
 import { MEMO_MODAL_MODE } from "../../util/memoUtil";
 import Loading from "../common/Loading";
 import Palette from "../common/Palette";
@@ -62,8 +60,7 @@ export default function MemoModal({
     setSelectedColor,
   } = useMemoModalForm({ mode, memo, selectedDate, isOpen, selectedPeriod });
 
-  const handleError = useErrorHandler();
-  const { openModal } = useModal();
+  const handleError = useErrorHandler(closeModal);
   const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -105,7 +102,7 @@ export default function MemoModal({
       ]);
       await reloadAndClose();
     } catch (error) {
-      handleMemoError(error, "add");
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +133,7 @@ export default function MemoModal({
       });
       await reloadAndClose();
     } catch (error) {
-      handleMemoError(error, "edit");
+      handleError(error, { closeCurrentModal: true });
     } finally {
       setIsLoading(false);
     }
@@ -168,18 +165,6 @@ export default function MemoModal({
     await loadDashboardDatas();
     await loadCalendarDatas();
     closeModal();
-  }
-
-  // 메모 에러 처리
-  function handleMemoError(error, context) {
-    if (error instanceof LoginExpiredError) {
-      closeModal();
-      handleLoginExpired(error.message);
-    } else {
-      console.error(`메모 ${context === "add" ? "추가" : "편집"} 오류:`, error);
-      closeModal();
-      openModal(error.message);
-    }
   }
 
   // 시작,끝 날짜 시간 유효성 검사
