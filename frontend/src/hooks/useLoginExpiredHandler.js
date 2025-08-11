@@ -1,18 +1,16 @@
-import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import { UserContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
+import { UserContext } from "../context/UserContext";
 
 export function useLoginExpiredHandler() {
-  const { setUser } = useContext(UserContext);
+  const { logout } = useContext(UserContext);
   const { openModal } = useModal();
   const navigate = useNavigate();
 
   const handleLoginExpired = (message) => {
     openModal(message, () => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-      setUser(null);
+      logout();
       navigate("/login");
     });
   };

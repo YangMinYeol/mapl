@@ -49,6 +49,13 @@ export default function App() {
   const updateAsset = useAssetStore((state) => state.updateAsset);
   const resetAsset = useAssetStore((state) => state.resetAsset);
 
+  // 로그아웃
+  function logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    setUser(null);
+  }
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -69,7 +76,7 @@ export default function App() {
   }, [user]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, logout }}>
       <ModalProvider>
         <ColorProvider>
           <BrowserRouter>

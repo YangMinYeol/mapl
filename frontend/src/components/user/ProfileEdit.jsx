@@ -9,7 +9,7 @@ import { EMAIL_REGEX, PASSWORD_REGEX } from "../../util/userUtil";
 import ColorButton from "../common/ColorButton";
 
 export function ProfileEdit() {
-  const { user, setUser } = useContext(UserContext);
+  const { user, logout } = useContext(UserContext);
   const navigate = useNavigate();
   const open = useDaumPostcodePopup();
   const [password, setPassword] = useState("");
@@ -22,10 +22,8 @@ export function ProfileEdit() {
   const handleError = useErrorHandler();
 
   // 로그아웃
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    setUser(null);
+  const handleLogout = () => {
+    logout();
     navigate("/login");
   };
 
@@ -99,7 +97,7 @@ export function ProfileEdit() {
 
       openModal(
         "회원정보 수정이 완료되었습니다!",
-        logout,
+        handleLogout,
         "다시 로그인 해주세요."
       );
     } catch (error) {
@@ -115,7 +113,7 @@ export function ProfileEdit() {
       async () => {
         try {
           await deleteAccount();
-          logout();
+          handleLogout();
         } catch (error) {
           handleError(error);
         }
