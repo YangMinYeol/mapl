@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import BoardList from "../BoardList";
 import { fetchNoticeBoard } from "../../../api/notice";
 import { formatDateYYYYMMDD } from "../../../util/dateUtil";
+import { useErrorHandler } from "../../../hooks/useErrorHandler";
 
 export default function NoticeBoard({
   currentPage,
   setTotalCount,
-  openModal,
   onPostClick,
 }) {
   const [posts, setPosts] = useState([]);
+  const handleError = useErrorHandler();
 
   useEffect(() => {
     async function loadPost() {
@@ -18,8 +19,7 @@ export default function NoticeBoard({
         setPosts(data.posts);
         setTotalCount(data.totalCount);
       } catch (error) {
-        console.error(error);
-        openModal(error.message);
+        handleError(error);
       }
     }
     loadPost();

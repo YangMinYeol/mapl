@@ -5,6 +5,7 @@ import Logo from "../components/common/Logo";
 import { useModal } from "../context/ModalContext";
 import { UserContext } from "../context/UserContext";
 import { PrimaryButton } from "../components/common/PrimaryButton";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const { openModal } = useModal();
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
+  const handleError = useErrorHandler();
 
   // 로그인 상태 확인
   useEffect(() => {
@@ -68,8 +70,7 @@ export default function LoginPage() {
 
       navigate("/");
     } catch (error) {
-      console.error("로그인 요청 중 에러 발생", error);
-      openModal(error.message);
+      handleError(error);
     }
   }
 

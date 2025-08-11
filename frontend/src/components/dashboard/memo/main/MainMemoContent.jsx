@@ -14,13 +14,12 @@ import {
 import { LINKED_MEMO } from "../../../../constants/messages";
 import { useModal } from "../../../../context/ModalContext";
 import { UserContext } from "../../../../context/UserContext";
-import { useLoginExpiredHandler } from "../../../../hooks/useLoginExpiredHandler";
+import { useErrorHandler } from "../../../../hooks/useErrorHandler";
 import {
   formatDateYYYYMMDD,
   postponeDates,
   setDateByPeriod,
 } from "../../../../util/dateUtil";
-import { LoginExpiredError } from "../../../../util/error";
 import {
   MEMO_MODAL_MODE,
   dailyMemoObjectToArray,
@@ -45,10 +44,10 @@ export default function MainMemoContent({
   const [memoText, setMemoText] = useState("");
   const { openModal, openConfirm } = useModal();
   const { user } = useContext(UserContext);
-  const handleLoginExpired = useLoginExpiredHandler();
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memoModalMode, setMemoModalMode] = useState(MEMO_MODAL_MODE.CREATE);
   const [selectedMemo, setSelectedMemo] = useState(null);
+  const handleError = useErrorHandler();
 
   // 메모 정렬
   function sortDashboardMemos(memos) {
@@ -94,12 +93,7 @@ export default function MainMemoContent({
       await loadCalendarDatas();
       setMemoText("");
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 추가 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 
@@ -122,12 +116,7 @@ export default function MainMemoContent({
         await loadCalendarDatas();
       }
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 삭제 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 
@@ -171,12 +160,7 @@ export default function MainMemoContent({
       await loadDashboardDatas();
       await loadCalendarDatas();
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 미루기 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 
@@ -197,12 +181,7 @@ export default function MainMemoContent({
         await loadDashboardDatas();
       }
     } catch (error) {
-      if (error instanceof LoginExpiredError) {
-        handleLoginExpired(error.message);
-      } else {
-        console.error("메모 상태 변경 오류:", error);
-        openModal(error.message);
-      }
+      handleError(error);
     }
   }
 
