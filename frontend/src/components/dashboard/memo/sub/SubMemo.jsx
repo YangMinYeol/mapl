@@ -6,6 +6,7 @@ import { useErrorHandler } from "../../../../hooks/useErrorHandler";
 import { setDateByPeriod } from "../../../../util/dateUtil";
 import SubMemoContent from "./SubMemoContent";
 import SubMemoHeader from "./SubMemoHeader";
+import { useNavigate } from "react-router-dom";
 
 export default function SubMemo({
   dashboardDatas,
@@ -16,7 +17,8 @@ export default function SubMemo({
   loadCalendarDatas,
   openLinkModal,
 }) {
-  const { openConfirm, openModal } = useModal();
+  const navigate = useNavigate();
+  const { openConfirm } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
   const handleError = useErrorHandler();
   const { user } = useContext(UserContext);
@@ -59,6 +61,11 @@ export default function SubMemo({
 
   // Sub메모 추가
   function handleAddMemo() {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
     if (checkedIds.length === 0) {
       return;
     }

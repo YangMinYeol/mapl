@@ -20,6 +20,7 @@ import { DEFAULT_COLOR } from "../../../util/util";
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
 import { AccountBookPieChart } from "./AccountBookPieChart";
+import { useNavigate } from "react-router-dom";
 
 const { INCOME, EXPENSE, ALL } = ACCOUNT_TYPE;
 
@@ -63,6 +64,7 @@ export default function AccountBookDashboardContent({
   const [selectedItem, setselectedItem] = useState(null);
   const { openConfirm } = useModal();
   const handleError = useErrorHandler();
+  const navigate = useNavigate();
 
   const asset = useAssetStore((state) => state.asset);
   const updateAsset = useAssetStore((state) => state.updateAsset);
@@ -90,6 +92,14 @@ export default function AccountBookDashboardContent({
   } else if (selectedPeriod.name === "Other") {
     groupedDatas = groupByYear(sortedDatas);
   }
+
+  const handleAddAccountBook = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    openAccountBookModal();
+  };
 
   // 모달 열기
   function openAccountBookModal() {
@@ -191,7 +201,7 @@ export default function AccountBookDashboardContent({
         </div>
         <button
           className="cursor-pointer w-1/16"
-          onClick={openAccountBookModal}
+          onClick={handleAddAccountBook}
         >
           <FontAwesomeIcon
             color={DEFAULT_COLOR}
