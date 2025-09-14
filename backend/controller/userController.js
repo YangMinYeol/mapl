@@ -111,7 +111,7 @@ async function refreshToken(req, res) {
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
     const newAccessToken = jwt.sign(
-      { userId: decoded.userId },
+      { id: decoded.id, userId: decoded.userId },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: TOKEN_EXPIRATION }
     );
