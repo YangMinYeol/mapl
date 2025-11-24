@@ -20,6 +20,15 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+// Health check 엔드포인트 (UptimeRobot용)
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    message: "Server is running",
+  });
+});
+
 // 라우트 설정
 app.use("/api/user", userRoute);
 app.use("/api/memo", memoRoute);
