@@ -1,5 +1,6 @@
-const serviceKey =
-  "gcSB7wjLBiKLao1SHJGEz5bHUk50NBpzcBld6q16tyeBjyVV4WsuuQt9LPfQ7V%2B0CoJ1HMGe5qAcI%2Bfz3Bw0zw%3D%3D";
+const serviceKey = encodeURIComponent(
+  "e53dac4cf55906c81f985bc5f872e85a58a3ec72e26cf24d5c0cd79248150b95"
+);
 
 // 단일 월 공휴일 요청
 export const fetchHolidays = async (year, month) => {
