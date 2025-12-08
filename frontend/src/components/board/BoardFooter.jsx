@@ -21,14 +21,14 @@ export default function BoardFooter({
         onPageChange={(page) => onPageChange(page)}
       />
       {/* 글작성 */}
-      {canWrite && (
+      {canWrite ? (
         <button
           className="h-8 text-white rounded w-18 bg-deep-green hover:cursor-pointer"
           onClick={onWriteClick}
         >
           글쓰기
         </button>
-      )}
+      ): <div className="w-18"></div>}
     </div>
   );
 }
