@@ -110,9 +110,9 @@ export default function LoginPage() {
           onKeyUp={handleEnterKey}
         />
         <div className="flex justify-end my-3">
-          <Link to="/test">아이디 찾기</Link>
+          {/* <Link to="/test">아이디 찾기</Link>
           <span className="mx-2"> | </span>
-          <Link to="/test">비밀번호 찾기</Link>
+          <Link to="/test">비밀번호 찾기</Link> */}
         </div>
         <div className="flex flex-col">
           <PrimaryButton text="로그인" onClick={handleLogin} />
