@@ -9,18 +9,18 @@ import { REPORT_TYPE_MAP, STATUS_LABEL_MAP } from "../../constants/report";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import ColorButton from "../common/ColorButton";
 import SelectArrow from "../common/SelectArrow";
+import Loading from "../common/Loading";
 
 const MAX_TITLE_LENGTH = 50;
 const MAX_LENGTH = 2000;
 const MAX_IMAGES = 6;
-const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp"];
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
   "image/gif",
   "image/webp",
   "image/bmp",
-  "image/svg+xml",
 ];
 
 export default function BoardPost({
@@ -41,6 +41,7 @@ export default function BoardPost({
   const [content, setContent] = useState("");
   const [serverImages, setServerImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isReadOnly = formMode === POST_FORM_MODE.VIEW;
   const isWriter = user?.id === post?.userId;
@@ -132,6 +133,7 @@ export default function BoardPost({
   // 게시글 등록
   async function handleSubmitPost() {
     if (!validateInputs()) return;
+    setIsLoading(true);
     try {
       switch (boardType) {
         case BOARD_TYPE.NOTICE:
@@ -173,6 +175,8 @@ export default function BoardPost({
       onClose();
     } catch (error) {
       handleError(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -182,6 +186,7 @@ export default function BoardPost({
       "정말로 삭제하시겠습니까?",
       "한번 삭제한 게시글은 되돌릴 수 없습니다.",
       async () => {
+        setIsLoading(true);
         try {
           if (!isWriter && !isAdmin) return;
           const id = post.id;
@@ -199,6 +204,8 @@ export default function BoardPost({
           onClose();
         } catch (error) {
           handleError(error);
+        } finally {
+          setIsLoading(false);
         }
       }
     );
@@ -366,7 +373,7 @@ export default function BoardPost({
               )}
             <input
               type="file"
-              accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
+              accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
               ref={fileInputRef}
               className="hidden"
               onChange={handleImageSelect}
@@ -402,6 +409,7 @@ export default function BoardPost({
           </>
         )}
       </div>
+      {isLoading && <Loading />}
     </div>
   );
 }
@@ -422,7 +430,9 @@ function FormRow({ label, children, isTextarea = false }) {
 }
 
 function ImageViewer({ src, alt, readOnly }) {
-  const fullSrc = `${import.meta.env.VITE_API_URL}${src}`;
+  const fullSrc = src.startsWith("http")
+    ? src
+    : `${import.meta.env.VITE_API_URL}${src}`;
 
   return readOnly ? (
     <a href={fullSrc} target="_blank" rel="noopener noreferrer">

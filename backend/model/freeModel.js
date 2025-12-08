@@ -1,4 +1,5 @@
 const db = require("../db");
+const { cloudinary } = require("../middleware/multer");
 
 function mapFreeRow(row) {
   return {
@@ -30,7 +31,6 @@ async function getFreeBoardList(page) {
   const result = await db.query(query, [page]);
   const posts = result.rows.map(mapFreeRow);
 
-  // 전체 게시글 수 가져오기
   const countQuery = `SELECT COUNT(*) FROM free`;
   const countResult = await db.query(countQuery);
   const totalCount = parseInt(countResult.rows[0].count, 10);
@@ -62,7 +62,7 @@ async function addFreePostWithImages({ userId, title, content, images }) {
         VALUES ${images.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `;
 
-      const imagePaths = images.map((file) => `/uploads/${file.filename}`);
+      const imagePaths = images.map((file) => file.path);
       await client.query(insertImageQuery, [freeId, ...imagePaths]);
     }
 
@@ -76,7 +76,12 @@ async function addFreePostWithImages({ userId, title, content, images }) {
   }
 }
 
-// 자유게시판 수정
+// Cloudinary public_id 추출 함수
+function getPublicIdFromUrl(url) {
+  const match = url.match(/\/([^\/]+\/[^\/]+)\.\w+$/);
+  return match ? match[1] : null;
+}
+
 async function updateFreePostWithImages({
   freeId,
   userId,
@@ -105,7 +110,21 @@ async function updateFreePostWithImages({
     const imagesToDelete = existingImages.filter(
       (url) => !serverImages.includes(url)
     );
+
+    // Cloudinary에서 이미지 삭제
     if (imagesToDelete.length > 0) {
+      for (const imageUrl of imagesToDelete) {
+        const publicId = getPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Cloudinary 이미지 삭제 성공: ${publicId}`);
+          } catch (error) {
+            console.error(`Cloudinary 이미지 삭제 실패: ${publicId}`, error);
+          }
+        }
+      }
+
       const deleteQuery = `
         DELETE FROM free_image 
         WHERE free_id = $1 AND url = ANY($2)
@@ -119,9 +138,7 @@ async function updateFreePostWithImages({
         INSERT INTO free_image (free_id, url)
         VALUES ${newImages.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `;
-      const newImagePaths = newImages.map(
-        (file) => `/uploads/${file.filename}`
-      );
+      const newImagePaths = newImages.map((file) => file.path);
       await client.query(insertQuery, [freeId, ...newImagePaths]);
     }
 
@@ -136,8 +153,39 @@ async function updateFreePostWithImages({
 
 // 자유게시판 게시글 삭제
 async function deleteFreePost(freeId) {
-  const query = `DELETE FROM free WHERE id = $1`;
-  return db.query(query, [freeId]);
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 삭제 전 이미지 목록 조회
+    const selectQuery = `SELECT url FROM free_image WHERE free_id = $1`;
+    const result = await client.query(selectQuery, [freeId]);
+    const imageUrls = result.rows.map((row) => row.url);
+
+    // Cloudinary에서 이미지 삭제
+    for (const imageUrl of imageUrls) {
+      const publicId = getPublicIdFromUrl(imageUrl);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+          console.log(`Cloudinary 이미지 삭제 성공: ${publicId}`);
+        } catch (error) {
+          console.error(`Cloudinary 이미지 삭제 실패: ${publicId}`, error);
+        }
+      }
+    }
+
+    // DB에서 게시글 삭제 (CASCADE로 이미지도 삭제)
+    const deleteQuery = `DELETE FROM free WHERE id = $1`;
+    await client.query(deleteQuery, [freeId]);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 module.exports = {

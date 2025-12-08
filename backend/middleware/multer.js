@@ -1,30 +1,36 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-// 저장할 폴더 경로 설정
-const uploadDir = path.join(process.cwd(), "uploads");
+// Cloudinary 설정
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// 폴더가 없다면 생성
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// multer 저장소 설정
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
+// Cloudinary 저장소 설정
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "uploads",
+    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp", "bmp"],
+    transformation: [
+      { width: 1920, height: 1080, crop: "limit" },
+      { quality: "auto" },
+    ],
   },
 });
 
-// 파일 필터 (선택 사항: 이미지 파일만 받기)
+// 파일 필터 (이미지만 허용)
 function fileFilter(req, file, cb) {
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/bmp",
+  ];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
@@ -32,11 +38,11 @@ function fileFilter(req, file, cb) {
   }
 }
 
-// 업로드 미들웨어 생성 (최대 6개 이미지 업로드 예시)
+// 업로드 미들웨어 생성
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB 제한 (필요시 변경)
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-module.exports = { upload };
+module.exports = { upload, cloudinary };

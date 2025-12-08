@@ -1,4 +1,5 @@
 const db = require("../db");
+const { cloudinary } = require("../middleware/multer");
 
 function mapReportRow(row) {
   return {
@@ -63,7 +64,7 @@ async function addReportWithImages({ userId, type, title, content, images }) {
         VALUES ${images.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `;
 
-      const imagePaths = images.map((file) => `/uploads/${file.filename}`);
+      const imagePaths = images.map((file) => file.path);
       await client.query(insertImageQuery, [reportId, ...imagePaths]);
     }
 
@@ -77,10 +78,10 @@ async function addReportWithImages({ userId, type, title, content, images }) {
   }
 }
 
-// 오류 보고 게시글 삭제
-async function deleteReport(reportId) {
-  const query = `DELETE FROM report WHERE id = $1`;
-  return db.query(query, [reportId]);
+// Cloudinary public_id 추출 함수
+function getPublicIdFromUrl(url) {
+  const match = url.match(/\/([^\/]+\/[^\/]+)\.\w+$/);
+  return match ? match[1] : null;
 }
 
 // 게시글 수정
@@ -119,7 +120,21 @@ async function updateReportWithImages({
     const imagesToDelete = existingImages.filter(
       (url) => !serverImages.includes(url)
     );
+
+    // Cloudinary에서 이미지 삭제
     if (imagesToDelete.length > 0) {
+      for (const imageUrl of imagesToDelete) {
+        const publicId = getPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Cloudinary 이미지 삭제 성공: ${publicId}`);
+          } catch (error) {
+            console.error(`Cloudinary 이미지 삭제 실패: ${publicId}`, error);
+          }
+        }
+      }
+
       const deleteQuery = `
         DELETE FROM report_image 
         WHERE report_id = $1 AND url = ANY($2)
@@ -133,11 +148,45 @@ async function updateReportWithImages({
         INSERT INTO report_image (report_id, url)
         VALUES ${newImages.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `;
-      const newImagePaths = newImages.map(
-        (file) => `/uploads/${file.filename}`
-      );
+      const newImagePaths = newImages.map((file) => file.path);
       await client.query(insertQuery, [reportId, ...newImagePaths]);
     }
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function deleteReport(reportId) {
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 삭제 전 이미지 목록 조회
+    const selectQuery = `SELECT url FROM report_image WHERE report_id = $1`;
+    const result = await client.query(selectQuery, [reportId]);
+    const imageUrls = result.rows.map((row) => row.url);
+
+    // Cloudinary에서 이미지 삭제
+    for (const imageUrl of imageUrls) {
+      const publicId = getPublicIdFromUrl(imageUrl);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+          console.log(`Cloudinary 이미지 삭제 성공: ${publicId}`);
+        } catch (error) {
+          console.error(`Cloudinary 이미지 삭제 실패: ${publicId}`, error);
+        }
+      }
+    }
+
+    // DB에서 게시글 삭제 (CASCADE로 이미지도 삭제)
+    const deleteQuery = `DELETE FROM report WHERE id = $1`;
+    await client.query(deleteQuery, [reportId]);
 
     await client.query("COMMIT");
   } catch (error) {

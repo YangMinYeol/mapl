@@ -1,4 +1,5 @@
 const db = require("../db");
+const { cloudinary } = require("../middleware/multer");
 
 function mapNoticeRow(row) {
   return {
@@ -62,7 +63,7 @@ async function addNoticeWithImages({ userId, title, content, images }) {
         VALUES ${images.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `;
 
-      const imagePaths = images.map((file) => `/uploads/${file.filename}`);
+      const imagePaths = images.map((file) => file.path);
       await client.query(insertImageQuery, [noticeId, ...imagePaths]);
     }
 
@@ -76,7 +77,12 @@ async function addNoticeWithImages({ userId, title, content, images }) {
   }
 }
 
-// 공지사항 수정
+// Cloudinary public_id 추출 함수
+function getPublicIdFromUrl(url) {
+  const match = url.match(/\/([^\/]+\/[^\/]+)\.\w+$/);
+  return match ? match[1] : null;
+}
+
 async function updateNoticeWithImages({
   noticeId,
   userId,
@@ -105,7 +111,21 @@ async function updateNoticeWithImages({
     const imagesToDelete = existingImages.filter(
       (url) => !serverImages.includes(url)
     );
+
+    // Cloudinary에서 이미지 삭제
     if (imagesToDelete.length > 0) {
+      for (const imageUrl of imagesToDelete) {
+        const publicId = getPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Cloudinary 이미지 삭제 성공: ${publicId}`);
+          } catch (error) {
+            console.error(`Cloudinary 이미지 삭제 실패: ${publicId}`, error);
+          }
+        }
+      }
+
       const deleteQuery = `
         DELETE FROM notice_image 
         WHERE notice_id = $1 AND url = ANY($2)
@@ -119,9 +139,7 @@ async function updateNoticeWithImages({
         INSERT INTO notice_image (notice_id, url)
         VALUES ${newImages.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `;
-      const newImagePaths = newImages.map(
-        (file) => `/uploads/${file.filename}`
-      );
+      const newImagePaths = newImages.map((file) => file.path);
       await client.query(insertQuery, [noticeId, ...newImagePaths]);
     }
 
@@ -136,8 +154,39 @@ async function updateNoticeWithImages({
 
 // 공지사항 게시글 삭제
 async function deleteNotice(noticeId) {
-  const query = `DELETE FROM notice WHERE id = $1`;
-  return db.query(query, [noticeId]);
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 삭제 전 이미지 목록 조회
+    const selectQuery = `SELECT url FROM notice_image WHERE notice_id = $1`;
+    const result = await client.query(selectQuery, [noticeId]);
+    const imageUrls = result.rows.map((row) => row.url);
+
+    // Cloudinary에서 이미지 삭제
+    for (const imageUrl of imageUrls) {
+      const publicId = getPublicIdFromUrl(imageUrl);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+          console.log(`Cloudinary 이미지 삭제 성공: ${publicId}`);
+        } catch (error) {
+          console.error(`Cloudinary 이미지 삭제 실패: ${publicId}`, error);
+        }
+      }
+    }
+
+    // DB에서 게시글 삭제 (CASCADE로 이미지도 삭제)
+    const deleteQuery = `DELETE FROM notice WHERE id = $1`;
+    await client.query(deleteQuery, [noticeId]);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 module.exports = {
