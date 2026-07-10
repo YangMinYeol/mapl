@@ -25,3 +25,5 @@ yarn-debug.log*
 yarn-error.log*
 
 uploads/
+# 개인 이력서 작업 자료 (공개 레포 유출 방지)
+이력서-작업장/
