@@ -1,0 +1,182 @@
+{
+  "report": [
+    {
+      "step": "root-page",
+      "status": "ok"
+    },
+    {
+      "step": "login-page",
+      "status": "ok"
+    },
+    {
+      "step": "login-error-state",
+      "status": "ok"
+    },
+    {
+      "step": "signup-page",
+      "status": "ok"
+    },
+    {
+      "step": "do-login",
+      "status": "fail",
+      "detail": "page.waitForSelector: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.calendar-header-left') to be visible\u001b[22m\n"
+    },
+    {
+      "step": "main-memo-day",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Day' })\u001b[22m\n"
+    },
+    {
+      "step": "main-memo-week",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Week' })\u001b[22m\n"
+    },
+    {
+      "step": "main-memo-month",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Month' })\u001b[22m\n"
+    },
+    {
+      "step": "main-memo-year",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Year' })\u001b[22m\n"
+    },
+    {
+      "step": "back-to-day",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Day' })\u001b[22m\n"
+    },
+    {
+      "step": "quick-add-memo",
+      "status": "fail",
+      "detail": "locator.fill: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.dashboard-content-add input')\u001b[22m\n"
+    },
+    {
+      "step": "memo-modal-open",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.dashboard-content-add button')\u001b[22m\n"
+    },
+    {
+      "step": "postpone-memo",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[title=\"미루기\"]').first()\u001b[22m\n"
+    },
+    {
+      "step": "link-create-source",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Week' })\u001b[22m\n"
+    },
+    {
+      "step": "link-select-and-add",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.dashboard-sub-content li').filter({ hasText: '링크 원본 메모' }).locator('button').first()\u001b[22m\n"
+    },
+    {
+      "step": "link-modal-view",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[title=\"링크\"]').first()\u001b[22m\n"
+    },
+    {
+      "step": "link-complete",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.dashboard-main-content li').filter({ hasText: '링크 원본 메모' }).locator('button').first()\u001b[22m\n"
+    },
+    {
+      "step": "switch-to-accountbook-tab",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.calendar-header-left button').filter({ hasText: '가계부' })\u001b[22m\n"
+    },
+    {
+      "step": "main-accountbook-day",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Day' })\u001b[22m\n"
+    },
+    {
+      "step": "main-accountbook-week",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Week' })\u001b[22m\n"
+    },
+    {
+      "step": "main-accountbook-month",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Month' })\u001b[22m\n"
+    },
+    {
+      "step": "main-accountbook-year",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Year' })\u001b[22m\n"
+    },
+    {
+      "step": "accountbook-modal-open",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.period-nav-list .nav-item').filter({ hasText: 'Day' })\u001b[22m\n"
+    },
+    {
+      "step": "month-navigation",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.calendar-header-left button').filter({ hasText: '메모' })\u001b[22m\n"
+    },
+    {
+      "step": "board-notice-list",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('link', { name: '게시판' })\u001b[22m\n"
+    },
+    {
+      "step": "board-free-list",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('자유게시판', { exact: true })\u001b[22m\n"
+    },
+    {
+      "step": "board-post-detail",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.divide-y.border-y > div').first()\u001b[22m\n"
+    },
+    {
+      "step": "board-write-form",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '글쓰기' })\u001b[22m\n"
+    },
+    {
+      "step": "board-report-list",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('오류 보고', { exact: true })\u001b[22m\n"
+    },
+    {
+      "step": "user-profile-password-check",
+      "status": "fail",
+      "detail": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('달력', { exact: true })\u001b[22m\n"
+    },
+    {
+      "step": "user-profile-edit",
+      "status": "fail",
+      "detail": "page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/user/profile/edit\" until \"commit\"\n============================================================"
+    },
+    {
+      "step": "accountbook-category-page",
+      "status": "fail",
+      "detail": "locator.hover: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('header').getByText(/님/)\u001b[22m\n"
+    }
+  ],
+  "consoleLogs": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()",
+      "url": "https://mapl.vercel.app/login"
+    },
+    {
+      "type": "error",
+      "text": "[ERROR] Error: 아이디 또는 비밀번호를 다시 한번 확인해 주세요.\n    at d (https://mapl.vercel.app/assets/index-DdIiHKDP.js:646:917)",
+      "url": "https://mapl.vercel.app/login"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()",
+      "url": "https://mapl.vercel.app/login"
+    },
+    {
+      "type": "error",
+      "text": "[ERROR] Error: 아이디 또는 비밀번호를 다시 한번 확인해 주세요.\n    at d (https://mapl.vercel.app/assets/index-DdIiHKDP.js:646:917)",
+      "url": "https://mapl.vercel.app/login"
+    }
+  ]
+}

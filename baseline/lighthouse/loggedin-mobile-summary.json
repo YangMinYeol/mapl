@@ -1,0 +1,18 @@
+{
+  "label": "loggedin",
+  "formFactor": "mobile",
+  "url": "https://mapl.vercel.app/",
+  "runs": 3,
+  "authenticated": true,
+  "median": {
+    "performance": 91,
+    "accessibility": 61,
+    "best-practices": 100,
+    "seo": 100,
+    "fcp_ms": 2385,
+    "lcp_ms": 2514,
+    "tbt_ms": 110,
+    "cls": 0,
+    "speedIndex_ms": 2874
+  }
+}

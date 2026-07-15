@@ -1,0 +1,18 @@
+{
+  "label": "landing",
+  "formFactor": "desktop",
+  "url": "https://mapl.vercel.app/",
+  "runs": 3,
+  "authenticated": false,
+  "median": {
+    "performance": 95,
+    "accessibility": 61,
+    "best-practices": 100,
+    "seo": 100,
+    "fcp_ms": 539,
+    "lcp_ms": 539,
+    "tbt_ms": 0,
+    "cls": 0,
+    "speedIndex_ms": 2270
+  }
+}
