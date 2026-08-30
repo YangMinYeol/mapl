@@ -1,163 +1,134 @@
-# 일정 관리 웹서비스 Mapl(My Planner)
+# Mapl (마플 My Planner)
 
-![마플 미리보기](/frontend/src/assets/images/readme/mapl_preview.png)
+## 기술 스택
 
-| 배포 URL                 | 계정      | 패스워드   |
-| ------------------------ | --------- | ---------- |
-| https://mapl.vercel.app/ | mapltest3 | mplatest3# |
+#### Frontend
 
-- 초기 접속 시 서버 활성화로 인해 잠시 지연될 수 있습니다.
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 
----
+#### Backend
 
-### 프로젝트 소개
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 
-Mapl(My Planner)는 달력을 중심으로 메모와 가계부를 간편하게 관리할 수 있는 개인 맞춤형 플래너 웹서비스입니다.
+#### Data & UI
 
-- 하루, 주, 월, 연 단위의 기록을 자연스럽게 연결해 사용자가 자신의 생활 패턴을 효율적으로 정리할 수 있도록 구성했습니다.
-- 가계부 데이터를 기반으로 수입·지출의 카테고리별 비중을 그래프로 시각화해 한눈에 파악할 수 있습니다.
-- 공지사항, 자유 게시판, 오류보고 게시판을 제공하여 사용자 간의 가벼운 소통도 가능하도록 만들었습니다.
+![Zustand](https://img.shields.io/badge/Zustand-433E38?style=for-the-badge) ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=for-the-badge) ![dnd kit](https://img.shields.io/badge/dnd--kit-FF3E00?style=for-the-badge) ![date-fns](https://img.shields.io/badge/date--fns-770C56?style=for-the-badge)
 
----
+#### Integrations
 
-### 기술 스택
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white) ![Daum Postcode](https://img.shields.io/badge/Daum_Postcode-FEE500?style=for-the-badge&logoColor=black)
 
-##### Frontend
-
-![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
-##### Backend
-
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-
-##### Database
-
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-
-##### Deployment
+#### Deployment
 
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white) ![Neon](https://img.shields.io/badge/Neon-00E699?style=for-the-badge&logo=neon&logoColor=white) ![UptimeRobot](https://img.shields.io/badge/UptimeRobot-2ECC71?style=for-the-badge&logo=uptimerobot&logoColor=white)
 
-#### 주요 라이브러리
+---
 
-- **상태 관리**: Zustand
-- **라우팅**: React Router DOM
-- **데이터 시각화**: Recharts
-- **드래그 앤 드롭**: @dnd-kit
-- **인증/보안**: bcrypt, JWT
-- **파일 업로드**: Multer, Cloudinary
-- **외부 API**: Daum Postcode API
-- **UI/UX**: FontAwesome, React Modal
-- **날짜 처리**: date-fns
+## 프로젝트 소개
+
+**회사 업무든 개인 일이든, 메모 하나로.** 달력을 중심에 두고 일정을 메모로 기록하고, 필요할 땐 그날의 수입·지출까지 함께 확인할 수 있는 개인용 플래너입니다.
+
+### 주제 선정 이유
+
+- 회사 업무와 개인 메모를 동시에 편하게 쓸 수 있는 메모장이 필요해서 만들기 시작
+- 일정과 지출을 한 달력에서 직관적으로 함께 보고 싶었음
+
+### 프로젝트 정보
+
+| 항목      | 내용                                              |
+| --------- | ------------------------------------------------- |
+| 형태      | 개인 프로젝트 (기획 · 설계 · 개발 · 배포 1인 진행) |
+| 개발 기간 | 2025.01 ~ 2025.08 |
 
 ---
 
-### 주요 기능
+## 실행 방법 & 테스트 계정
 
-#### 초기화면
+### 배포 사이트에서 바로 체험하기
 
-![초기화면](/frontend/src/assets/images/readme/calendar.png)
+**배포 링크**: [https://mapl.vercel.app/](https://mapl.vercel.app/)
 
-- Mapl 접속 시 기본 화면으로, **좌측에는 월별 달력, 우측에는 메모 및 가계부 내역**이 표시됩니다.
-- 메모 또는 가계부(수입/지출) 등록하면 달력과 대시보드에 실시간으로 반영됩니다.
-- 비로그인 상태에서 데이터 등록 시도 시 자동으로 로그인 페이지로 이동합니다.
+> Render 무료 플랜 특성상 초기 접속 시 서버 활성화로 잠시 지연될 수 있습니다.
 
-#### 로그인
-
-![로그인](/frontend/src/assets/images/readme/login.gif)
-
-- 입력 값 **유효성 검사**를 진행합니다
-  - 아이디: 영문으로 시작하는 8~16자의 영문자 및 숫자 조합
-  - 비밀번호: 8~15자의 영문, 숫자, 특수문자(!@#$%^\*+=.-) 조합
-- 로그인 성공 시, **사용자 정보와 토큰은 UserContext와 localStorage**에 저장되어 자동으로 메인(달력) 화면으로 이동합니다.
-- Enter 키 입력 시에도 로그인 처리가 가능하여 편리한 UX를 제공합니다.
-
-#### 회원가입
-
-![회원가입](/frontend/src/assets/images/readme/signup.gif)
-
-- 입력 값 **실시간 유효성 검사**를 진행합니다
-  - 이름: 2~5자의 한글만 입력 가능
-  - 아이디: 영문으로 시작하는 8~16자의 영문자 및 숫자 조합
-  - 비밀번호: 8~15자의 영문, 숫자, 특수문자(!@#$%^\*+=.-) 조합
-  - 비밀번호 확인: 입력한 비밀번호와 일치 여부 확인
-  - 이메일: 올바른 이메일 형식 검증
-- 각 입력 필드에서 발생하는 오류는 **실시간 에러 메시지**로 표시되어 사용자가 즉시 수정 가능
-- **중복 검사**를 통해 아이디와 이메일의 고유성을 보장합니다.
-- **Daum 우편번호 API**를 연동하여 정확한 주소 입력을 지원합니다.
-
-#### 메모
-
-![메모](/frontend/src/assets/images/readme/memo.gif)
-
-- 달력에 등록한 메모가 **컬러 태그**로 표시되어 한눈에 구분할 수 있습니다.
-  - 카테고리별 색상으로 목적에 따라 시각적으로 분류할 수 있습니다.
-  - 달력 태그에 **마우스 오버 시 상세 내역**이 툴팁으로 표시됩니다.
-  - **시작일과 종료일**에 따라 달력에 표시되는 태그 길이가 자동 조정됩니다.
-  - 연도/월 내비게이션과 **투데이 버튼**으로 원하는 날짜로 빠르게 이동할 수 있습니다.
-- 우측 대시보드에서 선택한 날짜 기준으로 메모를 작성 및 관리할 수 있습니다.
-  - **다음날로 미루기** 기능으로 클릭 한 번에 일정 조정이 가능합니다.
-  - **Day/Week/Month/Year** 전환으로 다양한 시간 단위로 메모를 확인할 수 있습니다.
-
-#### 가계부
-
-![가계부](/frontend/src/assets/images/readme/accountbook.gif)
-
-- 달력에 등록한 수입 및 지출 내역이 **컬러 태그**로 표시되어 한눈에 구분할 수 있습니다.
-  - 카테고리별 색상으로 목적에 따라 시각적으로 분류할 수 있습니다.
-  - 달력 태그에 **마우스 오버 시 상세 내역**이 툴팁으로 표시됩니다.
-- 우측 대시보드에서 선택한 날짜 기준으로 가계부 내역을 종합적으로 확인과 작성 및 관리할 수 있습니다.
-  - 자산, 수입, 지출을 한눈에 확인할 수 있습니다.
-  - **파이 차트**로 카테고리별 수입/지출 비중을 시각화하여 쉽게 파악할 수 있습니다.
-  - **Day/Week/Month/Year** 전환으로 다양한 시간 단위로 재무 현황을 확인할 수 있습니다.
-
-#### 가계부 카테고리
-
-![가계부 카테고리](/frontend/src/assets/images/readme/accountbook_category.gif)
-
-- 좌측에서 사용자의 현재 자산 총액을 확인할 수 있습니다.
-- **자산/수입** 탭을 전환하여 카테고리를 관리할 수 있습니다.
-- **카테고리 추가** 버튼을 통해 카테고리를 생성할 수 있습니다.
-- 각 카테고리는 **색상**으로 구분되어 시각적 식별이 용이합니다.
-- 각 카테고리는 **삭제 및 수정**이 가능하여 개인 맞춤형 관리가 가능합니다.
-- 드래그 앤 드롭(::)으로 카테고리 **순서를 변경**할 수 있습니다.
-
-#### 고객센터
-
-![고객센터](/frontend/src/assets/images/readme/board.png)
-
-- 좌측 메뉴에서 **공지사항, 자유게시판, 오류 보고** 게시판으로 이동할 수 있습니다.
-- **공지사항**: 서비스 업데이트 및 중요 공지사항을 확인할 수 있습니다.
-- **자유게시판**: 사용자 간 자유로운 소통 공간을 제공합니다.
-- **오류 보고**: 서비스 이용 중 발견한 오류를 신고하고 피드백을 받을 수 있습니다.
+| 구분      | 아이디    | 비밀번호                                                |
+| --------- | --------- | -------------------------------------------------------- |
+| 테스트 계정 | `mapltest3` | <details><summary>보기</summary>mapltest3#</details> |
 
 ---
 
-### 프로젝트 구조
+## 핵심 기능
 
-```
-├── backend                       # Node.js 백엔드
-    ├── controller                # 클라이언트 요청을 받아 처리하고 응답 반환
-    ├── middleware                # 미들웨어 (예: 인증, 에러 처리)
-    ├── model                     # 데이터베이스와 직접 상호작용하는 모듈
-    ├── route                     # API 라우트 정의
-    ├── db.js                     # PostgreSQL 데이터베이스 연결 설정
-    ├── server.js                 # 서버 진입점 (Express 서버 실행)
-    └── package.json              # 백엔드 패키지 및 의존성 관리
-│
-└── frontend                      # React 프론트엔드
-    ├── package.json              # 프론트엔드 패키지 및 의존성 관리
-    ├── tailwind.config.js        # Tailwind CSS 설정
-    └──  src
-      ├── api                     # 서버 API 요청 함수 정의
-      ├── assets                  # 이미지등 정적 리소스
-      ├── components              # 재사용 가능한 UI 컴포넌트
-      ├── constants               # 앱 내 상수 정의
-      ├── context                 # React Context (전역 상태 관리용)
-      ├── hooks                   # 커스텀 React Hooks
-      ├── pages                   # 페이지 단위 컴포넌트
-      ├── stores                  # Zustand를 사용한 전역 상태 관리
-      ├── styles                  # 전역 스타일 또는 Tailwind 설정 관련 스타일
-      ├── util                    # 유틸리티 함수 모음
-      └── App.jsx                 # 메인 App 컴포넌트 (라우팅 및 레이아웃 포함)
+### 회원가입 · 로그인
+
+![회원가입 · 로그인](.github/readme-images/회원가입.png)
+
+- **API 요청 중 401이 발생하면 자동으로 토큰을 재발급받아 재시도** - accessToken이 만료돼 401이 오면 httpOnly 쿠키에 저장된 refreshToken으로 새 토큰을 받아 원래 요청을 자동으로 재시도합니다.
+- **세션 만료는 별도로 구분해서 처리** - 세션이 만료된 경우만 따로 구분해 자동 로그아웃 후 로그인 페이지로 보내고, 그 외 에러는 공통 모달로 안내합니다.
+- **아이디·이메일 중복 확인을 동시에 요청** - 회원가입 제출 시 두 검사를 순차가 아니라 병렬로 보내 응답을 기다립니다.
+- **필드별 정규식 실시간 검증 + 비밀번호 확인 양방향 동기화** - 비밀번호를 다시 입력하면 이미 입력해둔 비밀번호 확인 필드도 즉시 재검증됩니다.
+- **Daum 우편번호 API로 실제 주소 입력 지원** - 검색 팝업에서 고른 주소가 우편번호·주소 필드에 자동으로 채워집니다.
+
+### 메모
+
+![메모](.github/readme-images/메모.png)
+
+- **메모 동기화로 여러 메모를 한 번에 관리** - 메모를 서로 동기화해두면 수정·완료 체크·삭제가 한 번에 반영되고, 필요 없어지면 동기화를 해제할 수도 있습니다.
+- **여러 주에 걸친 일정도 하나의 막대처럼 이어 보이게 렌더링** - 달력이 주 단위로 줄바뀌어도 시작일과 각 주의 첫 칸에서만 라벨을 다시 표시하고, 시작·종료일에만 모서리를 둥글게 처리해 자연스럽게 이어지도록 만들었습니다.
+- **미루기 버튼 한 번으로 일정 조정** - 미처 처리하지 못한 일정을 미루기 버튼 하나로 다음날로 미룰 수 있습니다.
+
+### 가계부
+
+![가계부](.github/readme-images/가계부.png)
+
+- **카테고리 삭제 시 트랜잭션으로 데이터 정합성 유지** - 삭제 전에 해당 카테고리의 내역을 전부 기본(`기타`) 카테고리로 옮기고 나서 삭제하도록 하나의 트랜잭션으로 묶어, 고아 데이터 없이 안전하게 삭제됩니다.
+- **드래그 앤 드롭 순서 변경도 트랜잭션으로 일괄 반영** - 바뀐 순서 목록을 하나의 트랜잭션 안에서 순서대로 업데이트합니다.
+- **파이 차트로 카테고리 비중 시각화** - Day/Week/Month/Year/Total 단위로 집계를 바꿔가며 수입·지출 비중을 확인할 수 있습니다.
+
+### 게시판
+
+![게시판](.github/readme-images/게시판.png)
+
+- **게시판 컴포넌트를 재사용해 3개 게시판 구성** - 헤더·목록·본문·하단·탭 컴포넌트를 공지사항·자유게시판·오류 보고가 그대로 공유하고, 오류 보고에만 유형 분류와 진행상태 변경이 추가로 붙습니다.
+- **이미지 여러 장을 한 번의 쿼리로 조회** - 게시글마다 이미지를 따로 쿼리하지 않고 한 번에 배열로 묶어 가져와 쿼리 횟수를 줄였습니다.
+- **페이지 단위로 잘라서 불러오는 페이지네이션** - 페이지당 15개씩 잘라서 불러옵니다.
+
+## 아키텍처
+
+**파일 관리 방법**: 계층형(Layered) 구조
+
+- 백엔드: `route → controller → model` — 요청 흐름을 그대로 폴더 구조에 대응
+- 프론트엔드: 역할(페이지 · 컴포넌트 · 상태 · API) 기준 최상위 분리, `components`만 도메인별 하위 분리
+
+**선택 이유**
+
+- 혼자 처음부터 끝까지 만드는 프로젝트라, 기능별로 쪼개는 구조보다 요청 하나가 어디서 어디로 흐르는지 추적하기 쉬운 전통적 계층형 구조를 택함
+
+```text
+backend/
+├── route/              # 도메인별 API 라우트 (user, memo, accountBook 등 10개)
+├── controller/         # 요청 처리 및 응답 반환
+├── model/               # DB 접근 계층 — pg.Pool 직접 쿼리 (ORM 없음)
+├── middleware/          # JWT 인증 · multer+Cloudinary 업로드
+├── db.js                 # PostgreSQL 커넥션 풀 설정
+└── server.js              # Express 진입점
+
+frontend/src/
+├── api/                 # 서버 API 요청 함수 (도메인별)
+├── components/          # UI 컴포넌트 (도메인별 하위 폴더)
+│   ├── calendar/
+│   ├── memo/
+│   ├── account-book/
+│   ├── account-book-category/
+│   ├── board/
+│   ├── dashboard/
+│   ├── user/
+│   ├── layout/
+│   ├── link/
+│   └── common/
+├── context/             # React Context (전역 인증 상태)
+├── stores/              # Zustand 전역 상태
+├── hooks/                # 커스텀 훅
+├── pages/                # 페이지 단위 컴포넌트
+├── constants/ · util/ · styles/ · assets/
+└── App.jsx               # 라우팅 및 레이아웃 포함 진입점
 ```
