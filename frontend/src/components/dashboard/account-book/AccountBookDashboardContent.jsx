@@ -1,5 +1,3 @@
-import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
 import { deleteAccountBookItem } from "../../../api/account-book";
 import { useModal } from "../../../context/ModalContext";
@@ -11,15 +9,14 @@ import {
   ACCOUNT_TYPE,
 } from "../../../util/accountBookUtil";
 import {
+  getAccountBookDate,
   groupByMonth,
   groupByMonthWeek,
   groupByWeekday,
   groupByYear,
 } from "../../../util/dateUtil";
-import { DEFAULT_COLOR } from "../../../util/util";
 import AccountBookModal from "../../account-book/AccountBookModal";
 import AccountBookDashboardItem from "./AccountBookDashboardItem";
-import { AccountBookPieChart } from "./AccountBookPieChart";
 import { useNavigate } from "react-router-dom";
 
 const { INCOME, EXPENSE, ALL } = ACCOUNT_TYPE;
@@ -61,7 +58,7 @@ export default function AccountBookDashboardContent({
   const { user } = useContext(UserContext);
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false);
   const [dashboardModalMode, setDashboardModalMode] = useState("");
-  const [selectedItem, setselectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
   const { openConfirm } = useModal();
   const handleError = useErrorHandler();
   const navigate = useNavigate();
@@ -76,10 +73,7 @@ export default function AccountBookDashboardContent({
 
   const accountSummary = calcIncomeExpense(filteredDatas);
 
-  const sortedDatas = filteredDatas.sort((a, b) => {
-    if (a.occurredAt < b.occurredAt) return -1;
-    if (a.occurredAt > b.occurredAt) return 1;
-  });
+  const sortedDatas = [...filteredDatas].sort((a, b) => getAccountBookDate(a) - getAccountBookDate(b));
 
   let groupedDatas = {};
 
@@ -110,14 +104,14 @@ export default function AccountBookDashboardContent({
   // 모달 닫기
   function closeAccountBookModal() {
     setIsDashboardModalOpen(false);
-    setselectedItem(null);
+    setSelectedItem(null);
   }
 
   // 가계부 항목 편집
   function handleAccountItemEdit(item) {
     setDashboardModalMode(ACCOUNTBOOK_MODAL_MODE.EDIT);
     setIsDashboardModalOpen(true);
-    setselectedItem(item);
+    setSelectedItem(item);
   }
 
   // 가계부 항목 삭제
@@ -139,33 +133,20 @@ export default function AccountBookDashboardContent({
   }
 
   return (
-    <div className="h-[600px] border-b border-mapl-slate">
-      <div className="flex items-center text-center border-b border-mapl-slate h-2/18">
-        <div className="w-1/3">
-          <div>전체 ({accountSummary[ALL].count})</div>
-          <div className="font-semibold">
-            {Number(accountSummary[ALL].amount).toLocaleString()}원
+    <div className="ledger-content">
+      <dl className="ledger-summary">
+        {[[ALL, "차액", ""], [INCOME, "수입", "+"], [EXPENSE, "지출", "−"]].map(([type, label, sign]) => (
+          <div key={type} data-type={type}>
+            <dt>{label} <span>{accountSummary[type].count}건</span></dt>
+            <dd>{sign}{Number(accountSummary[type].amount).toLocaleString()}원</dd>
           </div>
-        </div>
-        <div className="w-1/3">
-          <div>수입 ({accountSummary[INCOME].count})</div>
-          <div className="font-semibold text-blue-500">
-            +{Number(accountSummary[INCOME].amount).toLocaleString()}원
-          </div>
-        </div>
-        <div className="w-1/3">
-          <div>지출 ({accountSummary[EXPENSE].count})</div>
-          <div className="font-semibold text-red-500">
-            -{Number(accountSummary[EXPENSE].amount).toLocaleString()}원
-          </div>
-        </div>
+        ))}
+      </dl>
+      <div className="ledger-columns">
+        <span>분류</span><span>내용</span><span>금액</span>
       </div>
-      <div className="flex items-center font-semibold text-center border-b border-mapl-slate h-1/18">
-        <div className="w-[125px] shrink-0">분류</div>
-        <div className="w-8/20">내용</div>
-        <div className="w-7/20"> 금액</div>
-      </div>
-      <div className="overflow-auto border-b h- dashboard-main-content h-14/18 border-mapl-slate">
+      <div className="dashboard-main-content ledger-list">
+        {sortedDatas.length === 0 && <p className="ledger-empty">표시할 내역이 없어요.</p>}
         {selectedPeriod.name === "Day"
           ? sortedDatas.map((item) => (
               <AccountBookDashboardItem
@@ -179,7 +160,7 @@ export default function AccountBookDashboardContent({
               ([groupTitle, items]) =>
                 items.length > 0 && (
                   <div key={groupTitle}>
-                    <div className="px-4 py-2 font-semibold text-left bg-mapl-slate/20 text-mapl-dark">
+                    <div className="ledger-group">
                       {groupTitle}
                     </div>
                     {items.map((item) => (
@@ -195,23 +176,19 @@ export default function AccountBookDashboardContent({
             )}
       </div>
 
-      <div className="flex items-center justify-between px-2 h-1/18">
+      <div className="ledger-footer">
         <div>
           {`자산 ${Number(asset ? asset.balance : 0).toLocaleString()}원`}
         </div>
         <button
-          className="cursor-pointer w-1/16"
+          type="button"
+          aria-label="가계부 내역 추가"
+          className="planner-action"
           onClick={handleAddAccountBook}
         >
-          <FontAwesomeIcon
-            color={DEFAULT_COLOR}
-            icon={faCirclePlus}
-            size="2xl"
-          />
+          내역 추가
         </button>
       </div>
-
-      <AccountBookPieChart dashboardDatas={dashboardDatas} />
 
       <AccountBookModal
         isOpen={isDashboardModalOpen}

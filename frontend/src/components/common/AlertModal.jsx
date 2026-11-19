@@ -1,6 +1,7 @@
 import Modal from "react-modal";
 import { useEffect } from "react";
 import { useModal } from "../../context/ModalContext";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { baseModalStyle } from "../../styles/modalStyle";
 
 export default function AlertModal() {
@@ -14,6 +15,16 @@ export default function AlertModal() {
     onNo,
   } = useModal();
 
+  const handleError = useErrorHandler();
+  async function confirm(callback) {
+    closeModal();
+    try {
+      await callback?.();
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   useEffect(() => {
     Modal.setAppElement("#root");
   }, []);
@@ -22,7 +33,7 @@ export default function AlertModal() {
     <Modal
       isOpen={modalOpen}
       onRequestClose={closeModal}
-      style={baseModalStyle}
+      style={{ ...baseModalStyle, overlay: { ...baseModalStyle.overlay, zIndex: 110 } }}
       shouldCloseOnOverlayClick={false}
     >
       <div className="p-6 text-mapl-black">
@@ -46,19 +57,13 @@ export default function AlertModal() {
         ) : (
           <>
             <button
-              onClick={() => {
-                if (onYes) onYes();
-                closeModal();
-              }}
+              onClick={() => confirm(onYes)}
               className="w-1/2 p-3 font-semibold text-center border-t border-r cursor-pointer border-mapl-slate text-deep-green"
             >
               예
             </button>
             <button
-              onClick={() => {
-                if (onNo) onNo();
-                closeModal();
-              }}
+              onClick={() => confirm(onNo)}
               className="w-1/2 p-3 font-semibold text-center border-t cursor-pointer border-mapl-slate text-deep-green"
             >
               아니오

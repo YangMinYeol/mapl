@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 // 가계부 목록 불러오기
 export async function fetchDashboardAccountBooks(userId, startDate, endDate) {
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
   params.append("userId", userId.toString());
   if (startDate) params.append("startDate", startDate);
   if (endDate) params.append("endDate", endDate);
@@ -27,8 +27,9 @@ export async function fetchDashboardAccountBooks(userId, startDate, endDate) {
 
 // 달력 표기용 가계부 목록 불러오기
 export async function fetchCalendarAccountBooks(userId, currentDate) {
+  const params = new URLSearchParams({ userId, currentDate, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
   const response = await fetchWithAuth(
-    `${API_URL}/api/account-book/calendar?userId=${userId}&currentDate=${currentDate}`,
+    `${API_URL}/api/account-book/calendar?${params}`,
     {
       method: "GET",
       headers: {

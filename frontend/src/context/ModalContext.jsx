@@ -24,6 +24,7 @@ export function ModalProvider({ children }) {
   }
 
   function openConfirm(message, subMessage = "", onYesCallback, onNoCallback) {
+    setOnClose(null);
     setModalMessage(message);
     setSubMessage(subMessage);
     setModalType("confirm");

@@ -1,10 +1,10 @@
 import {
-  faPenToSquare,
+  faClock,
   faSquare,
   faSquareCheck,
   faTrashCan,
 } from "@fortawesome/free-regular-svg-icons";
-import { faArrowRight, faLink } from "@fortawesome/free-solid-svg-icons";
+import { faLink } from "@fortawesome/free-solid-svg-icons";
 import IconButton from "../../../common/IconButton";
 
 export default function MainMemoItem({
@@ -17,23 +17,27 @@ export default function MainMemoItem({
   selectedPeriod,
 }) {
   return (
-    <div className="flex items-center px-1 py-1 hover:bg-gray-50 group">
+    <div className="planner-edit-row flex items-center px-1 py-1 hover:bg-gray-50 group">
       {/* 체크박스 (완료 여부) */}
-      <div className="flex justify-center w-1/20">
+      <div className="planner-row-control flex justify-center w-1/20">
         <IconButton
           icon={memo.completed ? faSquareCheck : faSquare}
           onClick={() => onComplete(memo)}
+          title={memo.completed ? "완료 취소" : "완료"}
         />
       </div>
 
       {/* 메모 내용 */}
-      <div
-        className={`w-15/20 ${memo.completed && "line-through"} break-words`}
+      <button
+        type="button"
+        className={`planner-edit-target w-15/20 ${memo.completed && "line-through"} break-words`}
+        onClick={() => onEdit(memo)}
+        aria-label={`메모 편집: ${memo.content}`}
       >
         {memo.content}
-      </div>
+      </button>
 
-      <div className="flex gap-2 ml-auto opacity-0 group-hover:opacity-100">
+      <div className="planner-row-control planner-row-actions ml-auto">
         {/* 링크 아이콘: 연결된 메모일 경우만 표시 */}
         {memo.isLinked && (
           <IconButton
@@ -45,17 +49,11 @@ export default function MainMemoItem({
         {/* 미루기 아이콘: 버킷리스트가 아닐 경우만 표시 */}
         {selectedPeriod.name !== "Other" && (
           <IconButton
-            icon={faArrowRight}
+            icon={faClock}
             onClick={() => onPostpone(memo)}
             title="미루기"
           />
         )}
-        {/* 수정 아이콘 */}
-        <IconButton
-          icon={faPenToSquare}
-          onClick={() => onEdit(memo)}
-          title="수정"
-        />
         {/* 삭제 아이콘 */}
         <IconButton
           icon={faTrashCan}

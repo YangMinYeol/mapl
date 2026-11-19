@@ -1,48 +1,35 @@
-import { formatDateYYYYMMDD } from "../../util/dateUtil";
-import { formatTimeTo12Hour } from "../../util/timeUtil";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
-export default function Tooltip({ memo, children }) {
+export default function Tooltip({ children, content }) {
+  const anchor = useRef(null);
+  const popup = useRef(null);
   const [visible, setVisible] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const handleMouseEnter = () => setVisible(true);
-  const handleMouseLeave = () => setVisible(false);
-  const handleMouseMove = (e) => {
-    setPosition({ x: e.clientX, y: e.clientY });
-  };
-
+  useLayoutEffect(() => {
+    if (!visible) return;
+    function position() {
+      const rect = anchor.current.getBoundingClientRect();
+      const tip = popup.current;
+      const margin = 8;
+      const top = rect.bottom + margin + tip.offsetHeight <= window.innerHeight
+        ? rect.bottom + margin : rect.top - margin - tip.offsetHeight;
+      tip.style.top = Math.max(margin, top) + "px";
+      tip.style.left = Math.max(margin, Math.min(rect.left, document.documentElement.clientWidth - tip.offsetWidth - margin)) + "px";
+    }
+    position();
+    window.addEventListener("resize", position);
+    window.addEventListener("scroll", position, true);
+    return () => {
+      window.removeEventListener("resize", position);
+      window.removeEventListener("scroll", position, true);
+    };
+  }, [visible, content]);
   return (
-    <div
-      className="relative inline-block"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
-    >
+    <div ref={anchor} className="relative inline-block"
+      onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}
+      onFocus={() => setVisible(true)} onBlur={() => setVisible(false)}
+      onKeyDown={(event) => { if (event.key === "Escape") setVisible(false); }}>
       {children}
-      {visible && (
-        <div
-          className="fixed z-50 max-w-xs px-2 py-1 text-white break-words whitespace-pre-wrap bg-black rounded shadow-md"
-          style={{
-            top: position.y + 12, // 마우스 아래쪽에 띄움
-            left: position.x + 12, // 마우스 오른쪽에 띄움
-          }}
-        >
-          <div className="mb-1 font-semibold">{memo.content}</div>
-          <div className="text-xs">
-            <span className="inline-block w-10">From:</span>
-            {`${formatDateYYYYMMDD(memo.startDate)} ${formatTimeTo12Hour(
-              memo.startTime
-            )}`}
-          </div>
-          <div className="text-xs">
-            <span className="inline-block w-10">To:</span>
-            {`${formatDateYYYYMMDD(memo.endDate)} ${formatTimeTo12Hour(
-              memo.endTime
-            )}`}
-          </div>
-        </div>
-      )}
+      {visible && <div ref={popup} className="planner-tooltip planner-tag-tooltip" role="tooltip">{content}</div>}
     </div>
   );
 }

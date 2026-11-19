@@ -20,19 +20,9 @@ export const fetchHolidays = async (year, month) => {
   }
 };
 
-// 여러 달(예: 3개월) 공휴일 요청
-export const fetchMultipleMonthsHolidays = async (
-  year,
-  startMonth,
-  count = 3
-) => {
-  const allHolidays = [];
-
-  for (let i = 0; i < count; i++) {
-    const month = startMonth + i;
-    const holidays = await fetchHolidays(year, month);
-    allHolidays.push(...holidays);
-  }
-
-  return allHolidays;
-};
+// 달력에 걸쳐 보이는 이전·현재·다음 달을 요청한다.
+export async function fetchMultipleMonthsHolidays(year, month) {
+  const months = [-1, 0, 1].map((offset) => new Date(year, month - 1 + offset, 1));
+  const lists = await Promise.all(months.map((date) => fetchHolidays(date.getFullYear(), date.getMonth() + 1)));
+  return lists.flat();
+}

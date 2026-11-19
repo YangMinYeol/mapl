@@ -7,6 +7,7 @@ import { setDateByPeriod } from "../../../../util/dateUtil";
 import SubMemoContent from "./SubMemoContent";
 import SubMemoHeader from "./SubMemoHeader";
 import { useNavigate } from "react-router-dom";
+import SecondaryPanel from "../../SecondaryPanel";
 
 export default function SubMemo({
   dashboardDatas,
@@ -16,6 +17,7 @@ export default function SubMemo({
   loadDashboardDatas,
   loadCalendarDatas,
   openLinkModal,
+  onEdit,
 }) {
   const navigate = useNavigate();
   const { openConfirm } = useModal();
@@ -146,7 +148,7 @@ export default function SubMemo({
   }
 
   return (
-    <div className="h-[340px]">
+    <SecondaryPanel label={isBucketList ? "버킷리스트 한마디" : "상위 기간 메모"}>
       <SubMemoHeader
         filterPeriods={filterPeriods}
         selectedValue={selectedValue}
@@ -162,7 +164,8 @@ export default function SubMemo({
         handleToggle={handleToggle}
         isBucketList={isBucketList}
         openLinkModal={openLinkModal}
+        onEdit={onEdit}
       />
-    </div>
+    </SecondaryPanel>
   );
 }

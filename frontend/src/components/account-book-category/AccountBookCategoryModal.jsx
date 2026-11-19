@@ -3,11 +3,12 @@ import {
   addAccountBookCategory,
   updateAccountBookCategory,
 } from "../../api/account-book-category";
+import { useColors } from "../../context/ColorContext";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
-import { DEFAULT_COLOR } from "../../util/util";
+import { DEFAULT_COLOR, DEFAULT_COLOR_ID } from "../../util/util";
 import Palette from "../common/Palette";
 import ModalLayout from "../common/modal/ModalLayout";
 
@@ -20,10 +21,10 @@ export default function AccountBookCategoryModal({
   onSuccess,
   selectedItem,
 }) {
-  const modalSize = { width: "w-[350px]", height: "h-[210px]" };
+  const colors = useColors();
   const { user } = useContext(UserContext);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const [selectedColorId, setSelectedColorId] = useState(10);
+  const [selectedColorId, setSelectedColorId] = useState(DEFAULT_COLOR_ID);
   const [selectedColor, setSelectedColor] = useState(DEFAULT_COLOR);
   const [categoryName, setCategoryName] = useState("");
   const [isCategoryNameError, setIsCategoryNameError] = useState(false);
@@ -32,12 +33,12 @@ export default function AccountBookCategoryModal({
   const handleError = useErrorHandler(closeModal);
 
   useEffect(() => {
-    if (isEdit && selectedItem) {
+    if (isOpen && isEdit && selectedItem) {
       setCategoryName(selectedItem.name);
       setSelectedColor(selectedItem.colorHex);
       setSelectedColorId(selectedItem.colorId);
     }
-  }, [mode, selectedItem]);
+  }, [isOpen, isEdit, selectedItem]);
 
   // 가계부 카테고리 항목 추가
   async function addNewCategory() {
@@ -53,12 +54,12 @@ export default function AccountBookCategoryModal({
         type: type,
         colorId: selectedColorId,
       });
+      await onSuccess();
+      closeModal();
     } catch (error) {
-      handleError(error, { closeCurrentModal: true });
+      handleError(error);
     } finally {
       setIsLoading(false);
-      onSuccess();
-      closeModal();
     }
   }
 
@@ -75,12 +76,12 @@ export default function AccountBookCategoryModal({
         name: categoryName,
         colorId: selectedColorId,
       });
+      await onSuccess();
+      closeModal();
     } catch (error) {
-      handleError(error, { closeCurrentModal: true });
+      handleError(error);
     } finally {
       setIsLoading(false);
-      onSuccess();
-      closeModal();
     }
   }
 
@@ -93,7 +94,7 @@ export default function AccountBookCategoryModal({
   const resetForm = () => {
     setCategoryName("");
     setSelectedColor(DEFAULT_COLOR);
-    setSelectedColorId(10);
+    setSelectedColorId(DEFAULT_COLOR_ID);
     setIsCategoryNameError(false);
   };
 
@@ -125,13 +126,13 @@ export default function AccountBookCategoryModal({
       </div>
 
       <div>
-        <div className="flex items-center h-8 py-2">
+        <div className="flex items-center py-2">
           <span className="whitespace-nowrap">색상</span>
-          <div className="flex items-center h-full ml-1 w-96">
+          <div className="flex flex-wrap items-center gap-1 ml-1 min-w-0">
             <div
               className="w-4 h-4 mr-1 border rounded cursor-pointer"
               style={{
-                backgroundColor: selectedColor,
+                backgroundColor: colors.find(({ id }) => id === selectedColorId)?.hex ?? selectedColor,
                 borderColor: selectedColor,
               }}
               onClick={() => setIsPaletteOpen(!isPaletteOpen)}
@@ -174,7 +175,6 @@ export default function AccountBookCategoryModal({
       title={title}
       isOpen={isOpen}
       onClose={closeModal}
-      modalSize={modalSize}
       handleModalClick={handleModalClick}
       content={content}
       footer={footer}

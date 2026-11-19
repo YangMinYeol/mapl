@@ -1,3 +1,5 @@
+import { formatDateYYYYMMDD } from "../../util/dateUtil";
+import { formatTimeTo12Hour } from "../../util/timeUtil";
 import { isSameDay } from "date-fns";
 import { TAG_TYPE } from "../../constants/tag";
 import Tooltip from "../common/Tooltip";
@@ -34,28 +36,35 @@ export default function MemoTag({ tag, date, onClick }) {
       date.getDay() === 0);
 
   const handleClick = (e) => {
-    if (tag) {
+    if (editable) {
       e.stopPropagation();
       onClick(tag);
     }
   };
 
+  const editable = tag.type === TAG_TYPE.DAILY || tag.type === TAG_TYPE.RANGE;
+  const Tag = editable ? "button" : "div";
   const memoTag = (
-    <div
-      key={tag?.id}
-      className={`px-1 h-5 truncate ${getMemoTagClass(tag, date)} ${
+    <Tag
+      type={editable ? "button" : undefined}
+      aria-label={editable ? tag.content : undefined}
+      data-palette-color={tag?.colorId != null || undefined}
+      className={`block w-auto max-w-full text-left px-1 h-5 truncate ${getMemoTagClass(tag, date)} ${
         tag && "hover:cursor-pointer hover:font-bold"
       }`}
-      style={tag ? { backgroundColor: tag.colorHex } : {}}
+      style={tag ? { backgroundColor: tag.colorHex, "--tag-ink": tag.colorHex } : {}}
       onClick={handleClick}
     >
       {shouldShow ? tag.content : null}
-    </div>
+    </Tag>
   );
 
-  return tag && (tag.type === TAG_TYPE.DAILY || tag.type === TAG_TYPE.RANGE) ? (
-    <Tooltip memo={tag}>{memoTag}</Tooltip>
-  ) : (
-    memoTag
+  if (!editable) return memoTag;
+  return (
+    <Tooltip content={<>
+      <strong>{tag.content}</strong>
+      <div>시작 · {formatDateYYYYMMDD(tag.startDate)} {formatTimeTo12Hour(tag.startTime)}</div>
+      <div>종료 · {formatDateYYYYMMDD(tag.endDate)} {formatTimeTo12Hour(tag.endTime)}</div>
+    </>}>{memoTag}</Tooltip>
   );
 }

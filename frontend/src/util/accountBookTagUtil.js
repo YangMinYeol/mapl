@@ -1,6 +1,6 @@
 import { TAG_TYPE } from "../constants/tag";
 import { getDateKey } from "./calendarUtil";
-import { formatDateYYYYMMDD, formatHolidayDate } from "./dateUtil";
+import { formatDateYYYYMMDD, formatHolidayDate, getAccountBookDate } from "./dateUtil";
 
 // 달력 구조에 맞게 날짜별 태그 map 생성
 export function generateAccountBookTagMap(
@@ -46,7 +46,7 @@ function insertHolidayTagsToMap(tagMap, holidays) {
 // 가계부 항목을 날짜별 map에 추가
 function insertAccountTagsToMap(tagMap, datas) {
   datas.forEach((item) => {
-    const key = formatDateYYYYMMDD(item.occurredAt);
+    const key = formatDateYYYYMMDD(getAccountBookDate(item));
     if (!tagMap[key]) tagMap[key] = [];
     tagMap[key].push(item);
   });
@@ -61,7 +61,7 @@ function insertAccountTagsToMap(tagMap, datas) {
       if (isHolidayA && isHolidayB) return 0;
 
       // 둘 다 가계부 항목일 경우: occurredAt → createdAt 기준으로 정렬
-      const occurredDiff = new Date(a.occurredAt) - new Date(b.occurredAt);
+      const occurredDiff = getAccountBookDate(a) - getAccountBookDate(b);
       if (occurredDiff !== 0) return occurredDiff;
 
       return new Date(a.createdAt) - new Date(b.createdAt);

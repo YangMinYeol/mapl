@@ -1,10 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
 
 export default function DropdownCalendar({
-  isOpen,
   onClose,
   currentDate,
   onSelectYearMonth,
@@ -14,14 +12,12 @@ export default function DropdownCalendar({
   const dropdownRef = useRef(null);
   const [dropdownYear, setDropdownYear] = useState(currentDate.getFullYear());
   const calendarYear = currentDate.getFullYear();
-  const calendarMonth = format(currentDate, "M");
+  const calendarMonth = currentDate.getMonth() + 1;
+  const today = new Date();
 
-  // 드롭다운이 열릴 때 현재 날짜 기준으로 초기화
   useEffect(() => {
-    if (isOpen) {
-      setDropdownYear(currentDate.getFullYear());
-    }
-  }, [isOpen, currentDate]);
+    dropdownRef.current?.querySelector("[aria-pressed=true]")?.focus();
+  }, []);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -35,72 +31,73 @@ export default function DropdownCalendar({
       }
     }
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        onClose();
+        dropdownButtonRef.current?.focus();
+      }
     }
 
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("pointerdown", handleClickOutside);
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("pointerdown", handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [onClose, dropdownButtonRef]);
 
   // 연도 변경
   function handleChangeYear(amount) {
     setDropdownYear((prevYear) => prevYear + amount);
   }
 
-  return isOpen ? (
+  return (
     <div
       ref={dropdownRef}
-      className="absolute bg-white border border-gray-300 rounded shadow-md z-1 h-44 w-60 top-9"
+      id="planner-month-picker"
+      role="dialog"
+      aria-label="연월 선택"
+      className="planner-month-picker"
     >
-      {/* Year */}
-      <div className="flex justify-between px-2 py-1 font-medium border-b-2 text-deep-green border-mapl-slate">
-        <div className="flex items-center justify-between w-24">
-          <button
-            className="w-5 rounded-lg cursor-pointer hover:bg-gray-200"
-            onClick={() => handleChangeYear(-1)}
-          >
+      <div className="planner-month-heading">
+          <button aria-label="이전 해" onClick={() => handleChangeYear(-1)}>
             <FontAwesomeIcon icon={faAngleLeft} />
           </button>
-          <span>{dropdownYear}</span>
-          <button
-            className="w-5 rounded-lg cursor-pointer hover:bg-gray-200"
-            onClick={() => handleChangeYear(1)}
-          >
+        <strong aria-live="polite">{dropdownYear}년</strong>
+          <button aria-label="다음 해" onClick={() => handleChangeYear(1)}>
             <FontAwesomeIcon icon={faAngleRight} />
           </button>
-        </div>
-        <button
-          className="w-12 text-center rounded-lg cursor-pointer hover:bg-gray-200"
-          onClick={handleTodayClick}
-        >
-          Today
-        </button>
       </div>
-
-      {/* Month */}
-      <div className="grid grid-cols-4 gap-1 p-1 h-5/6">
-        {[...Array(12)].map((_, index) => {
-          const dropdownMonth = index + 1;
+      <div className="planner-month-grid">
+        {Array.from({ length: 12 }, (_, index) => {
+          const month = index + 1;
+          const isCurrent = dropdownYear === today.getFullYear() && month === today.getMonth() + 1;
           return (
             <button
-              key={dropdownMonth}
-              className={`${
-                dropdownYear === calendarYear && dropdownMonth == calendarMonth
-                  ? "bg-deep-green text-white"
-                  : "hover:bg-gray-200"
-              } flex items-center justify-center w-full h-full px-1 py-1 text-center rounded-lg cursor-pointer`}
+              key={month}
+              aria-pressed={dropdownYear === calendarYear && month === calendarMonth}
+              aria-current={isCurrent ? "date" : undefined}
               onClick={() => {
-                onSelectYearMonth(dropdownYear, dropdownMonth);
+                onSelectYearMonth(dropdownYear, month);
                 onClose();
+                dropdownButtonRef.current?.focus();
               }}
             >
-              {dropdownMonth}
+              {month}월
             </button>
           );
         })}
       </div>
+      <div className="planner-month-footer">
+        <button onClick={() => {
+          handleTodayClick();
+          dropdownButtonRef.current?.focus();
+        }}>
+          <time>{today.getMonth() + 1}월 {today.getDate()}일</time>
+          <span>오늘로 이동 <FontAwesomeIcon icon={faAngleRight} /></span>
+        </button>
+      </div>
     </div>
-  ) : null;
+  );
 }

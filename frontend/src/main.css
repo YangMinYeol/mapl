@@ -30,8 +30,13 @@ code {
   border-radius: 10px;
 }
 
-/* Recharts PieChart focus outline 제거 */
-.recharts-sector:focus,
-.recharts-surface:focus {
+/* 포인터 선택과 키보드 탐색의 포커스를 구분한다. */
+.recharts-sector:focus:not(:focus-visible),
+.recharts-surface:focus:not(:focus-visible) {
   outline: none;
+}
+
+.ledger-chart-slot :is(.recharts-sector, .recharts-surface):focus-visible {
+  outline: 2px solid var(--mapl-focus);
+  outline-offset: -2px;
 }

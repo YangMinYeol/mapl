@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import AlertModal from "./components/common/AlertModal";
 import Footer from "./components/layout/Footer";
@@ -11,11 +11,36 @@ import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage";
 import SignupPage from "./pages/SignupPage";
 import UserPage from "./pages/UserPage";
+import { useErrorHandler } from "./hooks/useErrorHandler";
 import useAssetStore from "./stores/useAssetStore";
 import useCategoryStore from "./stores/useCategoryStore";
 
 function AppContent() {
   const location = useLocation();
+  const { user } = useContext(UserContext);
+  const handleError = useErrorHandler();
+  const errorHandler = useRef(handleError);
+  useEffect(() => { errorHandler.current = handleError; }, [handleError]);
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
+  const resetCategories = useCategoryStore((state) => state.resetCategories);
+
+  const updateAsset = useAssetStore((state) => state.updateAsset);
+  const resetAsset = useAssetStore((state) => state.resetAsset);
+
+  useEffect(() => {
+    let current = true;
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+      Promise.all([fetchCategories(user.id), updateAsset(user.id)]).catch((error) => {
+        if (current) errorHandler.current(error);
+      });
+    } else {
+      localStorage.removeItem("user");
+      resetCategories();
+      resetAsset();
+    }
+    return () => { current = false; };
+  }, [user, fetchCategories, resetCategories, updateAsset, resetAsset]);
 
   const hideHeaderFooterRoutes = ["/login", "/signup"];
   const hideHeaderFooter = hideHeaderFooterRoutes.includes(location.pathname);
@@ -43,37 +68,12 @@ export default function App() {
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
-  const resetCategories = useCategoryStore((state) => state.resetCategories);
-
-  const updateAsset = useAssetStore((state) => state.updateAsset);
-  const resetAsset = useAssetStore((state) => state.resetAsset);
-
   // 로그아웃
   function logout() {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     setUser(null);
   }
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-      fetchCategories(user.id);
-      updateAsset(user.id);
-    } else {
-      localStorage.removeItem("user");
-      resetCategories();
-      resetAsset();
-    }
-  }, [user]);
 
   return (
     <UserContext.Provider value={{ user, setUser, logout }}>

@@ -13,7 +13,7 @@ export default function Dashboard({
   setSelectedPeriod,
 }) {
   return (
-    <div className="h-full">
+    <div className="planner-panels">
       {activeTab === TABS.MEMO ? (
         <MemoDashboard
           dashboardDatas={dashboardDatas}

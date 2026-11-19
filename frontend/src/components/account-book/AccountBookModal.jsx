@@ -13,29 +13,14 @@ import {
   ACCOUNT_TYPE,
   ACCOUNT_TYPE_FILTER,
 } from "../../util/accountBookUtil";
-import { combineDateAndTime } from "../../util/dateUtil";
-import Tab from "../common/Tab";
+import { combineDateAndTime, formatDateYYYYMMDD } from "../../util/dateUtil";
+import RecordActions from "../common/modal/RecordActions";
+import Dropdown from "../common/Dropdown";
 import ModalLayout from "../common/modal/ModalLayout";
 import DateTimeInput from "../memo/DateTimeInput";
 
 const MAX_AMOUNT = 100000000;
 
-const modalSize = {
-  width: "w-[400px]",
-  height: "h-[430px]",
-  contentHeight: "h-[325px]",
-};
-
-function renderSection(title, content) {
-  return (
-    <div className="pb-3">
-      <div className="py-2">
-        <span>{title}</span>
-      </div>
-      {content}
-    </div>
-  );
-}
 
 export default function AccountBookModal({
   isOpen,
@@ -53,8 +38,10 @@ export default function AccountBookModal({
     setDate,
     time,
     setTime,
+    hasTime,
+    setHasTime,
     category,
-    setCategory,
+    setCategoryId,
     content,
     setContent,
     amount,
@@ -63,8 +50,6 @@ export default function AccountBookModal({
     setIsAmountError,
     showDateSelect,
     setShowDateSelect,
-    showTimeSelect,
-    setShowTimeSelect,
     categories,
     isLoading,
     setIsLoading,
@@ -74,19 +59,16 @@ export default function AccountBookModal({
 
   const asset = useAssetStore((state) => state.asset);
   const updateAsset = useAssetStore((state) => state.updateAsset);
-  const handleError = useErrorHandler(closeModal);
+  const handleError = useErrorHandler(onClose);
 
-  // 메모 목록 최신화 및 모달 닫기
+  // 저장된 거래와 자산을 함께 갱신한다.
   async function reloadAndClose() {
-    await loadDashboardDatas();
-    await loadCalendarDatas();
-    closeModal();
+    onClose();
+    await Promise.all([updateAsset(user.id), loadDashboardDatas(), loadCalendarDatas()]);
   }
 
   const handleCategoryChange = (e) => {
-    const id = Number(e.target.value);
-    const selected = categories.find((c) => c.id === id);
-    if (selected) setCategory(selected);
+    setCategoryId(Number(e.target.value));
   };
 
   const handleAmountChange = (e) => {
@@ -98,29 +80,23 @@ export default function AccountBookModal({
     setIsAmountError(amountNumber > MAX_AMOUNT);
   };
 
-  function handleModalClick() {
-    if (showDateSelect) setShowDateSelect(false);
-    if (showTimeSelect) setShowTimeSelect(false);
-  }
-
   // 가계부 항목 추가
   async function addAccountBook() {
-    if (isAmountError) return;
+    if (isAmountError || (hasTime && !time)) return;
 
     setIsLoading(true);
-    const userId = user.id;
     try {
       await addAccountBookItem({
-        userId: userId,
+        userId: user.id,
         assetId: asset.id,
         type,
-        occurredAt: combineDateAndTime(date, time),
+        occurredAt: hasTime ? combineDateAndTime(date, time) : formatDateYYYYMMDD(date),
+        hasTime,
         categoryId: category.id,
         content,
         amount,
       });
-      updateAsset(userId);
-      reloadAndClose();
+      await reloadAndClose();
     } catch (error) {
       handleError(error, { closeCurrentModal: true });
     } finally {
@@ -130,20 +106,20 @@ export default function AccountBookModal({
 
   // 가계부 항목 수정
   async function editAccountBook() {
-    if (isAmountError) return;
+    if (isAmountError || (hasTime && !time)) return;
 
     setIsLoading(true);
     try {
       await editAccountBookItem({
         itemId: item.id,
         type,
-        occurredAt: combineDateAndTime(date, time),
+        occurredAt: hasTime ? combineDateAndTime(date, time) : formatDateYYYYMMDD(date),
+        hasTime,
         categoryId: category.id,
         content,
         amount,
       });
-      updateAsset(user.id);
-      reloadAndClose();
+      await reloadAndClose();
     } catch (error) {
       handleError(error, { closeCurrentModal: true });
     } finally {
@@ -153,174 +129,104 @@ export default function AccountBookModal({
 
   // 가계부 항목 삭제
   async function deleteAccountBook() {
+    setIsLoading(true);
     try {
       await deleteAccountBookItem(item.id);
-      updateAsset(user.id);
-      reloadAndClose();
+      await reloadAndClose();
     } catch (error) {
       handleError(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
-  // 모달 닫기
-  function closeModal() {
-    setType(ACCOUNT_TYPE.INCOME);
-    setDate(selectedDate);
-    setTime("12:00");
-    setCategory(null);
-    setContent("");
-    setAmount(0);
-    onClose();
-  }
-
-  /** 화면 */
-  // 날짜
-  const occurredSection = (
-    <>
-      <DateTimeInput
-        showDateSelect={showDateSelect}
-        setShowDateSelect={setShowDateSelect}
-        date={date}
-        setDate={setDate}
-        showTimeSelect={showTimeSelect}
-        setShowTimeSelect={setShowTimeSelect}
-        time={time}
-        setTime={setTime}
-        allDay={false}
-      />
-    </>
-  );
-
-  // 카테고리
-  const categorySection = (
-    <div className="flex items-center justify-between">
-      <select
-        className="w-11/12 border rounded outline-none border-mapl-black"
-        value={category?.id ?? ""}
-        onChange={handleCategoryChange}
-      >
-        {!categories ? (
-          <option disabled>카테고리가 없습니다</option>
-        ) : (
-          categories.map((categoryItem) => (
-            <option key={categoryItem.id} value={categoryItem.id}>
-              {categoryItem.name}
-            </option>
-          ))
-        )}
-      </select>
-      <div
-        className="w-5 h-5 border rounded"
-        style={{
-          backgroundColor: category?.colorHex ?? "transparent",
-          borderColor: category?.colorHex ?? "#ccc",
-        }}
-      ></div>
-    </div>
-  );
-
-  // 내용
-  const contentSection = (
-    <>
-      <div>
-        <input
-          className="w-full px-1 border rounded outline-none border-mapl-black"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="지출/수입 내용"
-          maxLength={50}
-        />
-      </div>
-    </>
-  );
-
-  // 금액
-  const amountSection = (
-    <>
-      <div>
-        <input
-          type="text"
-          inputMode="numeric"
-          className={`w-full px-1 border rounded outline-none ${
-            isAmountError ? "border-red-500" : "border-mapl-black"
-          }`}
-          value={amount ? Number(amount).toLocaleString() : ""}
-          onChange={handleAmountChange}
-          placeholder="금액 입력"
-          maxLength={11}
-        />
-      </div>
-      <div className="px-1 text-red-500">
-        {isAmountError && (
-          <span>100,000,000(1억) 이하의 금액만 입력 가능합니다.</span>
-        )}
-      </div>
-    </>
-  );
-
-  // footer
-  const footerButtonClass =
-    "h-8 px-3 font-semibold border rounded cursor-pointer";
-
-  const footer = (
-    <div className="flex items-center w-full">
-      <div className="flex-1">
-        {mode === ACCOUNTBOOK_MODAL_MODE.EDIT && (
-          <button
-            className={`${footerButtonClass} bg-red-500 text-white`}
-            onClick={deleteAccountBook}
-          >
-            삭제
-          </button>
-        )}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <button
-          className={`${footerButtonClass} bg-deep-green text-white`}
-          onClick={
-            mode === ACCOUNTBOOK_MODAL_MODE.ADD
-              ? addAccountBook
-              : editAccountBook
-          }
-        >
-          {mode === ACCOUNTBOOK_MODAL_MODE.ADD ? "추가" : "수정"}
-        </button>
-        <button className={footerButtonClass} onClick={onClose}>
-          닫기
-        </button>
-      </div>
-    </div>
-  );
-
-  const modalContent = (
-    <div>
-      <div className="py-2">
-        <Tab
-          options={ACCOUNT_TYPE_FILTER.filter(
-            (item) => item.value !== ACCOUNT_TYPE.ALL
-          )}
-          selected={type}
-          onSelect={setType}
-        />
-      </div>
-      {renderSection("날짜", occurredSection)}
-      {renderSection("카테고리", categorySection)}
-      {renderSection("내용", contentSection)}
-      {renderSection("금액", amountSection)}
-    </div>
-  );
+  const isEdit = mode === ACCOUNTBOOK_MODAL_MODE.EDIT;
+  const isExpense = type === ACCOUNT_TYPE.EXPENSE;
 
   return (
     <ModalLayout
-      title={"가계부"}
+      record
+      title="가계부"
       isOpen={isOpen}
-      onClose={closeModal}
-      modalSize={modalSize}
-      content={modalContent}
-      footer={footer}
-      handleModalClick={handleModalClick}
+      onClose={onClose}
       isLoading={isLoading}
+      content={
+        <div className="record-fields">
+          <section className="record-schedule" aria-label="거래 일시">
+            <div className="record-field-heading">
+              <h3>거래 일시</h3>
+              <label className="record-switch">
+                시간 미지정
+                <input type="checkbox" checked={!hasTime} onChange={(event) => setHasTime(!event.target.checked)} />
+              </label>
+            </div>
+            <DateTimeInput
+              label="거래"
+              hideLabel
+              showDateSelect={showDateSelect}
+              setShowDateSelect={setShowDateSelect}
+              date={date}
+              setDate={setDate}
+              time={time}
+              setTime={setTime}
+              allDay={!hasTime}
+            />
+          </section>
+          <div className="record-amount-panel" data-type={type}>
+            <div className="record-field-heading">
+              <label htmlFor="ledger-amount">거래 금액</label>
+              <div className="ledger-filters" role="group" aria-label="거래 구분">
+                {ACCOUNT_TYPE_FILTER.filter((option) => option.value !== ACCOUNT_TYPE.ALL).map((option) => (
+                  <button key={option.value} aria-pressed={type === option.value}
+                    onClick={() => {
+                      if (type !== option.value) {
+                        setType(option.value);
+                        setCategoryId(null);
+                      }
+                    }}>
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="record-amount">
+              <span aria-hidden="true">{isExpense ? "−" : "+"}</span>
+              <input
+                id="ledger-amount"
+                inputMode="numeric"
+                value={amount ? Number(amount).toLocaleString() : ""}
+                onChange={handleAmountChange}
+                placeholder="0"
+                maxLength={11}
+                aria-invalid={isAmountError}
+                aria-describedby={isAmountError ? "ledger-amount-error" : undefined}
+              />
+              <span>원</span>
+            </div>
+            {isAmountError && <p className="record-error" id="ledger-amount-error" role="alert">1억 원 이하의 금액을 입력해 주세요.</p>}
+          </div>
+          <div className="record-field">
+            <label htmlFor="ledger-content">거래 내용</label>
+            <input id="ledger-content" value={content} maxLength={50}
+              placeholder={isExpense ? "지출 내용 입력" : "수입 내용 입력"}
+              onChange={(event) => setContent(event.target.value)} />
+          </div>
+          <div className="record-field">
+            <label htmlFor="ledger-category">카테고리</label>
+            <div className="record-category">
+              <i aria-hidden="true" style={{ backgroundColor: category?.colorHex }} />
+              <Dropdown className="mapl-dropdown--form" id="ledger-category" value={category?.id ?? ""} disabled={!categories.length} onChange={handleCategoryChange}>
+                {!categories.length && <option value="">카테고리가 없습니다</option>}
+                {categories.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
+              </Dropdown>
+            </div>
+          </div>
+        </div>
+      }
+      footer={
+        <RecordActions onDelete={isEdit ? deleteAccountBook : undefined} onClose={onClose}
+          onSave={isEdit ? editAccountBook : addAccountBook} disabled={isLoading || (!isEdit && !asset?.id) || isAmountError || !category || (hasTime && !time)} />
+      }
     />
   );
 }

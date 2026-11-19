@@ -1,0 +1,215 @@
+.planner-dialog {
+  position: absolute;
+  width: min(480px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  border: 1px solid var(--mapl-line);
+  box-shadow: 0 18px 42px #17383626;
+  outline: none;
+}
+.planner-dialog-frame { color: #243931; }
+.planner-dialog .modal-header, .planner-dialog .modal-footer {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  height: auto;
+  padding-inline: 14px;
+  background: #fff;
+}
+.planner-dialog .modal-header { border-bottom: 1px solid var(--mapl-line); font-weight: 600; }
+.planner-dialog .modal-content { height: auto; padding: 10px 14px; }
+.planner-dialog .modal-footer { border-top: 1px solid var(--mapl-line); padding-block: 7px; }
+.planner-dialog:not(.planner-record-dialog) .modal-footer button { border-color: #d1dfd6; }
+.planner-dialog .modal-footer .bg-deep-green { background: var(--mapl-hover); color: var(--mapl-ink); }
+.planner-dialog .modal-footer .bg-red-500 { background: #faf0ee; color: #873d37; border-color: #f1dfdc; }
+.planner-dialog input:not([type=checkbox]), .planner-dialog select {
+  min-height: 34px;
+  border-color: #cbd9d1;
+  background: #f8faf9;
+  color: var(--mapl-ink);
+  padding-left: 8px;
+}
+.planner-dialog .modal-header { min-height: 52px; }
+.planner-dialog-title { display: inline-flex; align-items: center; gap: 9px; }
+.planner-dialog-title svg { padding: 7px; width: 30px; height: 30px; background: #dfede4; color: #365e4d; border-radius: var(--mapl-control-radius); }
+.planner-dialog-close { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--mapl-control-radius); color: #49665a; cursor: pointer; }
+.planner-dialog-close:hover { background: var(--mapl-hover); color: var(--mapl-ink); }
+.planner-dialog :is(button,input,select,textarea):focus-visible, .planner-month-picker button:focus-visible {
+  outline: 2px solid var(--mapl-focus);
+  outline-offset: 1px;
+}
+
+.planner-tooltip {
+  background: #fff;
+  color: var(--mapl-ink);
+  border: 1px solid var(--mapl-line);
+  border-radius: 4px;
+  box-shadow: 0 6px 20px #1738361a;
+}
+.planner-tooltip { width: max-content; padding: 8px 10px; max-width: min(236px, calc(100vw - 16px)); line-height: 1.45; font-size: 12px; overflow-wrap: anywhere; pointer-events: none; }
+.planner-tooltip strong { display: block; margin-bottom: 3px; font-size: 13px; }
+.planner-tooltip i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; }
+.planner-tag-tooltip { position: fixed; z-index: 50; }
+
+.planner-month-picker {
+  position: absolute;
+  z-index: 15;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(216px, calc(100vw - 18px));
+  background: #fff;
+  color: var(--mapl-ink);
+  border: 1px solid var(--mapl-line);
+  border-radius: var(--mapl-panel-radius);
+  box-shadow: 0 8px 24px #17383624;
+  overflow: hidden;
+}
+.planner-month-heading, .planner-month-footer, .record-field-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.planner-month-heading { display: grid; grid-template-columns: 28px 1fr 28px; text-align: center; padding: 8px 11px 6px; }
+.planner-month-heading strong { font-size: 16px; letter-spacing: -.025em; }
+.planner-month-picker button { border-radius: var(--mapl-control-radius); cursor: pointer; }
+.planner-month-heading button { width: 28px; height: 28px; color: #486358; background: #f1f5f2; }
+.planner-month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 0 9px 8px; }
+.planner-month-grid button { justify-self: center; width: min(100%, 40px); min-height: 32px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.planner-month-picker button:hover { background: var(--mapl-hover); }
+.planner-month-grid button[aria-pressed=true] { background: #dcebe2; color: var(--mapl-ink); box-shadow: inset 0 0 0 1px #aac9b7; font-weight: 650; }
+.planner-month-footer { padding: 4px 6px; border-top: 1px solid var(--mapl-line); background: #f5f8f6; font-size: 12px; }
+.planner-month-footer time { font-variant-numeric: proportional-nums; color: var(--mapl-ink); font-weight: 600; letter-spacing: -.025em; white-space: nowrap; }
+.planner-month-footer button { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 6px; color: #315b49; }
+.planner-month-footer svg { margin-left: 4px; }
+
+.planner-record-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background: rgb(18 41 33 / 35%);
+}
+.planner-record-dialog {
+  --dashboard-muted: #54675d;
+  position: relative;
+  width: min(100%, 464px);
+  border-radius: var(--mapl-panel-radius);
+  overflow: hidden;
+  font-family: var(--mapl-font);
+  font-variant-numeric: tabular-nums;
+}
+.planner-record-dialog .planner-dialog-frame { display: flex; flex-direction: column; max-height: calc(100dvh - 28px); }
+.planner-record-dialog .modal-header { flex: none; min-height: 44px; padding: 4px 20px; }
+.planner-record-dialog .planner-dialog-title { font-size: 16px; font-weight: 620; letter-spacing: -.025em; }
+.planner-record-dialog .modal-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px; }
+.planner-record-dialog .modal-footer { flex: none; padding: 7px 20px; }
+.record-fields, .record-field { display: grid; min-width: 0; }
+.record-fields { gap: 18px; }
+.record-field { gap: 6px; }
+.record-field label, .record-field legend, .record-schedule h3, .record-date-label, .record-amount-panel label { font-size: 13px; font-weight: 600; }
+.record-field legend { margin-bottom: 8px; }
+.record-counter { color: #65796e; font-size: 11px; }
+.planner-record-dialog :is(textarea, .record-field > input, .mapl-dropdown select), .record-date-value {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #cfdcd4;
+  border-radius: var(--mapl-control-radius);
+  color: var(--mapl-ink);
+  background: #fff;
+}
+.planner-record-dialog .record-field textarea { min-height: 88px; resize: vertical; line-height: 1.6; }
+.planner-record-dialog :is(input, textarea)::placeholder { color: #74877c; }
+.planner-record-dialog [aria-invalid=true] { border-color: #b45858; }
+.record-error { font-size: 12px; color: #9b4043; }
+.planner-record-colors { display: flex; flex-wrap: wrap; gap: 5px; }
+.planner-record-colors button { position: relative; width: 27px; height: 27px; border-radius: 50%; }
+.planner-record-colors button:hover { box-shadow: inset 0 0 0 1px #17383666; }
+.planner-record-colors button[aria-pressed=true]::after {
+  content: "";
+  position: absolute;
+  inset: 6px 9px 8px;
+  border: solid #173836;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.record-schedule { display: grid; gap: 12px; padding: 14px; border-radius: var(--mapl-menu-radius); background: #eff5f0; }
+.record-switch { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; }
+.record-switch input { appearance: none; width: 30px; height: 18px; padding: 3px; background: #7a8981; border-radius: 12px; cursor: pointer; }
+.record-switch input::after { content: ""; display: block; width: 12px; height: 12px; border-radius: 50%; background: #fff; }
+.record-switch input:checked { background: #34634e; }
+.record-switch input:checked::after { transform: translateX(12px); }
+.record-date-pair, .record-date-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: start; }
+.record-date-pair .record-date-controls { grid-template-columns: 1fr; }
+.record-date-pair .record-date-label { font-size: 12px; color: #52665a; }
+.record-date-value { display: flex; align-items: center; justify-content: start; gap: 8px; white-space: nowrap; }
+button.record-date-value { cursor: pointer; }
+button.record-date-value:hover, .record-date-value[aria-expanded=true] { border-color: #84a791; background: #fafcfb; }
+.record-date-value svg { color: #587766; }
+.record-time-picker { padding: 6px; background: #fff; border: 1px solid var(--mapl-line); border-radius: var(--mapl-control-radius); }
+.record-time-parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.record-time-parts .mapl-dropdown select { min-height: 32px; padding: 4px 16px 4px 6px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.record-time-parts .mapl-dropdown::after { right: 7px; width: 5px; height: 5px; }
+@supports (appearance: base-select) and selector(select::picker(select)) {
+  .record-time-parts .mapl-dropdown--form select::picker(select) {
+    inline-size: anchor-size(width);
+    min-inline-size: 0;
+    max-block-size: min(148px, 50dvh);
+    padding: 3px;
+  }
+  .record-time-parts .mapl-dropdown--form option {
+    min-height: 28px;
+    padding: 3px 4px;
+    white-space: nowrap;
+  }
+  .record-time-parts .mapl-dropdown--form option::checkmark { display: none; }
+}
+.record-time-done { display: block; margin-top: 8px; margin-left: auto; padding: 5px 10px; border-radius: var(--mapl-control-radius); background: var(--mapl-hover); color: var(--mapl-ink); font-size: 12px; font-weight: 600; cursor: pointer; }
+.record-time-done:hover { background: #dcebe2; }
+.record-category { position: relative; }
+.record-category > i { position: absolute; z-index: 1; left: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.record-category > i { width: 13px; height: 13px; border-radius: 4px; border: 1px solid #17383624; }
+.record-category .mapl-dropdown { width: 100%; }
+.planner-record-dialog .record-category select { padding-inline: 32px 25px; }
+.planner-mini-calendar { border: 1px solid var(--mapl-line); background: #fff; border-radius: var(--mapl-control-radius); padding: 6px; font-size: 12px; }
+.planner-mini-calendar .date-cell { min-width: 0; cursor: pointer; }
+.record-date-popup {
+  position: fixed;
+  z-index: 2;
+  width: min(236px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow: auto;
+  border-radius: var(--mapl-control-radius);
+  box-shadow: 0 8px 24px #17383626;
+}
+.record-date-popup:has(.record-time-picker) { width: min(208px, calc(100vw - 16px)); }
+.record-amount-panel { padding: 11px 14px; border: 1px solid #e5ebe7; border-radius: var(--mapl-menu-radius); background: #f4f7f5; }
+.record-amount { display: flex; gap: 8px; align-items: baseline; padding: 5px 0 2px; border-bottom: 1px solid #cbd8cf; font-weight: 650; }
+.record-amount > span:first-child { font-size: 19px; }
+.record-amount-panel[data-type=income] .record-amount { color: #23644e; }
+.record-amount-panel[data-type=expense] .record-amount { color: #9d4352; }
+.planner-record-dialog .record-amount input { flex: 1; width: 0; min-width: 0; padding: 0; min-height: 36px; background: transparent; border: 0; color: inherit; font-size: 26px; font-weight: 650; text-align: right; letter-spacing: -.035em; }
+.record-amount-panel .record-error { margin-top: 6px; }
+.record-actions { width: 100%; display: flex; align-items: center; gap: 8px; }
+.record-actions button { display: inline-flex; gap: 6px; align-items: center; justify-content: center; min-height: 36px; padding: 6px 13px; border-radius: var(--mapl-control-radius); font-size: 13px; font-weight: 600; cursor: pointer; }
+.record-delete { border: 1px solid #e8d7d4; color: #964944; }
+.record-delete:hover { border-color: #d9b9b4; background: #faf0ee; }
+.record-cancel { margin-left: auto; border: 1px solid var(--mapl-line); }
+.record-cancel:hover { background: #eff4f0; }
+.record-save { color: #fff; background: var(--mapl-ink); }
+.record-save:hover { background: #285348; }
+.record-save:disabled { opacity: .5; cursor: default; }
+@media (max-width: 480px) {
+  .planner-record-dialog .modal-header, .planner-record-dialog .modal-content, .planner-record-dialog .modal-footer { padding-inline: 14px; }
+  .planner-record-dialog :is(input:not([type=checkbox]), select, textarea) { font-size: 16px; }
+  .planner-record-dialog .record-amount input { font-size: 25px; }
+}
+@media (max-width: 359px) {
+  .record-date-pair { grid-template-columns: 1fr; }
+}

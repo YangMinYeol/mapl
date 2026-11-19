@@ -1,10 +1,10 @@
-export default function Loading() {
+export default function Loading({ inline = false }) {
   return (
-    <div className="bg-black opacity-10 inset-0 fixed">
-      <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className={inline ? "grid min-h-24 flex-1 place-items-center" : "bg-black opacity-10 inset-0 fixed"}>
+      <div className={inline ? "flex items-center justify-center" : "fixed inset-0 flex items-center justify-center z-50"}>
         <svg
           aria-hidden="true"
-          className="w-12 h-12 text-white animate-spin fill-deep-green"
+          className={inline ? "w-6 h-6 text-gray-200 motion-safe:animate-spin fill-deep-green" : "w-12 h-12 text-white motion-safe:animate-spin fill-deep-green"}
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

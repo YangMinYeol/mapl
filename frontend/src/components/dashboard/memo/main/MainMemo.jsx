@@ -11,9 +11,10 @@ export default function MainMemo({
   loadDashboardDatas,
   loadCalendarDatas,
   openLinkModal,
+  onEdit,
 }) {
   return (
-    <div className="h-[520px]">
+    <section className="planner-panel primary-panel" aria-label="선택한 기간 메모">
       <MainMemoHeader
         selectedDate={selectedDate}
         selectedPeriod={selectedPeriod}
@@ -28,7 +29,8 @@ export default function MainMemo({
         loadDashboardDatas={loadDashboardDatas}
         loadCalendarDatas={loadCalendarDatas}
         openLinkModal={openLinkModal}
+        onEdit={onEdit}
       />
-    </div>
+    </section>
   );
 }

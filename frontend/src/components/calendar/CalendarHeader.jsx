@@ -30,13 +30,15 @@ export default function CalendarHeader({
   }
 
   return (
-    <div className="relative flex items-center justify-between py-2 border-y-1 border-mapl-slate h-[40px]">
+    <div className="planner-toolbar">
       {/* Left */}
       <div className="calendar-header-left">
         <div className="flex pl-1 space-x-1">
           {Object.values(TABS).map((tab) => (
             <button
               key={tab}
+              type="button"
+              aria-pressed={activeTab === tab}
               className={`px-1 border border-mapl-slate cursor-pointer rounded-md ${
                 activeTab === tab ? "bg-deep-green text-white" : "bg-white"
               } hover:bg-deep-green hover:text-white`}
@@ -53,27 +55,31 @@ export default function CalendarHeader({
         {createMonthNavigationButton("prev", handleChangeMonth)}
         <button
           className="inline-block px-3 font-medium rounded cursor-pointer dropdown-btn hover:bg-mapl-slate w-28"
+          aria-expanded={isDropdownOpen}
+          aria-haspopup="dialog"
+          aria-controls={isDropdownOpen ? "planner-month-picker" : undefined}
           onClick={toggleCalendarDropdown}
           ref={dropdownButtonRef}
         >
           {yearMonth}
         </button>
-        {createMonthNavigationButton("next", handleChangeMonth)}
 
         {/* 드롭다운 */}
-        <DropdownCalendar
-          isOpen={isDropdownOpen}
-          onClose={() => setIsDropdownOpen(false)}
-          currentDate={currentDate}
-          onSelectYearMonth={handleYearMonth}
-          handleTodayClick={handleDropdownTodayClick}
-          dropdownButtonRef={dropdownButtonRef}
-        />
+        {isDropdownOpen && (
+          <DropdownCalendar
+            onClose={() => setIsDropdownOpen(false)}
+            currentDate={currentDate}
+            onSelectYearMonth={handleYearMonth}
+            handleTodayClick={handleDropdownTodayClick}
+            dropdownButtonRef={dropdownButtonRef}
+          />
+        )}
+        {createMonthNavigationButton("next", handleChangeMonth)}
       </div>
 
       {/* Right */}
       <div className="pr-2">
-        <button className="cursor-pointer group" onClick={goToToday}>
+        <button className="cursor-pointer group" aria-label="오늘로 이동" title="오늘로 이동" onClick={goToToday}>
           <FontAwesomeIcon
             icon={faCalendarCheck}
             className="group-hover:text-green-900"

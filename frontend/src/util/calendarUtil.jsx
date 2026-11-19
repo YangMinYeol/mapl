@@ -68,6 +68,7 @@ export function createMonthNavigationButton(direction, handleChangeMonth) {
   return (
     <button
       className="flex items-center justify-center w-5 h-5 rounded cursor-pointer hover:bg-mapl-slate"
+      aria-label={direction === "next" ? "다음 달" : "이전 달"}
       onClick={() => handleChangeMonth(direction === "next" ? 1 : -1)}
     >
       <FontAwesomeIcon

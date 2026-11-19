@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useColors } from "../context/ColorContext";
 import { setDateByPeriod } from "../util/dateUtil";
-import { DEFAULT_COLOR } from "../util/util";
+import { getDefaultMemoTimes } from "../util/timeUtil";
+import { DEFAULT_COLOR_ID } from "../util/util";
 
 export function useMemoModalForm({
   mode,
@@ -20,8 +20,6 @@ export function useMemoModalForm({
   // 시간
   const [startTime, setStartTime] = useState("12:00");
   const [endTime, setEndTime] = useState("12:30");
-  const [showStartTimeSelect, setShowStartTimeSelect] = useState(false);
-  const [showEndTimeSelect, setShowEndTimeSelect] = useState(false);
 
   // 내용
   const [content, setContent] = useState("");
@@ -29,12 +27,14 @@ export function useMemoModalForm({
   const [dateTimeError, setDateTimeError] = useState(false);
 
   // 팔레트
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const [selectedColorId, setSelectedColorId] = useState(10);
-  const [selectedColor, setSelectedColor] = useState(DEFAULT_COLOR);
-  const colors = useColors();
+  const [selectedColorId, setSelectedColorId] = useState(DEFAULT_COLOR_ID);
 
   useEffect(() => {
+    setShowStartDateSelect(false);
+    setShowEndDateSelect(false);
+    if (!isOpen) return;
+    setContentError(false);
+    setDateTimeError(false);
     if (mode === "create") {
       const { startDate, endDate } = setDateByPeriod(
         selectedPeriod,
@@ -42,12 +42,12 @@ export function useMemoModalForm({
       );
       setStartDate(startDate);
       setEndDate(endDate);
-      setStartTime("12:00");
-      setEndTime("12:30");
+      const defaultTimes = getDefaultMemoTimes();
+      setStartTime(defaultTimes.startTime);
+      setEndTime(defaultTimes.endTime);
       setAllDay(true);
       setContent("");
-      setSelectedColorId(10);
-      setSelectedColor(DEFAULT_COLOR);
+      setSelectedColorId(DEFAULT_COLOR_ID);
     } else if (mode === "edit" && memo) {
       setStartDate(memo.startDate);
       setEndDate(memo.endDate);
@@ -56,12 +56,8 @@ export function useMemoModalForm({
       setAllDay(memo.allday);
       setContent(memo.content);
       setSelectedColorId(memo.colorId);
-      const selectedColor = colors.find((color) => color.id === memo.colorId);
-      if (selectedColor) {
-        setSelectedColor(selectedColor.hex);
-      }
     }
-  }, [mode, isOpen]);
+  }, [mode, isOpen, selectedDate, selectedPeriod, memo]);
 
   return {
     allDay,
@@ -76,10 +72,6 @@ export function useMemoModalForm({
     setShowEndDateSelect,
     startTime,
     setStartTime,
-    showStartTimeSelect,
-    setShowStartTimeSelect,
-    showEndTimeSelect,
-    setShowEndTimeSelect,
     endTime,
     setEndTime,
     content,
@@ -88,11 +80,7 @@ export function useMemoModalForm({
     setContentError,
     dateTimeError,
     setDateTimeError,
-    isPaletteOpen,
-    setIsPaletteOpen,
     selectedColorId,
     setSelectedColorId,
-    selectedColor,
-    setSelectedColor,
   };
 }

@@ -12,7 +12,7 @@ export default function MiniCalendar({ date, setDate }) {
   }
 
   return (
-    <div className="absolute z-10 w-full h-48 mt-1 bg-white border rounded top-5">
+    <div className="planner-mini-calendar">
       <MiniCalendarHeader
         calendarDate={calendarDate}
         handleChangeMonth={handleChangeMonth}

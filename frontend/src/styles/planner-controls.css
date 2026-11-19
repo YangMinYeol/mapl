@@ -1,0 +1,28 @@
+:root {
+  --mapl-ink: var(--color-deep-green, #173836);
+  --mapl-line: #dce5e0;
+  --mapl-control-radius: 6px;
+  --mapl-menu-radius: 8px;
+  --mapl-panel-radius: 12px;
+  --mapl-focus: #527d6d;
+  --mapl-hover: #e7f0ea;
+  --mapl-font: Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+.ledger-filters { display: flex; gap: 3px; padding: 3px; border: 1px solid var(--mapl-line); background: #eaf0ec; border-radius: var(--mapl-menu-radius); }
+.ledger-filters button {
+  padding: 4px 9px;
+  border-radius: var(--mapl-control-radius);
+  color: var(--dashboard-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ledger-filters button:hover:not([aria-pressed=true]) { background: #dbe6df; color: var(--mapl-ink); }
+.ledger-filters button:focus-visible { outline: 2px solid var(--mapl-focus); outline-offset: 1px; }
+.ledger-filters button[aria-pressed=true] { background: #fff; box-shadow: 0 1px 4px #123c2e18; color: var(--mapl-ink); font-weight: 650; }
+
+:where(.planner-workspace, .planner-dialog) :is(button, input, textarea, select):focus-visible {
+  outline: 2px solid var(--mapl-focus);
+  outline-offset: 1px;
+}
