@@ -8,7 +8,7 @@ import { BOARD_TYPE, POST_FORM_MODE } from "../../constants/board";
 import { REPORT_TYPE_MAP, STATUS_LABEL_MAP } from "../../constants/report";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import ColorButton from "../common/ColorButton";
-import SelectArrow from "../common/SelectArrow";
+import Dropdown from "../common/Dropdown";
 import Loading from "../common/Loading";
 
 const MAX_TITLE_LENGTH = 50;
@@ -237,10 +237,10 @@ export default function BoardPost({
         {isReport && isReadOnly && isAdmin && (
           <FormRow label="진행상태">
             <div className="flex w-full gap-2">
-              <div className="relative flex-grow h-12">
-                <select
+                <Dropdown
                   ref={statusRef}
-                  className="w-full h-full px-3 pr-10 border rounded appearance-none border-mapl-slate hover:cursor-pointer"
+                  className="flex-grow h-12"
+                  aria-label="진행상태"
                   defaultValue={Object.keys(STATUS_LABEL_MAP)[0]}
                 >
                   {Object.entries(STATUS_LABEL_MAP).map(([key, label]) => (
@@ -248,9 +248,7 @@ export default function BoardPost({
                       {label}
                     </option>
                   ))}
-                </select>
-                <SelectArrow />
-              </div>
+                </Dropdown>
               <div className="h-12">
                 <button
                   className="h-full py-3 text-white rounded cursor-pointer px-7 bg-deep-green"
@@ -264,10 +262,10 @@ export default function BoardPost({
         )}
         {isReport && (
           <FormRow label="유형">
-            <div className="relative w-full h-12">
-              <select
+              <Dropdown
                 ref={typeRef}
-                className="w-full h-full px-3 pr-10 border rounded appearance-none border-mapl-slate hover:cursor-pointer"
+                className="w-full h-12"
+                aria-label="오류 유형"
                 defaultValue={Object.keys(REPORT_TYPE_MAP)[0]}
                 disabled={isReadOnly}
               >
@@ -276,9 +274,7 @@ export default function BoardPost({
                     {label}
                   </option>
                 ))}
-              </select>
-              <SelectArrow />
-            </div>
+              </Dropdown>
           </FormRow>
         )}
 
