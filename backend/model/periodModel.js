@@ -3,7 +3,7 @@ const db = require("../db");
 // 기한 목록 조회
 async function getPeriodType() {
   const query = `
-  SELECT * FROM period_type`;
+  SELECT * FROM period_type ORDER BY id`;
   return db.query(query);
 }
 

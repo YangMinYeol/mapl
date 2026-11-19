@@ -5,15 +5,8 @@ const {
   startOfMonth,
   endOfMonth,
   format,
-  addDays,
+  parseISO,
 } = require("date-fns");
-
-// 하루 더한 yyyy-MM-dd 문자열 반환
-function getNextDateString(dateStr) {
-  const date = new Date(dateStr);
-  const nextDate = addDays(date, 1);
-  return format(nextDate, "yyyy-MM-dd");
-}
 
 function mapAccountBookRow(row) {
   return {
@@ -23,8 +16,10 @@ function mapAccountBookRow(row) {
     categoryId: row.category_id,
     type: row.type,
     content: row.content,
-    amount: row.amount,
+    amount: Number(row.amount),
     occurredAt: row.occurred_at,
+    occurredDate: row.occurred_date,
+    hasTime: row.has_time,
     createdAt: row.created_at,
     assetId: row.asset_id,
     // account_book_category
@@ -35,83 +30,46 @@ function mapAccountBookRow(row) {
   };
 }
 
-// 대시보드용 가계부 조회 (종료일은 exclusive)
-async function getDashboardAccountBooks(userId, startDate, endDate) {
-  const conditions = ["ab.user_id = $1"];
+// 시간 지정 거래는 pg가 timestamp를 해석하는 서버 시간대에서 사용자 시간대로 변환한다.
+async function getDashboardAccountBooks(userId, startDate, endDate, timeZone) {
   const params = [userId];
-  let paramIndex = 2;
-
-  if (startDate) {
-    conditions.push(`ab.occurred_at::date >= $${paramIndex++}`);
-    params.push(startDate);
+  const conditions = ["ab.user_id = $1"];
+  if (startDate || endDate) {
+    let day = "ab.occurred_at::date";
+    if (timeZone) {
+      params.push(Intl.DateTimeFormat().resolvedOptions().timeZone, timeZone);
+      day = "(CASE WHEN ab.has_time THEN (ab.occurred_at AT TIME ZONE $2) AT TIME ZONE $3 ELSE ab.occurred_at END)::date";
+    }
+    if (startDate) {
+      params.push(startDate);
+      conditions.push(`${day} >= $${params.length}`);
+    }
+    if (endDate) {
+      params.push(endDate);
+      conditions.push(`${day} <= $${params.length}`);
+    }
   }
 
-  if (endDate) {
-    const endDateExclusive = getNextDateString(endDate);
-    conditions.push(`ab.occurred_at::date < $${paramIndex++}`);
-    params.push(endDateExclusive);
-  }
-
-  const whereClause = `WHERE ${conditions.join(" AND ")}`;
-
-  const query = `
-    SELECT
-      ab.id,
-      ab.user_id,
-      ab.category_id,
-      ab.type,
-      ab.content,
-      ab.amount,
-      ab.occurred_at,
-      ab.created_at,
-      abc.name,
-      abc.color_id,
-      c.hex
+  const result = await db.query(`
+    SELECT ab.*, abc.name, abc.color_id, c.hex,
+      CASE WHEN NOT ab.has_time THEN to_char(ab.occurred_at, 'YYYY-MM-DD') END AS occurred_date
     FROM account_book ab
     JOIN account_book_category abc ON ab.category_id = abc.id
     LEFT JOIN color c ON abc.color_id = c.id
-    ${whereClause}
-    ORDER BY ab.occurred_at DESC;
-  `;
-
-  const result = await db.query(query, params);
+    WHERE ${conditions.join(" AND ")}
+    ORDER BY ab.occurred_at DESC, ab.id DESC
+  `, params);
   return result.rows.map(mapAccountBookRow);
 }
 
-// 달력용 가계부 목록 조회
-async function getCalendarAccountBooks(userId, currentDate) {
-  const prevMonthStart = startOfMonth(subMonths(currentDate, 1));
-  const nextMonthEnd = endOfMonth(addMonths(currentDate, 1));
-
-  const startDate = format(prevMonthStart, "yyyy-MM-dd");
-  const endDate = format(nextMonthEnd, "yyyy-MM-dd");
-
-  const endDateExclusive = getNextDateString(endDate);
-
-  const query = `
-    SELECT
-      ab.id,
-      ab.user_id,
-      ab.category_id,
-      ab.type,
-      ab.content,
-      ab.amount,
-      ab.occurred_at,
-      ab.created_at,
-      abc.name,
-      abc.color_id,
-      c.hex
-    FROM account_book ab
-    JOIN account_book_category abc ON ab.category_id = abc.id
-    LEFT JOIN color c ON abc.color_id = c.id
-    WHERE ab.user_id = $1
-      AND ab.occurred_at >= $2
-      AND ab.occurred_at < $3
-    ORDER BY ab.occurred_at DESC;
-  `;
-
-  const result = await db.query(query, [userId, startDate, endDateExclusive]);
-  return result.rows.map(mapAccountBookRow);
+function getCalendarAccountBooks(userId, currentDate, timeZone) {
+  const month = parseISO(currentDate);
+  return getDashboardAccountBooks(
+    userId,
+    format(startOfMonth(subMonths(month, 1)), "yyyy-MM-dd"),
+    format(endOfMonth(addMonths(month, 1)), "yyyy-MM-dd"),
+    timeZone
+  );
 }
 
 // 가계부 항목 추가
@@ -122,23 +80,28 @@ async function addAccountBookItem(
   occurredAt,
   categoryId,
   content,
-  amount
+  amount,
+  hasTime = true
 ) {
   const client = await db.connect();
 
   try {
     await client.query("BEGIN");
 
-    const date = new Date(occurredAt);
+    const date = hasTime ? new Date(occurredAt) : `${occurredAt} 00:00:00`;
 
-    // 1. 가계부 기록 추가
-    await client.query(
+    // 소유한 자산과 해당 유형의 카테고리만 거래에 연결한다.
+    const inserted = await client.query(
       `
-      INSERT INTO account_book(user_id, type, occurred_at, category_id, asset_id, content, amount)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO account_book(user_id, type, occurred_at, category_id, asset_id, content, amount, has_time)
+      SELECT $1, $2, $3, c.id, a.id, $6, $7, $8
+      FROM account_book_category c, asset a
+      WHERE c.id = $4 AND c.user_id = $1 AND c.type = $2 AND a.id = $5 AND a.user_id = $1
       `,
-      [userId, type, date, categoryId, assetId, content, amount]
+      [userId, type, date, categoryId, assetId, content, amount, hasTime]
     );
+
+    if (!inserted.rowCount) throw new Error("자산 또는 카테고리를 찾을 수 없습니다.");
 
     // 2. 자산 balance 업데이트
     const assetUpdateQuery = `
@@ -166,7 +129,9 @@ async function updateAccountBookItem(
   newOccurredAt,
   newCategoryId,
   newContent,
-  newAmount
+  newAmount,
+  hasTime,
+  userId
 ) {
   const client = await db.connect();
 
@@ -177,9 +142,10 @@ async function updateAccountBookItem(
     const selectQuery = `
       SELECT user_id, asset_id, type AS old_type, amount AS old_amount
       FROM account_book
-      WHERE id = $1
+      WHERE id = $1 AND user_id = $2
+      FOR UPDATE
     `;
-    const { rows } = await client.query(selectQuery, [itemId]);
+    const { rows } = await client.query(selectQuery, [itemId, userId]);
     const existing = rows[0];
 
     if (!existing) {
@@ -213,25 +179,30 @@ async function updateAccountBookItem(
     );
 
     // 4. 가계부 항목 수정
-    await client.query(
+    const updated = await client.query(
       `
       UPDATE account_book
       SET type = $1,
           occurred_at = $2,
           category_id = $3,
           content = $4,
-          amount = $5
-      WHERE id = $6
+          amount = $5,
+          has_time = $7
+      WHERE id = $6 AND EXISTS (SELECT 1 FROM account_book_category
+        WHERE id = $3 AND type = $1 AND user_id = $8)
       `,
       [
         newType,
-        new Date(newOccurredAt),
+        hasTime ? new Date(newOccurredAt) : `${newOccurredAt} 00:00:00`,
         newCategoryId,
         newContent,
         newAmount,
         itemId,
+        hasTime,
+        userId,
       ]
     );
+    if (!updated.rowCount) throw new Error("카테고리를 찾을 수 없습니다.");
 
     await client.query("COMMIT");
   } catch (error) {
@@ -243,7 +214,7 @@ async function updateAccountBookItem(
 }
 
 // 가계부 항목 삭제 (자산 반영 포함)
-async function deleteAccountBookItem(itemId) {
+async function deleteAccountBookItem(itemId, userId) {
   const client = await db.connect();
 
   try {
@@ -253,9 +224,10 @@ async function deleteAccountBookItem(itemId) {
     const selectQuery = `
       SELECT id, user_id, asset_id, type, amount
       FROM account_book
-      WHERE id = $1
+      WHERE id = $1 AND user_id = $2
+      FOR UPDATE
     `;
-    const { rows } = await client.query(selectQuery, [itemId]);
+    const { rows } = await client.query(selectQuery, [itemId, userId]);
     const item = rows[0];
 
     if (!item) {

@@ -5,6 +5,7 @@ const {
   startOfMonth,
   endOfMonth,
   format,
+  parseISO,
 } = require("date-fns");
 
 // DB memo row → 프론트용 메모 객체로 매핑
@@ -46,8 +47,8 @@ async function getMemos(userId, selectedDate) {
 
 // 달력 메모 목록 조회
 async function getCalendarMemos(userId, currentDate) {
-  const prevMonthStart = startOfMonth(subMonths(currentDate, 1));
-  const nextMonthEnd = endOfMonth(addMonths(currentDate, 1));
+  const prevMonthStart = startOfMonth(subMonths(parseISO(currentDate), 1));
+  const nextMonthEnd = endOfMonth(addMonths(parseISO(currentDate), 1));
 
   const startDate = format(prevMonthStart, "yyyy-MM-dd");
   const endDate = format(nextMonthEnd, "yyyy-MM-dd");
@@ -68,7 +69,7 @@ async function getCalendarMemos(userId, currentDate) {
 }
 
 // 메모 추가
-async function addMemo(memos) {
+async function addMemo(memos, userId) {
   const client = await db.connect();
   try {
     await client.query("BEGIN");
@@ -77,16 +78,16 @@ async function addMemo(memos) {
 
     for (const memo of memos) {
       // 1. 메모 추가
-      const memoId = await insertMemo(memo);
+      const memoId = await insertMemo(client, { ...memo, userId });
 
       if (memo.isLinked) {
         // 2. 메모 링크 값 업데이트
-        const updatedMemo = await updateMemoLink(memoId, memo.link);
+        const updatedMemo = await updateMemoLink(client, memoId, memo.link);
         insertedMemos.push(updatedMemo);
         // 3. 부모 메모 링크여부 업데이트
-        await markParentAsLinked(memo.link);
+        await markParentAsLinked(client, memo.link, userId);
       } else {
-        const updatedMemo = await updateMemoLink(memoId, memoId);
+        const updatedMemo = await updateMemoLink(client, memoId, memoId);
         insertedMemos.push(updatedMemo);
       }
     }
@@ -102,7 +103,7 @@ async function addMemo(memos) {
 }
 
 // 메모 추가
-async function insertMemo({
+async function insertMemo(client, {
   userId,
   content,
   startDate,
@@ -112,14 +113,14 @@ async function insertMemo({
   allDay = true,
   periodId,
   isLinked,
-  colorId = 10,
+  colorId = 5,
 }) {
   const query = `
     INSERT INTO memo (user_id, content, start_date, end_date, start_time, end_time, allday, period_id, color_id, is_linked, link)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NULL)
     RETURNING id;
   `;
-  const result = await db.query(query, [
+  const result = await client.query(query, [
     userId,
     content,
     startDate,
@@ -135,108 +136,87 @@ async function insertMemo({
 }
 
 // 메모 링크 업데이트
-async function updateMemoLink(memoId, linkId) {
+async function updateMemoLink(client, memoId, linkId) {
   const query = `
     UPDATE memo SET link = $1 WHERE id = $2 RETURNING *;
   `;
-  const result = await db.query(query, [linkId, memoId]);
+  const result = await client.query(query, [linkId, memoId]);
   return result.rows[0];
 }
 
 // 부모 메모 링크여부 업데이트
-async function markParentAsLinked(parentId) {
-  await db.query(`UPDATE memo SET is_linked = true WHERE id = $1`, [parentId]);
+async function markParentAsLinked(client, parentId, userId) {
+  const parent = await client.query(
+    "UPDATE memo SET is_linked = true WHERE id = $1 AND user_id = $2 RETURNING id",
+    [parentId, userId]
+  );
+  if (!parent.rowCount) throw new Error("연결할 메모를 찾을 수 없습니다.");
 }
 
 // 메모 수정
-async function updateMemo(memo) {
-  const {
-    id,
-    content,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-    allDay,
-    link,
-    isLinked,
-    colorId,
-  } = memo;
-
-  // 1. 본인 메모(id 기준) 전체 수정
-  const updateSelfQuery = `
-    UPDATE memo
-    SET content = $1,
-        start_date = $2,
-        end_date = $3,
-        start_time = $4,
-        end_time = $5,
-        allDay = $6,
-        color_id = $7
-    WHERE id = $8;
-  `;
-
-  const selfResult = await db.query(updateSelfQuery, [
-    content,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-    allDay,
-    colorId,
-    id,
-  ]);
-
-  // 2. 링크된 메모가 있다면 해당 group 전체의 content 수정
-  if (isLinked) {
-    const updateLinkedQuery = `
-      UPDATE memo
-      SET content = $1
-      WHERE link = $2;
-    `;
-    await db.query(updateLinkedQuery, [content, link]);
+async function updateMemo(memo, userId) {
+  const { id, content, startDate, endDate, startTime, endTime, allDay, colorId } = memo;
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await client.query(
+      `UPDATE memo SET content = $1, start_date = $2, end_date = $3, start_time = $4,
+        end_time = $5, allday = $6, color_id = $7 WHERE id = $8 AND user_id = $9
+        RETURNING link, is_linked`,
+      [content, startDate, endDate, startTime, endTime, allDay, colorId, id, userId]
+    );
+    const updated = result.rows[0];
+    if (!updated) throw new Error("수정할 메모를 찾을 수 없습니다.");
+    if (updated.is_linked) {
+      await client.query("UPDATE memo SET content = $1 WHERE link = $2 AND user_id = $3",
+        [content, updated.link, userId]);
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
   }
-
-  return selfResult;
 }
 
 // 메모 삭제
-async function deleteMemo(memoId) {
-  const query = `DELETE FROM memo WHERE id = $1`;
-  return db.query(query, [memoId]);
+async function deleteMemo(memoId, userId) {
+  const query = `DELETE FROM memo WHERE id = $1 AND user_id = $2`;
+  return db.query(query, [memoId, userId]);
 }
 
 // 링크 메모 일괄 삭제
-async function deleteLinkedMemos(linkId) {
-  const query = `DELETE FROM memo WHERE link = $1`;
-  return db.query(query, [linkId]);
+async function deleteLinkedMemos(linkId, userId) {
+  const query = `DELETE FROM memo WHERE link = $1 AND user_id = $2`;
+  return db.query(query, [linkId, userId]);
 }
 
 // 메모 상태 변경
-async function toggleMemoCompletion(memoId) {
-  const query = `UPDATE memo SET completed = NOT completed WHERE id = $1`;
-  return db.query(query, [memoId]);
+async function toggleMemoCompletion(memoId, userId) {
+  const query = `UPDATE memo SET completed = NOT completed WHERE id = $1 AND user_id = $2`;
+  return db.query(query, [memoId, userId]);
 }
 
 // 링크 메모 상태 일괄 변경
-async function toggleLinkedMemosCompletion(linkId) {
-  const query = `UPDATE memo SET completed = NOT completed WHERE link = $1`;
-  return db.query(query, [linkId]);
+async function toggleLinkedMemosCompletion(linkId, userId) {
+  const query = `UPDATE memo SET completed = NOT completed WHERE link = $1 AND user_id = $2`;
+  return db.query(query, [linkId, userId]);
 }
 
 // 메모 미루기
-async function postponeMemo(memoId, startDate, endDate) {
+async function postponeMemo(memoId, startDate, endDate, userId) {
   const query = `
     UPDATE memo
     SET start_date = $1,
         end_date = $2
-    WHERE id = $3
+    WHERE id = $3 AND user_id = $4
   `;
-  return db.query(query, [startDate, endDate, memoId]);
+  return db.query(query, [startDate, endDate, memoId, userId]);
 }
 
 // 링크 연결되어있는 메모 목록 불러오기
-async function getLinkedMemos(linkId) {
+async function getLinkedMemos(linkId, userId) {
   const query = `
     SELECT memo.*,
       color.hex AS color_hex,
@@ -246,41 +226,36 @@ async function getLinkedMemos(linkId) {
     ON memo.color_id = color.id
     JOIN period_type
     ON memo.period_id = period_type.id
-    WHERE link = $1;
+    WHERE link = $1 AND memo.user_id = $2;
   `;
-  const result = await db.query(query, [linkId]);
+  const result = await db.query(query, [linkId, userId]);
   return result.rows.map(mapMemoRow);
 }
 
 // 링크되어있는 메모 링크 해제
-async function unlinkMemo(memoId, linkId) {
-  const linkedMemoCount = await getLinkedMemoCount(linkId);
-
-  if (linkedMemoCount === 2) {
-    const query = `
-      UPDATE memo SET link = id, is_linked = false WHERE link = $1;
-    `;
-    const result = await db.query(query, [linkId]);
-    return result.rowCount;
-  } else if (linkedMemoCount >= 3) {
-    const query = `
-      UPDATE memo SET link = $1, is_linked = false WHERE id = $1;
-    `;
-    const result = await db.query(query, [memoId]);
-    return result.rowCount;
-  } else {
-    // 링크된 메모가 1개 이하인 경우: 아무 것도 하지 않음
-    return 0;
+async function unlinkMemo(memoId, linkId, userId) {
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const group = await client.query(
+      "SELECT id FROM memo WHERE user_id = $1 AND link = $2 AND is_linked ORDER BY id FOR UPDATE",
+      [userId, linkId]
+    );
+    const ids = group.rows.map((row) => row.id);
+    const target = ids.find((id) => String(id) === String(memoId));
+    if (target != null && ids.length >= 2) {
+      await client.query(
+        "UPDATE memo SET link = id, is_linked = false WHERE user_id = $1 AND id = ANY($2::int[])",
+        [userId, ids.length === 2 ? ids : [target]]
+      );
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
   }
-}
-
-// 링크된 메모 개수 조회
-async function getLinkedMemoCount(linkId) {
-  const query = `
-    SELECT COUNT(*) FROM memo WHERE link = $1 AND is_linked = true;
-  `;
-  const result = await db.query(query, [linkId]);
-  return parseInt(result.rows[0].count, 10);
 }
 
 module.exports = {

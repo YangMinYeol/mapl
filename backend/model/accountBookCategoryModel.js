@@ -77,16 +77,16 @@ async function getNextSortOrder(userId, type) {
 }
 
 // 가계부 카테고리 수정
-async function updateAccountBookCategory(id, name, colorId) {
+async function updateAccountBookCategory(id, name, colorId, userId) {
   const query = `
     UPDATE account_book_category
     SET 
       name = $1,
       color_id = $2
-    WHERE id = $3
+    WHERE id = $3 AND user_id = $4
   `;
 
-  const result = await db.query(query, [name, colorId, id]);
+  const result = await db.query(query, [name, colorId, id, userId]);
   return result.rows[0];
 }
 
@@ -98,8 +98,8 @@ async function deleteAccountBookCategory(userId, type, categoryId) {
 
     await moveItemsToDefaultCategoryOnDelete(client, userId, type, categoryId);
 
-    const deleteQuery = `DELETE FROM account_book_category WHERE id = $1`;
-    await client.query(deleteQuery, [categoryId]);
+    const deleteQuery = `DELETE FROM account_book_category WHERE id = $1 AND user_id = $2 AND type = $3 AND NOT is_default`;
+    await client.query(deleteQuery, [categoryId, userId, type]);
 
     await client.query("COMMIT");
   } catch (error) {
@@ -135,23 +135,23 @@ async function moveItemsToDefaultCategoryOnDelete(
   const updateQuery = `
     UPDATE account_book
     SET category_id = $1
-    WHERE category_id = $2
+    WHERE category_id = $2 AND user_id = $3 AND type = $4
   `;
-  await client.query(updateQuery, [defaultCategoryId, categoryId]);
+  await client.query(updateQuery, [defaultCategoryId, categoryId, userId, type]);
 }
 
 // 가계부 카테고리 재정렬
-async function reorderAccountBookCategory(reorderList) {
+async function reorderAccountBookCategory(reorderList, userId) {
   const client = await db.connect();
   try {
     await client.query("BEGIN");
     const query = `
       UPDATE account_book_category
       SET sort_order = $1
-      WHERE id = $2;
+      WHERE id = $2 AND user_id = $3;
     `;
     for (const { id, sortOrder } of reorderList) {
-      await client.query(query, [sortOrder, id]);
+      await client.query(query, [sortOrder, id, userId]);
     }
     await client.query("COMMIT");
   } catch (error) {
