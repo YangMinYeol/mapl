@@ -1,5 +1,6 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { memoEmptyMessages } from "../memoEmptyMessages";
 import {
   addMemo,
   deleteLinkedMemos,
@@ -37,6 +38,8 @@ export default function MainMemoContent({
 }) {
   const navigate = useNavigate();
   const [memoText, setMemoText] = useState("");
+  const [isQuickSaving, setIsQuickSaving] = useState(false);
+  const quickSavePending = useRef(false);
   const { openConfirm } = useModal();
   const { user } = useContext(UserContext);
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
@@ -53,6 +56,7 @@ export default function MainMemoContent({
 
   // 메모 추가
   function handleAddMemo() {
+    if (quickSavePending.current) return;
     if (!user) {
       navigate("/login");
       return;
@@ -66,6 +70,8 @@ export default function MainMemoContent({
 
   // 빠른 메모 추가
   async function addNewMemo() {
+    quickSavePending.current = true;
+    setIsQuickSaving(true);
     try {
       const { startDate, endDate } = setDateByPeriod(
         selectedPeriod,
@@ -81,11 +87,13 @@ export default function MainMemoContent({
           isLinked: false,
         },
       ]);
-      await loadDashboardDatas();
-      await loadCalendarDatas();
+      await Promise.all([loadDashboardDatas(), loadCalendarDatas()]);
       setMemoText("");
     } catch (error) {
       handleError(error);
+    } finally {
+      quickSavePending.current = false;
+      setIsQuickSaving(false);
     }
   }
 
@@ -152,7 +160,8 @@ export default function MainMemoContent({
 
   // Enter키 눌렀을때 메모 추가
   function handleKeyPress(e) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.repeat && !e.nativeEvent.isComposing && e.keyCode !== 229) {
+      e.preventDefault();
       handleAddMemo();
     }
   }
@@ -162,31 +171,30 @@ export default function MainMemoContent({
     setMemoText(e.target.value);
   }
 
+  const visibleMemos = selectedPeriod.name === "Day"
+    ? sortDashboardMemos(dashboardDatas)
+    : dashboardDatas;
+
   return (
     <div className="h-[480px] border-b border-mapl-slate">
       <div className="overflow-auto h-11/12 dashboard-main-content">
-        <ul>
-          {(selectedPeriod.id === 1
-            ? sortDashboardMemos(dashboardDatas)
-            : dashboardDatas
-          ).map((memo) => {
-            if (memo.periodId === selectedPeriod.id) {
-              return (
-                <li key={memo.id}>
-                  <MainMemoItem
-                    memo={memo}
-                    onComplete={handleToggleMemoCompletion}
-                    onDelete={handleDeleteMemo}
-                    onEdit={onEdit}
-                    onPostpone={handlePostponeMemo}
-                    openLinkModal={openLinkModal}
-                    selectedPeriod={selectedPeriod}
-                  />
-                </li>
-              );
-            }
-          })}
-        </ul>
+        {visibleMemos.length === 0 ? (
+          <p className="memo-empty">{memoEmptyMessages[selectedPeriod.name]}</p>
+        ) : <ul>
+          {visibleMemos.map((memo) => (
+            <li key={memo.id}>
+              <MainMemoItem
+                memo={memo}
+                onComplete={handleToggleMemoCompletion}
+                onDelete={handleDeleteMemo}
+                onEdit={onEdit}
+                onPostpone={handlePostponeMemo}
+                openLinkModal={openLinkModal}
+                selectedPeriod={selectedPeriod}
+              />
+            </li>
+          ))}
+        </ul>}
       </div>
       <div className="flex items-center p-2 h-1/12 dashboard-content-add">
         <input
@@ -195,15 +203,17 @@ export default function MainMemoContent({
           placeholder="메모 입력"
           value={memoText}
           onChange={handleMemoChange}
-          onKeyUp={handleKeyPress}
+          onKeyDown={handleKeyPress}
+          readOnly={isQuickSaving}
           maxLength={100}
         />
         <button
           type="button"
           className="planner-action"
           onClick={handleAddMemo}
+          disabled={isQuickSaving}
         >
-          {memoText.trim() ? "저장" : "추가"}
+          {isQuickSaving ? "저장 중" : memoText.trim() ? "저장" : "추가"}
         </button>
       </div>
       <MemoModal

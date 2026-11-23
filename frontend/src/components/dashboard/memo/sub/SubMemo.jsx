@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SecondaryPanel from "../../SecondaryPanel";
 
 export default function SubMemo({
+  quote,
   dashboardDatas,
   periods,
   selectedPeriod,
@@ -158,8 +159,10 @@ export default function SubMemo({
         isBucketList={isBucketList}
       />
       <SubMemoContent
+        quote={quote}
         dashboardDatas={dashboardDatas}
         selectedValue={selectedValue}
+        selectedPeriodName={filterPeriods.find((period) => period.id === Number(selectedValue))?.name}
         selectedDate={selectedDate}
         checkedIds={checkedIds}
         handleToggle={handleToggle}

@@ -1,49 +1,47 @@
-import { useState } from "react";
 import SubMemoItem from "./SubMemoItem";
-import { bucketQuotes } from "../../../../constants/bucketQuotes";
-
-function getRandomQuote() {
-  const randomIndex = Math.floor(Math.random() * bucketQuotes.length);
-  return bucketQuotes[randomIndex];
-}
+import { memoEmptyMessages } from "../memoEmptyMessages";
 
 export default function SubMemoContent({
   dashboardDatas,
   selectedValue,
+  selectedPeriodName,
+  quote,
   checkedIds,
   handleToggle,
   isBucketList,
   openLinkModal,
   onEdit,
 }) {
-  const [randomQuote] = useState(getRandomQuote);
+  const visibleMemos = dashboardDatas.filter(
+    (memo) => memo.periodId === Number(selectedValue) && !memo.completed
+  );
   return (
     <div className={`h-[300px] overflow-auto dashboard-sub-content${isBucketList ? " bucket-quote-content" : ""}`}>
       {isBucketList ? (
         <div className="bucket-quote px-4 py-6 text-center">
           <p className="mb-2 text-xl font-semibold text-gray-700">
-            “{randomQuote.quoteKr}”
+            “{quote.quoteKr}”
           </p>
-          <p className="text-sm text-gray-500">– {randomQuote.author}</p>
+          <p className="text-sm text-gray-500">– {quote.author}</p>
           <p className="mt-1 text-xs italic text-gray-400">
-            {randomQuote.quote}
+            {quote.quote}
           </p>
         </div>
+      ) : visibleMemos.length === 0 ? (
+        <p className="memo-empty">{memoEmptyMessages[selectedPeriodName] ?? "계획하고 있는 일을 적어보세요."}</p>
       ) : (
         <ul>
-          {dashboardDatas
-            .filter((memo) => memo.periodId == selectedValue && !memo.completed)
-            .map((memo) => (
-              <li key={memo.id}>
-                <SubMemoItem
-                  memo={memo}
-                  checked={checkedIds.includes(memo.id)}
-                  onToggle={() => handleToggle(memo.id)}
-                  openLinkModal={openLinkModal}
-                  onEdit={() => onEdit(memo)}
-                />
-              </li>
-            ))}
+          {visibleMemos.map((memo) => (
+            <li key={memo.id}>
+              <SubMemoItem
+                memo={memo}
+                checked={checkedIds.includes(memo.id)}
+                onToggle={() => handleToggle(memo.id)}
+                openLinkModal={openLinkModal}
+                onEdit={() => onEdit(memo)}
+              />
+            </li>
+          ))}
         </ul>
       )}
     </div>

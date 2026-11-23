@@ -162,6 +162,17 @@
 .dashboard-main-content li .line-through { color: var(--dashboard-muted); }
 .planner-edit-row { position: relative; }
 .planner-edit-target { text-align: left; cursor: pointer; }
+.dashboard-main-content:not(.ledger-list) .planner-edit-target, .dashboard-sub-content .planner-edit-target {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.dashboard-main-content:has(> .memo-empty), .dashboard-sub-content:has(> .memo-empty) {
+  display: grid;
+  place-content: center;
+}
+.secondary-body > .dashboard-sub-content:has(> .memo-empty) { flex: 1; }
+.memo-empty { margin: 12px; color: var(--dashboard-muted); font-size: 13px; text-align: center; }
+.planner-workspace[aria-busy=true] .memo-empty { visibility: hidden; }
 .planner-edit-target::after { content: ""; position: absolute; inset: 0; }
 .planner-edit-target:focus-visible { outline: none; }
 .planner-edit-target:focus-visible::after { outline: 2px solid var(--mapl-focus); outline-offset: -2px; border-radius: var(--mapl-control-radius); }

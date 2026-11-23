@@ -45,7 +45,7 @@ export default function MemoModal({
     setSelectedColorId,
   } = useMemoModalForm({ mode, memo, selectedDate, isOpen, selectedPeriod });
 
-  const handleError = useErrorHandler(onClose);
+  const handleError = useErrorHandler();
   const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -78,7 +78,7 @@ export default function MemoModal({
       ]);
       await reloadAndClose();
     } catch (error) {
-      handleError(error, { closeCurrentModal: true });
+      handleError(error);
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +109,7 @@ export default function MemoModal({
       });
       await reloadAndClose();
     } catch (error) {
-      handleError(error, { closeCurrentModal: true });
+      handleError(error);
     } finally {
       setIsLoading(false);
     }
@@ -142,8 +142,7 @@ export default function MemoModal({
 
   // 메모 목록 최신화 및 모달 닫기
   async function reloadAndClose() {
-    await loadDashboardDatas();
-    await loadCalendarDatas();
+    await Promise.all([loadDashboardDatas(), loadCalendarDatas()]);
     onClose();
   }
 
