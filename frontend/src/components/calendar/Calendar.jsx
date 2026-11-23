@@ -1,4 +1,4 @@
-import { addMonths, setMonth, setYear } from "date-fns";
+import { addMonths, getDate, getDaysInMonth, setDate, setMonth, setYear, startOfMonth } from "date-fns";
 import { useSyncExternalStore } from "react";
 import { TABS } from "../../constants/tab";
 import useHolidayData from "../../hooks/useHolidayData";
@@ -30,18 +30,19 @@ export default function Calendar({
   const { holidays } = useHolidayData(currentDate);
   const tagMaxCount = useSyncExternalStore(subscribeToWidth, getTagMaxCount);
 
-  // 한달씩 이동
-  function handleChangeMonth(month) {
-    setCurrentDate((prevDate) => addMonths(prevDate, month));
+  function moveToMonth(month) {
+    const day = Math.min(getDate(selectedDate), getDaysInMonth(month));
+    setCurrentDate(month);
+    setSelectedDate(setDate(month, day));
   }
 
-  // 연도와 월을 선택한 숫자로 한번에 이동
+  function handleChangeMonth(month) {
+    moveToMonth(addMonths(startOfMonth(currentDate), month));
+  }
+
   function handleYearMonth(selectedYear, selectedMonth) {
-    setCurrentDate((prevDate) => {
-      let newDate = setYear(prevDate, selectedYear);
-      newDate = setMonth(newDate, selectedMonth - 1);
-      return newDate;
-    });
+    const year = setYear(startOfMonth(currentDate), selectedYear);
+    moveToMonth(setMonth(year, selectedMonth - 1));
   }
 
   // Today로 이동
