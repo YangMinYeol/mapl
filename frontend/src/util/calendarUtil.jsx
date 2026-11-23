@@ -83,13 +83,6 @@ export function getDateKey(date) {
   return format(date, "yyyy-MM-dd");
 }
 
-// 달력에 들어갈 날짜 최대 개수 지정
-export function getTagMaxCount(weeks) {
-  if (weeks.length === 4) return 8;
-  if (weeks.length === 5) return 6;
-  return 5;
-}
-
 // 날짜 클릭 핸들러
 export function handleDateClick(
   date,

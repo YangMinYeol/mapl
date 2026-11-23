@@ -11,8 +11,8 @@ export function useAccountBookDataManager(user, selectedDate, currentDate, selec
     return fetchDashboardAccountBooks(userId, startDate, endDate);
   }, [userId, selectedDate, selectedPeriod]);
   const calendarQuery = useCallback(() => fetchCalendarAccountBooks(userId, month), [userId, month]);
-  const [dashboardDatas, loadDashboardDatas] = usePlannerList(userId && selectedPeriod?.name ? dashboardQuery : null);
-  const [calendarDatas, loadCalendarDatas] = usePlannerList(userId ? calendarQuery : null);
+  const [dashboardDatas, loadDashboardDatas, dashboardPending] = usePlannerList(userId && selectedPeriod?.name ? dashboardQuery : null);
+  const [calendarDatas, loadCalendarDatas, calendarPending] = usePlannerList(userId ? calendarQuery : null);
 
-  return { dashboardDatas, calendarDatas, loadDashboardDatas, loadCalendarDatas };
+  return { dashboardDatas, calendarDatas, loadDashboardDatas, loadCalendarDatas, dashboardPending, calendarPending };
 }

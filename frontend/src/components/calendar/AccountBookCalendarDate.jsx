@@ -5,7 +5,6 @@ import {
   ACCOUNT_TYPE,
 } from "../../util/accountBookUtil";
 import {
-  getTagMaxCount,
   getWeekDates,
   handleDateClick,
 } from "../../util/calendarUtil";
@@ -22,10 +21,10 @@ export default function AccountBookCalendarDate({
   loadDashboardDatas,
   loadCalendarDatas,
   periods,
+  tagMaxCount,
   setSelectedPeriod,
 }) {
   const weeks = getWeekDates(currentDate);
-  const tagMaxCount = getTagMaxCount(weeks);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
