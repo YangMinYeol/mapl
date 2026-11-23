@@ -118,7 +118,6 @@ function truncateMemoMap(memoMap, tagMaxCount) {
       truncatedMemos[tagMaxCount - 1] = {
         id: `more-${dateKey}`,
         content: `+${overflowCount}개`,
-        colorHex: "#ffffff",
         type: TAG_TYPE.MORE,
       };
     }
