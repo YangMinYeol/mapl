@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { addMemo } from "../../../../api/memo";
 import { useModal } from "../../../../context/ModalContext";
 import { UserContext } from "../../../../context/UserContext";
@@ -23,6 +23,8 @@ export default function SubMemo({
   const navigate = useNavigate();
   const { openConfirm } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
+  const importing = useRef(false);
+  const [isImporting, setIsImporting] = useState(false);
   const handleError = useErrorHandler();
   const { user } = useContext(UserContext);
   const isBucketList = useMemo(
@@ -64,89 +66,50 @@ export default function SubMemo({
 
   // Sub메모 추가
   function handleAddMemo() {
+    if (importing.current) return;
     if (!user) {
       navigate("/login");
       return;
     }
 
-    if (checkedIds.length === 0) {
-      return;
-    }
+    const selectedMemos = dashboardDatas.filter((memo) => checkedIds.includes(memo.id));
+    if (selectedMemos.length === 0) return;
+
     openConfirm(
       "선택한 메모를 가져올까요?",
       "복사하면 원본과 별도로 관리돼요.\n연결하면 원본과 수정·완료·삭제가 함께 반영돼요.",
-      addLinkedSubMemoToMain,
-      addSubMemoToMain,
+      () => importMemos(selectedMemos, true),
+      () => importMemos(selectedMemos, false),
       { yes: "연결", no: "복사" }
     );
   }
 
-  // Sub 메모를 Main에 추가 - default
-  async function addSubMemoToMain() {
+  async function importMemos(selectedMemos, isLinked) {
+    if (importing.current) return;
+    importing.current = true;
+    setIsImporting(true);
     try {
-      const memoArray = [];
       const { startDate, endDate } = setDateByPeriod(
         selectedPeriod,
         selectedDate
       );
-      const userId = user.id;
-      const periodId = selectedPeriod.id;
-      const filterMemos = filterCheckedMemos();
-      for (const filterMemo of filterMemos) {
-        memoArray.push({
-          userId,
-          content: filterMemo.content,
-          startDate,
-          endDate,
-          periodId,
-          isLinked: false,
-        });
-      }
-
-      await addMemo(memoArray);
-      await loadDashboardDatas();
-      await loadCalendarDatas();
-      setCheckedIds([]);
+      await addMemo(selectedMemos.map((memo) => ({
+        userId: user.id,
+        content: memo.content,
+        startDate,
+        endDate,
+        periodId: selectedPeriod.id,
+        link: isLinked ? memo.link : undefined,
+        isLinked,
+      })));
+      await Promise.all([loadDashboardDatas(), loadCalendarDatas()]);
+      setCheckedIds((ids) => ids.filter((id) => !selectedMemos.some((memo) => memo.id === id)));
     } catch (error) {
       handleError(error);
+    } finally {
+      importing.current = false;
+      setIsImporting(false);
     }
-  }
-
-  // Sub 메모를 Main에 추가 - link
-  async function addLinkedSubMemoToMain() {
-    try {
-      const memoArray = [];
-      const { startDate, endDate } = setDateByPeriod(
-        selectedPeriod,
-        selectedDate
-      );
-      const userId = user.id;
-      const periodId = selectedPeriod.id;
-      const filterMemos = filterCheckedMemos();
-      for (const filterMemo of filterMemos) {
-        memoArray.push({
-          userId,
-          content: filterMemo.content,
-          startDate,
-          endDate,
-          periodId,
-          link: filterMemo.link,
-          isLinked: true,
-        });
-      }
-
-      await addMemo(memoArray);
-      await loadDashboardDatas();
-      await loadCalendarDatas();
-      setCheckedIds([]);
-    } catch (error) {
-      handleError(error);
-    }
-  }
-
-  // 체크된 메모만 필터링
-  function filterCheckedMemos() {
-    return dashboardDatas.filter((memo) => checkedIds.includes(memo.id));
   }
 
   return (
@@ -156,6 +119,7 @@ export default function SubMemo({
         selectedValue={selectedValue}
         handleChange={(e) => setSelectedValue(e.target.value)}
         handleAddMemo={handleAddMemo}
+        isImporting={isImporting}
         isBucketList={isBucketList}
       />
       <SubMemoContent

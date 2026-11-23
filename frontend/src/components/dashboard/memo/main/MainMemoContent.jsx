@@ -103,7 +103,7 @@ export default function MainMemoContent({
       if (memo.isLinked) {
         openConfirm(
           LINKED_MEMO.TITLE,
-          "동기화되어있는 메모 모두 삭제하시겠습니까?",
+          "연결된 메모를 모두 삭제할까요?",
           async () => {
             await deleteLinkedMemos(memo.link);
             await loadDashboardDatas();
@@ -143,7 +143,7 @@ export default function MainMemoContent({
       if (memo.isLinked) {
         openConfirm(
           LINKED_MEMO.TITLE,
-          "동기화되어있는 메모 모두 complete 하시겠습니까?",
+          memo.completed ? "연결된 메모의 완료를 취소할까요?" : "연결된 메모를 모두 완료할까요?",
           async () => {
             await toggleLinkedMemosCompletion(memo.link);
             await loadDashboardDatas();
