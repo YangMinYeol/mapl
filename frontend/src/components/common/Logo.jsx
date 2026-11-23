@@ -1,20 +1,11 @@
-import { useNavigate } from "react-router-dom";
-import LogoImage from "../../assets/images/logo.svg";
-import LogoWhiteImage from "../../assets/images/logo_white.svg";
+import { Link } from "react-router-dom";
+import "../../styles/logo.css";
 
-export default function Logo({ height = "h-auto", useWhiteLogo = false }) {
-  const navigate = useNavigate();
-
-  function navigateToHome() {
-    navigate("/");
-  }
-
+export default function Logo({ withSubtitle = false }) {
   return (
-    <img
-      src={useWhiteLogo ? LogoWhiteImage : LogoImage}
-      alt="Mapl Logo"
-      className={`cursor-pointer ${height}`}
-      onClick={navigateToHome}
-    />
+    <Link to="/" aria-label="마플 홈" className="mapl-logo shrink-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+      <span className="mapl-logo-name">Mapl</span>
+      {withSubtitle && <span className="mapl-logo-subtitle">My Planner</span>}
+    </Link>
   );
 }

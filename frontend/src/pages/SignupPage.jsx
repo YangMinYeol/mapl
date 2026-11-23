@@ -201,9 +201,9 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-deep-green">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-deep-green py-6">
       <div className="flex justify-center mb-6">
-        <Logo useWhiteLogo={true} />
+        <Logo withSubtitle />
       </div>
       <section className="p-10 bg-white border rounded-lg">
         <div className="text-right">

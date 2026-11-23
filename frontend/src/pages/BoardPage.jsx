@@ -130,13 +130,13 @@ export default function BoardPage() {
   }
 
   return (
-    <div className="flex min-[1080px] h-[900px] justify-center my-10">
+    <div className="mx-auto my-6 flex min-h-[calc(100dvh-200px)] max-w-[1060px] flex-col gap-4 px-4 md:my-10 md:flex-row md:gap-0">
       <BoardTabs
         onTabClick={handleTabClick}
         boardTabs={boardTabs}
         activeBoard={boardTabs.find((tab) => tab.key === activeBoard)}
       />
-      <div className="w-[820px] px-5">
+      <div className="w-full min-w-0 max-w-[820px] md:px-5">
         <BoardHeader
           activeBoard={boardTabs.find((tab) => tab.key === activeBoard)}
         />

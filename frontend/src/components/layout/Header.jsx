@@ -18,14 +18,14 @@ export default function Header() {
   }, [setUser]);
 
   return (
-    <header className="py-3 bg-deep-green min-w-[910px]">
-      <div className="flex justify-between px-8">
-        <Logo height="h-12" useWhiteLogo={true} />
-        <div className="flex items-center text-white">
+    <header className="bg-deep-green py-3">
+      <div className="mx-auto flex max-w-[1560px] items-center justify-between gap-4 px-[clamp(16px,3vw,48px)]">
+        <Logo />
+        <div className="flex min-w-0 items-center text-white">
           {user ? (
             <UserDropDown user={user} handleLogout={logout} />
           ) : (
-            <Link to="/login" className="hover:underline">
+            <Link to="/login" className="rounded-md px-2 py-1 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2">
               로그인
             </Link>
           )}
