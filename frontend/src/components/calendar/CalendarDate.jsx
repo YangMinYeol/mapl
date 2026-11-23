@@ -50,7 +50,7 @@ export default function CalendarDate({
                   {format(date, "d")}
                 </button>
 
-                <div className="flex flex-col gap-[1px]">
+                <div className="calendar-tag-slots">
                   {tags.map((tag, i) =>
                     tag ? (
                       <TagComponent

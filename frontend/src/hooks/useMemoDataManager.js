@@ -8,8 +8,8 @@ export function useMemoDataManager(user, selectedDate, currentDate) {
   const month = formatDateYYYYMMDD(currentDate);
   const dashboardQuery = useCallback(() => fetchDashboardMemos(userId, selectedDate), [userId, selectedDate]);
   const calendarQuery = useCallback(() => fetchCalendarMemos(userId, month), [userId, month]);
-  const [dashboardDatas, loadDashboardDatas] = usePlannerList(userId ? dashboardQuery : null);
-  const [calendarDatas, loadCalendarDatas] = usePlannerList(userId ? calendarQuery : null);
+  const [dashboardDatas, loadDashboardDatas, dashboardPending] = usePlannerList(userId ? dashboardQuery : null);
+  const [calendarDatas, loadCalendarDatas, calendarPending] = usePlannerList(userId ? calendarQuery : null);
 
-  return { dashboardDatas, calendarDatas, loadDashboardDatas, loadCalendarDatas };
+  return { dashboardDatas, calendarDatas, loadDashboardDatas, loadCalendarDatas, dashboardPending, calendarPending };
 }

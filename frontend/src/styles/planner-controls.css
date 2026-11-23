@@ -6,6 +6,9 @@
   --mapl-panel-radius: 12px;
   --mapl-focus: #527d6d;
   --mapl-hover: #e7f0ea;
+  --mapl-control-border: #cfdcd4;
+  --mapl-control-fill: #f8faf9;
+  --mapl-ink-hover: #285348;
   --mapl-font: Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 
@@ -19,10 +22,87 @@
   cursor: pointer;
 }
 .ledger-filters button:hover:not([aria-pressed=true]) { background: #dbe6df; color: var(--mapl-ink); }
-.ledger-filters button:focus-visible { outline: 2px solid var(--mapl-focus); outline-offset: 1px; }
 .ledger-filters button[aria-pressed=true] { background: #fff; box-shadow: 0 1px 4px #123c2e18; color: var(--mapl-ink); font-weight: 650; }
 
-:where(.planner-workspace, .planner-dialog) :is(button, input, textarea, select):focus-visible {
+.mapl-button {
+  border: 1px solid transparent;
+  border-radius: var(--mapl-control-radius);
+  background: var(--mapl-ink);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mapl-button:not(:disabled):hover { background: var(--mapl-ink-hover); }
+.mapl-button-outline { border-color: var(--mapl-control-border); background: #fff; color: var(--mapl-ink); }
+.mapl-button-outline:not(:disabled):hover { background: var(--mapl-hover); }
+.mapl-button:disabled { opacity: .5; cursor: default; }
+
+.planner-action, .record-actions button {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  height: 32px;
+  min-width: 56px;
+  padding: 0 6px;
+  border-radius: var(--mapl-control-radius);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.planner-action { background: var(--mapl-hover); color: var(--mapl-ink); }
+.planner-action:hover { background: #d9e9df; }
+
+.mapl-input {
+  border: 1px solid var(--mapl-control-border);
+  border-radius: var(--mapl-control-radius);
+  color: var(--mapl-ink);
+}
+.mapl-input[aria-invalid=true] { border-color: #b45858; }
+
+.mapl-tabs {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--mapl-line);
+  border-radius: var(--mapl-menu-radius);
+  background: #eaf0ec;
+}
+.mapl-tab { cursor: pointer; padding-block: 3px; border-radius: var(--mapl-control-radius); color: var(--mapl-ink); }
+.mapl-tab:hover { background: var(--mapl-hover); }
+.mapl-tab[aria-pressed=true] { background: #fff; box-shadow: 0 1px 4px #123c2e18; font-weight: 650; }
+
+:where(.planner-workspace, .planner-dialog) :is(button, input, textarea, select):focus-visible,
+:is(.mapl-button, .mapl-input, .mapl-field-action, .mapl-tab, .mapl-dropdown select):focus-visible {
   outline: 2px solid var(--mapl-focus);
   outline-offset: 1px;
+}
+
+.mapl-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--mapl-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.mapl-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--mapl-line);
+  border-top-color: var(--mapl-focus);
+  border-radius: 50%;
+  animation: mapl-spin .75s linear infinite;
+}
+.mapl-loading-inline { min-height: 96px; }
+.mapl-loading-page, .mapl-loading-surface { inset: 0; z-index: 1; background: rgb(248 250 249 / 88%); }
+.mapl-loading-page { position: fixed; z-index: 90; }
+body:has(#root .mapl-loading-page) { overflow: hidden; }
+.mapl-loading-surface { position: absolute; }
+@keyframes mapl-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .mapl-loading-spinner { animation: none; }
 }

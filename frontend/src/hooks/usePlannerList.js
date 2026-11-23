@@ -17,12 +17,20 @@ export function usePlannerList(query) {
     const request = current.current?.query;
     if (!request) return;
     const id = ++sequence.current;
+    setResult((previous) => ({
+      query: request,
+      items: previous?.query === request ? previous.items : [],
+      pending: true,
+    }));
     const stillCurrent = () => current.current?.query === request && sequence.current === id;
     try {
       const items = await request();
-      if (stillCurrent()) setResult({ query: request, items });
+      if (stillCurrent()) setResult({ query: request, items, pending: false });
     } catch (error) {
-      if (stillCurrent()) current.current.handleError(error);
+      if (stillCurrent()) {
+        setResult((previous) => ({ ...previous, pending: false }));
+        current.current.handleError(error);
+      }
     }
   }, []);
 
@@ -31,5 +39,6 @@ export function usePlannerList(query) {
     return () => { sequence.current++; };
   }, [query, reload]);
 
-  return [result && result.query === query ? result.items : [], reload];
+  const matchesQuery = result?.query === query;
+  return [matchesQuery ? result.items : [], reload, Boolean(query && (!matchesQuery || result.pending))];
 }

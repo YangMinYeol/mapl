@@ -405,7 +405,7 @@ export default function BoardPost({
           </>
         )}
       </div>
-      {isLoading && <Loading />}
+      {isLoading && <Loading label="처리 중" />}
     </div>
   );
 }

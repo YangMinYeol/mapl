@@ -121,12 +121,13 @@ function truncateMemoMap(memoMap, tagMaxCount) {
       truncatedMemos.push(allMemos[i] ?? null);
     }
 
-    const visibleMemosCount = allMemos.filter(Boolean).length;
+    const hiddenCount = allMemos.slice(tagMaxCount).filter(Boolean).length;
 
-    if (visibleMemosCount > tagMaxCount) {
+    if (hiddenCount > 0) {
+      const overflowCount = hiddenCount + Number(Boolean(truncatedMemos[tagMaxCount - 1]));
       truncatedMemos[tagMaxCount - 1] = {
         id: `more-${dateKey}`,
-        content: `+${visibleMemosCount - (tagMaxCount - 1)}`,
+        content: `+${overflowCount}개`,
         colorHex: "#ffffff",
         type: TAG_TYPE.MORE,
       };

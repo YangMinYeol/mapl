@@ -29,11 +29,13 @@ const FloatingLabelInput = forwardRef(
           <input
             type={isPassword && show ? "text" : type}
             id={id}
-            className={`block w-full h-full px-2 py-2 text-sm border border-mapl-black rounded-md focus:outline-none focus:ring-0 peer ${isPassword ? "pr-10" : ""}`}
+            className={`mapl-input block w-full h-full px-2 py-2 text-sm peer ${isPassword ? "pr-10" : ""}`}
             placeholder=" "
             onChange={onChange}
             onKeyUp={onKeyUp}
             value={value}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${id}-error` : undefined}
             ref={ref}
           />
           <label
@@ -43,18 +45,22 @@ const FloatingLabelInput = forwardRef(
             {text}
           </label>
           {isPassword && (
-            <span className="absolute inset-y-0 flex items-center cursor-pointer right-3">
+            <button
+              type="button"
+              className="mapl-field-action absolute top-1/2 right-2 -translate-y-1/2 flex size-8 cursor-pointer items-center justify-center rounded-md text-mapl-black hover:bg-[var(--mapl-hover)]"
+              onClick={handleShow}
+              aria-label={show ? "비밀번호 숨기기" : "비밀번호 보기"}
+            >
               <FontAwesomeIcon
                 icon={show ? faEyeSlash : faEye}
-                className="text-lg text-mapl-black hover:text-green-900"
-                onClick={handleShow}
+                className="text-lg"
                 fixedWidth
-                aria-label={show ? "비밀번호 숨기기" : "비밀번호 보기"}
+                aria-hidden="true"
               />
-            </span>
+            </button>
           )}
         </div>
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p id={`${id}-error`} className="text-xs text-red-500">{error}</p>}
       </div>
     );
   }

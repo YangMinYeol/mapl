@@ -3,7 +3,6 @@ import { LINKED_MEMO } from "../../constants/messages";
 import { TAG_TYPE } from "../../constants/tag";
 import { useModal } from "../../context/ModalContext";
 import {
-  getTagMaxCount,
   getWeekDates,
   handleDateClick,
 } from "../../util/calendarUtil";
@@ -22,10 +21,10 @@ export default function MemoCalendarDate({
   loadDashboardDatas,
   loadCalendarDatas,
   periods,
+  tagMaxCount,
   setSelectedPeriod,
 }) {
   const weeks = getWeekDates(currentDate);
-  const tagMaxCount = getTagMaxCount(weeks);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { openConfirm } = useModal();

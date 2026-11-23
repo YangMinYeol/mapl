@@ -13,17 +13,14 @@
 .planner-dialog .modal-header, .planner-dialog .modal-footer {
   display: flex;
   align-items: center;
-  min-height: 46px;
+  min-height: 40px;
   height: auto;
   padding-inline: 14px;
   background: #fff;
 }
-.planner-dialog .modal-header { border-bottom: 1px solid var(--mapl-line); font-weight: 600; }
+.planner-dialog .modal-header { justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--mapl-line); font-weight: 600; }
 .planner-dialog .modal-content { height: auto; padding: 10px 14px; }
-.planner-dialog .modal-footer { border-top: 1px solid var(--mapl-line); padding-block: 7px; }
-.planner-dialog:not(.planner-record-dialog) .modal-footer button { border-color: #d1dfd6; }
-.planner-dialog .modal-footer .bg-deep-green { background: var(--mapl-hover); color: var(--mapl-ink); }
-.planner-dialog .modal-footer .bg-red-500 { background: #faf0ee; color: #873d37; border-color: #f1dfdc; }
+.planner-dialog .modal-footer { border-top: 1px solid var(--mapl-line); }
 .planner-dialog input:not([type=checkbox]), .planner-dialog select {
   min-height: 34px;
   border-color: #cbd9d1;
@@ -31,11 +28,11 @@
   color: var(--mapl-ink);
   padding-left: 8px;
 }
-.planner-dialog .modal-header { min-height: 52px; }
 .planner-dialog-title { display: inline-flex; align-items: center; gap: 9px; }
 .planner-dialog-title svg { padding: 7px; width: 30px; height: 30px; background: #dfede4; color: #365e4d; border-radius: var(--mapl-control-radius); }
-.planner-dialog-close { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--mapl-control-radius); color: #49665a; cursor: pointer; }
+.planner-dialog-close { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--mapl-control-radius); color: #49665a; cursor: pointer; }
 .planner-dialog-close:hover { background: var(--mapl-hover); color: var(--mapl-ink); }
+.planner-dialog-close { flex: none; }
 .planner-dialog :is(button,input,select,textarea):focus-visible, .planner-month-picker button:focus-visible {
   outline: 2px solid var(--mapl-focus);
   outline-offset: 1px;
@@ -105,10 +102,59 @@
   font-variant-numeric: tabular-nums;
 }
 .planner-record-dialog .planner-dialog-frame { display: flex; flex-direction: column; max-height: calc(100dvh - 28px); }
-.planner-record-dialog .modal-header { flex: none; min-height: 44px; padding: 4px 20px; }
+.planner-record-dialog .modal-header { flex: none; padding: 4px 14px; }
 .planner-record-dialog .planner-dialog-title { font-size: 16px; font-weight: 620; letter-spacing: -.025em; }
-.planner-record-dialog .modal-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px; }
-.planner-record-dialog .modal-footer { flex: none; padding: 7px 20px; }
+.planner-record-dialog .modal-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px 14px; }
+.planner-record-dialog .modal-footer { flex: none; padding: 8px 14px; }
+.planner-notice-overlay { z-index: 110; }
+.planner-notice { width: min(100%, 392px); }
+.planner-heading-icon {
+  display: inline-grid;
+  place-items: center;
+  color: var(--mapl-focus);
+  font-size: 15px;
+}
+.planner-notice .modal-content {
+  display: grid;
+  place-items: center;
+  min-height: min(104px, 25dvh);
+  padding-block: 14px;
+}
+.planner-notice-message {
+  width: 100%;
+  padding: 15px 4px;
+  color: var(--mapl-ink);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.55;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.planner-notice-description { margin: 7px 0 0; color: #53655d; font-size: 13px; font-weight: 400; }
+.planner-notice-actions { justify-content: flex-end; }
+
+.planner-link-dialog .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: clamp(220px, 44dvh, 320px);
+  overflow: hidden;
+}
+.planner-link-summary { flex: none; display: grid; gap: 3px; padding: 12px 14px; border-radius: var(--mapl-menu-radius); background: var(--mapl-hover); }
+.planner-link-summary span { color: #53655d; font-size: 12px; }
+.planner-link-summary strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; color: var(--mapl-ink); }
+.planner-link-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 4px 10px; border: 1px solid var(--mapl-line); border-radius: var(--mapl-menu-radius); background: var(--mapl-control-fill); }
+.planner-link-list:focus-visible { outline: 2px solid var(--mapl-focus); outline-offset: 1px; }
+.planner-link-list li + li { border-top: 1px solid var(--mapl-line); }
+.planner-link-row { display: grid; gap: 6px; padding: 10px 0; }
+.planner-link-current { margin-inline: -10px; padding-inline: 10px; background: var(--mapl-hover); }
+.planner-link-labels { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.planner-link-badge { color: #456558; font-size: 11px; font-weight: 600; }
+.planner-link-period { justify-self: start; padding: 3px 7px; border-radius: var(--mapl-control-radius); background: var(--mapl-hover); color: var(--mapl-ink); font-size: 11px; font-weight: 600; }
+.planner-link-dates { display: grid; gap: 4px; font-size: 12px; }
+.planner-link-dates > div { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+.planner-link-dates dt, .planner-link-empty { color: #53655d; font-size: 12px; }
 .record-fields, .record-field { display: grid; min-width: 0; }
 .record-fields { gap: 18px; }
 .record-field { gap: 6px; }
@@ -119,7 +165,7 @@
   width: 100%;
   min-height: 40px;
   padding: 8px 10px;
-  border: 1px solid #cfdcd4;
+  border: 1px solid var(--mapl-control-border);
   border-radius: var(--mapl-control-radius);
   color: var(--mapl-ink);
   background: #fff;
@@ -197,16 +243,15 @@ button.record-date-value:hover, .record-date-value[aria-expanded=true] { border-
 .planner-record-dialog .record-amount input { flex: 1; width: 0; min-width: 0; padding: 0; min-height: 36px; background: transparent; border: 0; color: inherit; font-size: 26px; font-weight: 650; text-align: right; letter-spacing: -.035em; }
 .record-amount-panel .record-error { margin-top: 6px; }
 .record-actions { width: 100%; display: flex; align-items: center; gap: 8px; }
-.record-actions button { display: inline-flex; gap: 6px; align-items: center; justify-content: center; min-height: 36px; padding: 6px 13px; border-radius: var(--mapl-control-radius); font-size: 13px; font-weight: 600; cursor: pointer; }
 .record-delete { border: 1px solid #e8d7d4; color: #964944; }
 .record-delete:hover { border-color: #d9b9b4; background: #faf0ee; }
 .record-cancel { margin-left: auto; border: 1px solid var(--mapl-line); }
 .record-cancel:hover { background: #eff4f0; }
 .record-save { color: #fff; background: var(--mapl-ink); }
-.record-save:hover { background: #285348; }
+.record-save:not(:disabled):hover { background: var(--mapl-ink-hover); }
 .record-save:disabled { opacity: .5; cursor: default; }
 @media (max-width: 480px) {
-  .planner-record-dialog .modal-header, .planner-record-dialog .modal-content, .planner-record-dialog .modal-footer { padding-inline: 14px; }
+  .planner-record-dialog .modal-header, .planner-record-dialog .modal-content, .planner-record-dialog .modal-footer { padding-inline: 12px; }
   .planner-record-dialog :is(input:not([type=checkbox]), select, textarea) { font-size: 16px; }
   .planner-record-dialog .record-amount input { font-size: 25px; }
 }

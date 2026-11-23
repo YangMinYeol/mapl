@@ -17,6 +17,11 @@ export default function LinkModal({
   const handleError = useErrorHandler(onClose);
 
   const linkId = selectedLinkMemo?.link;
+  const currentId = selectedLinkMemo?.id;
+  const displayedMemos = [
+    ...linkedMemos.filter((memo) => memo.id === currentId),
+    ...linkedMemos.filter((memo) => memo.id !== currentId),
+  ];
   useEffect(() => {
     if (!isOpen || linkId == null) return;
     let current = true;
@@ -45,18 +50,28 @@ export default function LinkModal({
 
   return (
     <ModalLayout
-      record title="링크 연결된 메모 목록" isOpen={isOpen} onClose={onClose} isLoading={isLoading}
+      title="연결된 메모 목록" className="planner-link-dialog" isOpen={isOpen} onClose={onClose} isLoading={isLoading}
       content={<>
-        <p className="mb-3">{selectedLinkMemo?.content}</p>
-        <ul className="max-h-48 overflow-auto">
-          {linkedMemos.map((memo) => <li key={memo.id}><LinkMemoItem memo={memo} /></li>)}
-        </ul>
+        <div className="planner-link-summary">
+          <span>선택한 메모</span>
+          <strong>{selectedLinkMemo?.content}</strong>
+        </div>
+        <div className="planner-link-list" tabIndex={0} role="region" aria-label="연결된 메모">
+          {linkedMemos.length === 0 && !isLoading && <p className="planner-link-empty">연결된 메모가 없어요.</p>}
+          <ul>
+            {displayedMemos.map((memo) => (
+              <li key={memo.id} className={memo.id === currentId ? "planner-link-current" : undefined}>
+                <LinkMemoItem memo={memo} isCurrent={memo.id === currentId} isOriginal={memo.id === linkId} />
+              </li>
+            ))}
+          </ul>
+        </div>
       </>}
       footer={<div className="record-actions">
         {selectedLinkMemo && selectedLinkMemo.id !== selectedLinkMemo.link && (
-          <button className="record-delete" disabled={isLoading} onClick={handleUnlinkMemo}>현재 메모 링크 해제</button>
+          <button type="button" className="record-delete" disabled={isLoading} onClick={handleUnlinkMemo}>현재 메모 링크 해제</button>
         )}
-        <button className="record-cancel" onClick={onClose}>닫기</button>
+        <button type="button" className="record-cancel" onClick={onClose}>닫기</button>
       </div>}
     />
   );

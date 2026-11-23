@@ -6,13 +6,9 @@ export function PrimaryButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`
-        h-12 mb-2 font-semibold border cursor-pointer ${width}  ${
-        isOutline
-          ? "border-deep-green text-deep-green bg-white"
-          : "text-white bg-deep-green"
-      }`}
+      className={`mapl-button h-12 mb-2 ${width}${isOutline ? " mapl-button-outline" : ""}`}
     >
       {text}
     </button>

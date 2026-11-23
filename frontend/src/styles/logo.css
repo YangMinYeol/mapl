@@ -1,0 +1,24 @@
+.mapl-logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  color: #f9faf5;
+}
+
+.mapl-logo-name {
+  font: italic 700 32px/.96 Fraunces, Georgia, serif;
+  letter-spacing: -.055em;
+}
+
+.mapl-logo:has(.mapl-logo-subtitle) .mapl-logo-name {
+  font-size: 90px;
+}
+
+.mapl-logo-subtitle {
+  margin-inline-start: 4px;
+  font: 500 14px/1.2 "Instrument Sans", system-ui, sans-serif;
+  letter-spacing: .04em;
+  opacity: .83;
+  white-space: nowrap;
+}

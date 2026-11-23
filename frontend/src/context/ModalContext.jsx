@@ -14,6 +14,7 @@ export function ModalProvider({ children }) {
   const [onClose, setOnClose] = useState(null);
   const [onYes, setOnYes] = useState(null);
   const [onNo, setOnNo] = useState(null);
+  const [confirmLabels, setConfirmLabels] = useState(null);
 
   function openModal(message, onCloseCallback = null, subMessage = "") {
     setModalMessage(message);
@@ -23,7 +24,7 @@ export function ModalProvider({ children }) {
     setOnClose(() => onCloseCallback);
   }
 
-  function openConfirm(message, subMessage = "", onYesCallback, onNoCallback) {
+  function openConfirm(message, subMessage = "", onYesCallback, onNoCallback, labels = null) {
     setOnClose(null);
     setModalMessage(message);
     setSubMessage(subMessage);
@@ -31,6 +32,7 @@ export function ModalProvider({ children }) {
     setModalOpen(true);
     setOnYes(() => onYesCallback);
     setOnNo(() => onNoCallback);
+    setConfirmLabels(labels);
   }
 
   function closeModal() {
@@ -53,6 +55,7 @@ export function ModalProvider({ children }) {
         closeModal,
         onYes,
         onNo,
+        confirmLabels,
       }}
     >
       {children}

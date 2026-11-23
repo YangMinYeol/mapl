@@ -12,9 +12,9 @@
   min-width: 0;
   min-height: 34px;
   padding: 4px 29px 4px 10px;
-  border: 1px solid #d2dfd7;
+  border: 1px solid var(--mapl-control-border);
   border-radius: var(--mapl-control-radius);
-  background: #f8faf9;
+  background: var(--mapl-control-fill);
   color: var(--mapl-ink);
   font: inherit;
   cursor: pointer;
@@ -44,11 +44,6 @@
   right: 9px;
   width: 5px;
   height: 5px;
-}
-
-.mapl-dropdown select:focus-visible {
-  outline: 2px solid var(--mapl-focus);
-  outline-offset: 2px;
 }
 
 .mapl-dropdown select:disabled {

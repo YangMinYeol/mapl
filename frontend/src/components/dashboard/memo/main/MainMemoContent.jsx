@@ -13,12 +13,12 @@ import { useModal } from "../../../../context/ModalContext";
 import { UserContext } from "../../../../context/UserContext";
 import { useErrorHandler } from "../../../../hooks/useErrorHandler";
 import {
-  formatDateYYYYMMDD,
   postponeDates,
   setDateByPeriod,
 } from "../../../../util/dateUtil";
 import {
   MEMO_MODAL_MODE,
+  canPostponeMemo,
   dailyMemoObjectToArray,
   separateDailyAndRangeMemos,
   sortMemos,
@@ -37,7 +37,7 @@ export default function MainMemoContent({
 }) {
   const navigate = useNavigate();
   const [memoText, setMemoText] = useState("");
-  const { openModal, openConfirm } = useModal();
+  const { openConfirm } = useModal();
   const { user } = useContext(UserContext);
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const handleError = useErrorHandler();
@@ -114,23 +114,11 @@ export default function MainMemoContent({
 
   // 메모 미루기,연장하기
   async function handlePostponeMemo(memo) {
+    if (!canPostponeMemo(memo, selectedPeriod.name)) return;
     try {
-      const { periodId, startDate, endDate } = memo;
-      if (
-        periodId === 1 &&
-        formatDateYYYYMMDD(startDate) !== formatDateYYYYMMDD(endDate)
-      ) {
-        openModal(
-          "시작일과 종료일이 같지 않은 메모는 미루기가 불가능합니다.",
-          null,
-          "기간 메모는 편집을 통해 직접 날짜를 변경해 주세요."
-        );
-        return;
-      }
-
       const { newStartDate, newEndDate } = postponeDates(
         selectedPeriod,
-        startDate
+        memo.startDate
       );
 
       await postponeMemo(memo.id, newStartDate, newEndDate);

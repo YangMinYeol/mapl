@@ -145,7 +145,6 @@ export default function AccountBookModal({
 
   return (
     <ModalLayout
-      record
       title="가계부"
       isOpen={isOpen}
       onClose={onClose}
