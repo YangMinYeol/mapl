@@ -269,8 +269,27 @@
 }
 @media (min-width: 768px) and (max-width: 1023.98px) {
   .planner-workspace { grid-template-columns: minmax(0,1fr); padding: 16px 20px; gap: 14px; }
-  .planner-panels { grid-template-columns: repeat(2,minmax(0,1fr)); align-items: stretch; }
+  .planner-panels { grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; }
   .planner-panels > div:has(>nav) { grid-column: 1/-1; }
+  .planner-panel:not(.ledger-chart-panel) { height: 320px; }
+  .primary-panel:has(.ledger-content) { height: 360px; }
+}
+@media (max-width: 1023.98px) {
+  .planner-panel > .header, .secondary-body > .header, .dashboard-content-add { flex-shrink: 0; }
+  .primary-panel > div:has(.dashboard-content-add), .ledger-content, .secondary-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .ledger-content > :not(.dashboard-main-content) { flex-shrink: 0; }
+  .dashboard-main-content, .dashboard-sub-content {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
 }
 @media (max-width: 767.98px) {
   .app-container:has(.planner-workspace) { --planner-header-height: 38px; --planner-header-padding: 12px; }
@@ -288,21 +307,6 @@
   .planner-panels .period-nav-list { --period-padding: 2px; }
   .planner-panel { height: clamp(250px, 38dvh, 320px); box-shadow: none; }
   .primary-panel:has(.ledger-content) { height: clamp(300px, 46dvh, 380px); }
-  .planner-panel > .header, .dashboard-content-add { flex-shrink: 0; }
-  .primary-panel > div:has(.dashboard-content-add), .ledger-content, .secondary-body {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .ledger-content > :not(.dashboard-main-content) { flex-shrink: 0; }
-  .dashboard-main-content, .dashboard-sub-content {
-    flex: 1;
-    min-height: 0;
-    max-height: none;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-  }
   .ledger-chart-panel { align-self: stretch; height: auto; }
   .ledger-chart-panel .ledger-chart-heading { display: none; }
   .dashboard-content-add { padding: 8px 12px; }
