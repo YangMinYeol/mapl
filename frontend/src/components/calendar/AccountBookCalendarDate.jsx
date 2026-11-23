@@ -22,6 +22,7 @@ export default function AccountBookCalendarDate({
   loadCalendarDatas,
   periods,
   tagMaxCount,
+  onTagCapacityChange,
   setSelectedPeriod,
 }) {
   const weeks = getWeekDates(currentDate);
@@ -50,6 +51,7 @@ export default function AccountBookCalendarDate({
       holidays={holidays}
       tagMap={tagMap}
       tagMaxCount={tagMaxCount}
+      onTagCapacityChange={onTagCapacityChange}
       onDateClick={(date) =>
         handleDateClick(date, setSelectedDate, setSelectedPeriod, periods)
       }

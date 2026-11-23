@@ -69,7 +69,7 @@ export default function LinkModal({
       </>}
       footer={<div className="record-actions">
         {selectedLinkMemo && selectedLinkMemo.id !== selectedLinkMemo.link && (
-          <button type="button" className="record-delete" disabled={isLoading} onClick={handleUnlinkMemo}>현재 메모 링크 해제</button>
+          <button type="button" className="record-delete" disabled={isLoading} onClick={handleUnlinkMemo}>현재 메모 연결 해제</button>
         )}
         <button type="button" className="record-cancel" onClick={onClose}>닫기</button>
       </div>}

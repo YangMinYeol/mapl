@@ -86,7 +86,6 @@ function fillTagMapToMaxCount(tagMap, tagMaxCount) {
       filled[tagMaxCount - 1] = {
         id: `more-${dateKey}`,
         content: `+${visibleCount - (tagMaxCount - 1)}개`,
-        colorHex: "#ffffff",
         type: TAG_TYPE.MORE,
       };
     }

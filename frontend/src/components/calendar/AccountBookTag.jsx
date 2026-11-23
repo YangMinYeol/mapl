@@ -6,7 +6,6 @@ import { extractDateAndTime, getAccountBookDate } from "../../util/dateUtil";
 export default function AccountBookTag({ tag, onClick }) {
   const amountPrefix = tag.type === ACCOUNT_TYPE.EXPENSE ? "-" : "+";
   const isHoliday = tag.type === TAG_TYPE.HOLIDAY;
-  const isMore = tag.type === TAG_TYPE.MORE;
 
   const handleClick = (e) => {
     if (editable) {
@@ -15,7 +14,7 @@ export default function AccountBookTag({ tag, onClick }) {
     }
   };
 
-  const editable = !isHoliday && !isMore;
+  const editable = !isHoliday;
   const Tag = editable ? "button" : "div";
   const accountTag = (
     <Tag
@@ -24,13 +23,11 @@ export default function AccountBookTag({ tag, onClick }) {
       data-palette-color={tag?.colorId != null || undefined}
       className={`${tag && "hover:cursor-pointer hover:font-bold"} ${
         !isHoliday && "text-right"
-      } ${
-        isMore ? "text-gray-500" : "text-white"
-      } rounded mx-1 px-1 h-5 truncate`}
+      } text-white rounded mx-1 px-1 h-5 truncate`}
       style={tag ? { backgroundColor: tag.colorHex, "--tag-ink": tag.colorHex } : {}}
       onClick={handleClick}
     >
-      {isHoliday || isMore
+      {isHoliday
         ? tag.content
         : `${amountPrefix}${tag.amount?.toLocaleString()}원`}
     </Tag>

@@ -33,7 +33,7 @@ export default function ModalLayout({
       <div className="planner-dialog-frame" inert={isLoading ? "" : undefined} aria-busy={isLoading}>
         <div className="modal-header">
           <h2 className="planner-dialog-title" id={titleId}>
-            {headingIcon && <span className="planner-heading-icon" aria-hidden="true"><FontAwesomeIcon icon={headingIcon} /></span>}
+            {headingIcon && <span className="planner-heading-icon" aria-hidden="true">{headingIcon}</span>}
             {title}
           </h2>
           <button type="button" className="planner-dialog-close" aria-label="닫기" onClick={onClose}>

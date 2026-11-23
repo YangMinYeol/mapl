@@ -1,4 +1,6 @@
 import { format, isSameDay, isToday } from "date-fns";
+import { useLayoutEffect, useRef } from "react";
+import { TAG_TYPE } from "../../constants/tag";
 import { getDateKey, getDateTextColor } from "../../util/calendarUtil";
 
 export default function CalendarDate({
@@ -8,6 +10,7 @@ export default function CalendarDate({
   holidays,
   tagMap,
   tagMaxCount,
+  onTagCapacityChange,
   onDateClick,
   onTagClick,
   TagComponent,
@@ -16,6 +19,24 @@ export default function CalendarDate({
   isModalOpen,
   closeModal,
 }) {
+  const firstTagArea = useRef(null);
+
+  useLayoutEffect(() => {
+    const area = firstTagArea.current;
+    function measureCapacity() {
+      const styles = getComputedStyle(area);
+      const row = parseFloat(styles.getPropertyValue("--calendar-tag-height"));
+      const gap = parseFloat(styles.getPropertyValue("--calendar-tag-gap"));
+      const height = area.getBoundingClientRect().height;
+      onTagCapacityChange(Math.max(1, Math.floor((height + gap) / (row + gap))));
+    }
+
+    measureCapacity();
+    const observer = new ResizeObserver(measureCapacity);
+    observer.observe(area);
+    return () => observer.disconnect();
+  }, [onTagCapacityChange]);
+
   return (
     <div
       className="grid flex-1 gap-[1px] bg-gray-200"
@@ -50,19 +71,38 @@ export default function CalendarDate({
                   {format(date, "d")}
                 </button>
 
-                <div className="calendar-tag-slots">
-                  {tags.map((tag, i) =>
-                    tag ? (
-                      <TagComponent
-                        key={tag.id}
-                        tag={tag}
-                        date={date}
-                        onClick={() => onTagClick(tag)}
-                      />
-                    ) : (
-                      <div key={`placeholder-${i}`} className="h-5 px-1 mx-1" />
-                    )
-                  )}
+                <div className="calendar-tag-area" ref={weekIndex === 0 && dateIndex === 0 ? firstTagArea : undefined}>
+                  <div className="calendar-tag-slots">
+                    {tags.map((tag, i) =>
+                      tag?.type === TAG_TYPE.MORE ? (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          className="calendar-more mx-1 px-1 h-5 truncate"
+                          aria-label={`${format(date, "yyyy년 M월 d일")} 기록 더 보기 (${tag.content})`}
+                          aria-controls="planner-dashboard"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDateClick(date);
+                            if (window.matchMedia("(max-width: 1023.98px)").matches) {
+                              document.getElementById("planner-dashboard")?.focus();
+                            }
+                          }}
+                        >
+                          {tag.content.replace(/개$/, "")}
+                        </button>
+                      ) : tag ? (
+                        <TagComponent
+                          key={tag.id}
+                          tag={tag}
+                          date={date}
+                          onClick={() => onTagClick(tag)}
+                        />
+                      ) : (
+                        <div key={`placeholder-${i}`} className="h-5 px-1 mx-1" />
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             );

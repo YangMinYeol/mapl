@@ -1,6 +1,6 @@
 import { TAG_TYPE } from "../constants/tag";
 import { getDateKey } from "./calendarUtil";
-import { formatHolidayDate } from "./dateUtil";
+import { formatDateYYYYMMDD, formatHolidayDate } from "./dateUtil";
 import { separateDailyAndRangeMemos, sortMemos } from "./memoUtil";
 
 // 날짜별 메모 할당
@@ -58,34 +58,24 @@ function addHolidayMemos(dailyMemos, holidays) {
 // 3. 기간 메모 Level 지정
 function placeRangeMemosInLevels(map, rangeMemos) {
   const sortedMemos = sortMemos(rangeMemos, false);
-  const maxLevels = 100;
-  const usedLevelsMap = {};
+  const visibleDates = Object.keys(map);
 
   for (const memo of sortedMemos) {
-    const start = new Date(memo.startDate);
-    const end = new Date(memo.endDate);
+    const start = formatDateYYYYMMDD(memo.startDate);
+    const end = formatDateYYYYMMDD(memo.endDate);
+    const dates = visibleDates.filter((date) => date >= start && date <= end);
+    if (dates.length === 0) continue;
+
     let level = 0;
+    // 날짜가 바뀌어도 이어지는 기간 메모는 같은 줄에 표시한다.
+    while (dates.some((date) => map[date][level] !== undefined)) level++;
 
-    levelLoop: for (; level < maxLevels; level++) {
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        const key = getDateKey(d);
-        if (!usedLevelsMap[key]) usedLevelsMap[key] = new Set();
-        if (usedLevelsMap[key].has(level)) {
-          continue levelLoop;
-        }
-      }
-      break;
-    }
-
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const key = getDateKey(d);
-      if (!map[key]) map[key] = [];
-      map[key][level] = {
+    for (const date of dates) {
+      map[date][level] = {
         ...memo,
         level,
         type: TAG_TYPE.RANGE,
       };
-      usedLevelsMap[key].add(level);
     }
   }
 }
@@ -128,7 +118,6 @@ function truncateMemoMap(memoMap, tagMaxCount) {
       truncatedMemos[tagMaxCount - 1] = {
         id: `more-${dateKey}`,
         content: `+${overflowCount}개`,
-        colorHex: "#ffffff",
         type: TAG_TYPE.MORE,
       };
     }

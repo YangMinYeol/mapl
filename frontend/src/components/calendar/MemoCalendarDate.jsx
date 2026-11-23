@@ -22,6 +22,7 @@ export default function MemoCalendarDate({
   loadCalendarDatas,
   periods,
   tagMaxCount,
+  onTagCapacityChange,
   setSelectedPeriod,
 }) {
   const weeks = getWeekDates(currentDate);
@@ -32,7 +33,7 @@ export default function MemoCalendarDate({
   const tagMap = buildMemoLevelMap(weeks, calendarDatas, tagMaxCount, holidays);
 
   function handleTagClick(memo) {
-    if (memo.type === TAG_TYPE.MORE || memo.type === TAG_TYPE.HOLIDAY) return;
+    if (memo.type === TAG_TYPE.HOLIDAY) return;
 
     if (memo.isLinked) {
       openConfirm(LINKED_MEMO.TITLE, LINKED_MEMO.EDIT_CONFIRM, () => {
@@ -53,6 +54,7 @@ export default function MemoCalendarDate({
       holidays={holidays}
       tagMap={tagMap}
       tagMaxCount={tagMaxCount}
+      onTagCapacityChange={onTagCapacityChange}
       onDateClick={(date) =>
         handleDateClick(date, setSelectedDate, setSelectedPeriod, periods)
       }

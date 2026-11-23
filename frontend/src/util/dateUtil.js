@@ -6,7 +6,6 @@ import {
   format,
   getDay,
   getMonth,
-  getWeekOfMonth,
   getYear,
   isAfter,
   isBefore,
@@ -16,6 +15,9 @@ import {
   startOfWeek,
   startOfYear,
 } from "date-fns";
+import { ko } from "date-fns/locale";
+
+const PLANNING_WEEK = { weekStartsOn: 1 };
 
 export function formatDateYYYYMMDD(date) {
   if (!(date instanceof Date)) {
@@ -37,8 +39,8 @@ export function setDateByPeriod(period, selectedDate) {
       endDate = selectedDate;
       break;
     case "Week":
-      startDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
-      endDate = endOfWeek(selectedDate, { weekStartsOn: 1 });
+      startDate = startOfWeek(selectedDate, PLANNING_WEEK);
+      endDate = endOfWeek(selectedDate, PLANNING_WEEK);
       break;
     case "Month":
       startDate = startOfMonth(selectedDate);
@@ -67,7 +69,7 @@ export function postponeDates(period, startDate) {
       break;
     case "Week":
       newStart = addWeeks(newStart, 1);
-      newEnd = endOfWeek(newStart, { weekStartsOn: 1 });
+      newEnd = endOfWeek(newStart, PLANNING_WEEK);
       break;
     case "Month":
       newStart = addMonths(newStart, 1);
@@ -133,8 +135,11 @@ export function formatDateByPeriod(date, periodName, isAccountBook) {
   switch (periodName) {
     case "Day":
       return format(date, "yyyy년 MM월 dd일");
-    case "Week":
-      return format(date, `yyyy년 MM월 ${getWeekOfMonth(date)}주차`);
+    case "Week": {
+      const { startDate, endDate } = setDateByPeriod({ name: "Week" }, date);
+      const pattern = startDate.slice(0, 4) === endDate.slice(0, 4) ? "MM.dd(EEE)" : "yyyy.MM.dd(EEE)";
+      return `${format(startDate, pattern, { locale: ko })} ~ ${format(endDate, pattern, { locale: ko })}`;
+    }
     case "Month":
       return format(date, "yyyy년 MM월");
     case "Year":
@@ -220,9 +225,7 @@ export function groupByMonthWeek(datas) {
   datas.forEach((item) => {
     const date = getAccountBookDate(item);
     const start = startOfMonth(date);
-    const weekDiff = differenceInCalendarWeeks(date, start, {
-      weekStartsOn: 1,
-    }); // 월요일 기준
+    const weekDiff = differenceInCalendarWeeks(date, start, PLANNING_WEEK);
     const weekLabel = `${weekDiff + 1}주차`;
 
     if (!grouped[weekLabel]) grouped[weekLabel] = [];
