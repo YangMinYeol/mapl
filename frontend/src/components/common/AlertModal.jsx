@@ -1,4 +1,3 @@
-import { faCheck, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../../context/ModalContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import ModalLayout from "./modal/ModalLayout";
@@ -33,7 +32,16 @@ export default function AlertModal() {
       isOpen={modalOpen}
       onClose={closeModal}
       title={isConfirm ? "확인" : "알림"}
-      headingIcon={isConfirm ? faCheck : faCircleInfo}
+      headingIcon={
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          {isConfirm ? <path d="m5 12 4 4 10-9" /> : (
+            <>
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 11v5m0-8.4v.2" />
+            </>
+          )}
+        </svg>
+      }
       content={
         <div className="planner-notice-message">
           <p>{modalMessage}</p>

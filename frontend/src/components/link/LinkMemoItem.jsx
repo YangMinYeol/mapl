@@ -10,7 +10,7 @@ export default function LinkMemoItem({ memo, isCurrent, isOriginal }) {
     <div className="planner-link-row">
       <div className="planner-link-labels">
         <span className="planner-link-period">{getPeriodDisplayName(periodName, "memo")}</span>
-        {isCurrent && <span className="planner-link-badge">현재 메모</span>}
+        {isCurrent && <span className="planner-link-badge planner-link-badge-current">현재 메모</span>}
         {isOriginal && <span className="planner-link-badge">원본</span>}
       </div>
       {hasDates ? (
