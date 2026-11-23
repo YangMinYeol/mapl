@@ -107,7 +107,7 @@ export default function MainPage() {
                 setActiveTab={setActiveTab}
               />
             </div>
-            <div className="dashboard-container">
+            <div id="planner-dashboard" className="dashboard-container" tabIndex={-1}>
               <Dashboard
                 activeTab={activeTab}
                 dashboardDatas={dashboardDatas}

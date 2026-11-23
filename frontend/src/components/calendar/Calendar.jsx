@@ -1,18 +1,11 @@
 import { addMonths, getDate, getDaysInMonth, setDate, setMonth, setYear, startOfMonth } from "date-fns";
-import { useSyncExternalStore } from "react";
+import { useState } from "react";
 import { TABS } from "../../constants/tab";
 import useHolidayData from "../../hooks/useHolidayData";
 import AccountBookCalendarDate from "./AccountBookCalendarDate";
 import CalendarDays from "./CalendarDays";
 import CalendarHeader from "./CalendarHeader";
 import MemoCalendarDate from "./MemoCalendarDate";
-
-const mobileQuery = window.matchMedia("(max-width: 767.98px)");
-const subscribeToWidth = (notify) => {
-  mobileQuery.addEventListener("change", notify);
-  return () => mobileQuery.removeEventListener("change", notify);
-};
-const getTagMaxCount = () => mobileQuery.matches ? 3 : 4;
 
 export default function Calendar({
   calendarDatas,
@@ -28,7 +21,7 @@ export default function Calendar({
   activeTab,
 }) {
   const { holidays } = useHolidayData(currentDate);
-  const tagMaxCount = useSyncExternalStore(subscribeToWidth, getTagMaxCount);
+  const [tagMaxCount, setTagMaxCount] = useState(1);
 
   function moveToMonth(month) {
     const day = Math.min(getDate(selectedDate), getDaysInMonth(month));
@@ -66,6 +59,7 @@ export default function Calendar({
       {activeTab === TABS.MEMO ? (
         <MemoCalendarDate
           tagMaxCount={tagMaxCount}
+          onTagCapacityChange={setTagMaxCount}
           holidays={holidays}
           currentDate={currentDate}
           selectedDate={selectedDate}
@@ -79,6 +73,7 @@ export default function Calendar({
       ) : (
         <AccountBookCalendarDate
           tagMaxCount={tagMaxCount}
+          onTagCapacityChange={setTagMaxCount}
           holidays={holidays}
           currentDate={currentDate}
           selectedDate={selectedDate}

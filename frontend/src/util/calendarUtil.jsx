@@ -91,5 +91,5 @@ export function handleDateClick(
   periods
 ) {
   setSelectedDate(date);
-  setSelectedPeriod(periods[0]);
+  setSelectedPeriod(periods.find((period) => period.name === "Day") ?? periods[0]);
 }

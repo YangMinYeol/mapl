@@ -7,10 +7,6 @@ import Tooltip from "../common/Tooltip";
 function getMemoTagClass(tag, date) {
   if (!tag) return "";
 
-  if (tag.type === TAG_TYPE.MORE) {
-    return "mx-1 text-gray-500 rounded";
-  }
-
   if (tag.type === TAG_TYPE.HOLIDAY) {
     return "mx-1 text-white rounded";
   }
@@ -30,8 +26,7 @@ function getMemoTagClass(tag, date) {
 export default function MemoTag({ tag, date, onClick }) {
   const shouldShow =
     tag?.content &&
-    (tag.type === TAG_TYPE.MORE ||
-      tag.type === TAG_TYPE.HOLIDAY ||
+    (tag.type === TAG_TYPE.HOLIDAY ||
       isSameDay(date, new Date(tag.startDate)) ||
       date.getDay() === 0);
 
