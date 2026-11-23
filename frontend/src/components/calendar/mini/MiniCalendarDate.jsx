@@ -5,12 +5,15 @@ export default function MiniCalendarDate({ calendarDate, date, setDate }) {
   const weeks = getWeekDates(calendarDate);
 
   return (
-    <div className={`grid flex-1 grid-rows-${weeks.length} h-36`}>
+    <div className="grid flex-1 auto-rows-fr h-36">
       {weeks.map((week, weekIndex) => (
         <div key={weekIndex} className="grid grid-cols-7">
           {week.map((d, index) => (
-            <div
+            <button
+              type="button"
               key={index}
+              aria-label={format(d, "yyyy년 M월 d일")}
+              aria-pressed={isSameDay(d, date)}
               className={`date-cell rounded flex flex-col items-center justify-center ${getDateTextColor(
                 d,
                 calendarDate
@@ -21,10 +24,8 @@ export default function MiniCalendarDate({ calendarDate, date, setDate }) {
               }`}
               onClick={() => setDate(d)}
             >
-              <div className="flex items-center justify-center rounded w-[24px] h-[24px] cursor-pointer">
-                {format(d, "d")}
-              </div>
-            </div>
+              {format(d, "d")}
+            </button>
           ))}
         </div>
       ))}

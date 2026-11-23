@@ -19,7 +19,7 @@ import {
 
 export function formatDateYYYYMMDD(date) {
   if (!(date instanceof Date)) {
-    date = new Date(date);
+    date = typeof date === "string" ? parseISO(date) : new Date(date);
   }
   return format(date, "yyyy-MM-dd"); // YYYY-MM-DD 형식으로 변환
 }
@@ -67,7 +67,7 @@ export function postponeDates(period, startDate) {
       break;
     case "Week":
       newStart = addWeeks(newStart, 1);
-      newEnd = endOfWeek(newStart, { weekStartsOn: 0 });
+      newEnd = endOfWeek(newStart, { weekStartsOn: 1 });
       break;
     case "Month":
       newStart = addMonths(newStart, 1);
@@ -180,6 +180,10 @@ export function extractDateAndTime(dateInput) {
 }
 
 // Week: 요일별
+export function getAccountBookDate(item) {
+  return parseISO(item.occurredDate ?? item.occurredAt);
+}
+
 export function groupByWeekday(dataList) {
   const weekdayNames = [
     "월요일",
@@ -197,7 +201,7 @@ export function groupByWeekday(dataList) {
   }, {});
 
   dataList.forEach((item) => {
-    const date = parseISO(item.occurredAt);
+    const date = getAccountBookDate(item);
     const day = getDay(date); // 0(일) ~ 6(토)
 
     const weekdayIndex = (day + 6) % 7; // 월요일 시작 기준 인덱스 맞추기
@@ -214,7 +218,7 @@ export function groupByMonthWeek(datas) {
   const grouped = {};
 
   datas.forEach((item) => {
-    const date = parseISO(item.occurredAt);
+    const date = getAccountBookDate(item);
     const start = startOfMonth(date);
     const weekDiff = differenceInCalendarWeeks(date, start, {
       weekStartsOn: 1,
@@ -233,7 +237,7 @@ export function groupByMonth(datas) {
   const grouped = {};
 
   datas.forEach((item) => {
-    const date = parseISO(item.occurredAt);
+    const date = getAccountBookDate(item);
     const month = getMonth(date); // 0~11
     const label = `${month + 1}월`;
 
@@ -249,7 +253,7 @@ export function groupByYear(datas) {
   const grouped = {};
 
   datas.forEach((item) => {
-    const date = parseISO(item.occurredAt);
+    const date = getAccountBookDate(item);
     const year = getYear(date);
     const label = `${year}년`;
 

@@ -8,19 +8,16 @@ import { useAccountBookDataManager } from "../hooks/useAccountBookDataManager";
 import { useErrorHandler } from "../hooks/useErrorHandler";
 import { useMemoDataManager } from "../hooks/useMemoDataManager";
 import { formatDateYYYYMMDD } from "../util/dateUtil";
+import "../styles/planner.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-function getTabData(activeTab, managers) {
-  return activeTab === TABS.MEMO ? managers.memo : managers.accountBook;
-}
 
 export default function MainPage() {
   const today = new Date();
 
   const [activeTab, setActiveTab] = useState(TABS.MEMO);
   const [periods, setPeriods] = useState([]);
-  const [selectedPeriod, setSelectedPeriod] = useState({});
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(formatDateYYYYMMDD(today));
 
@@ -41,39 +38,39 @@ export default function MainPage() {
     calendarDatas,
     loadDashboardDatas,
     loadCalendarDatas,
-  } = getTabData(activeTab, { memo, accountBook });
+  } = activeTab === TABS.MEMO ? memo : accountBook;
 
-  const isLoading =
-    memo.isLoading || accountBook.isLoading || periods.length === 0;
+  const isLoading = periods.length === 0;
 
   const handleSetSelectedDate = (date) => {
     setSelectedDate(formatDateYYYYMMDD(date));
   };
 
   useEffect(() => {
-    fetchPeriodType();
-  }, []);
-
-  async function fetchPeriodType() {
-    try {
-      const response = await fetch(`${API_URL}/api/period`);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
-      setPeriods(data);
-      setSelectedPeriod(data[0]);
-    } catch (error) {
-      handleError(error);
+    const controller = new AbortController();
+    async function loadPeriods() {
+      try {
+        const response = await fetch(`${API_URL}/api/period`, { signal: controller.signal });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        setPeriods(data);
+        setSelectedPeriod(data.find((period) => period.name === "Day") ?? data[0]);
+      } catch (error) {
+        if (!controller.signal.aborted) handleError(error);
+      }
     }
-  }
+    loadPeriods();
+    return () => controller.abort();
+  }, []);
 
   return (
     <div>
-      <div className="flex flex-nowrap h-[900px]">
+      <div className="planner-workspace">
         {isLoading ? (
           <Loading />
         ) : (
           <>
-            <div className="w-[70%] h-full min-w-[600px] calendar-container">
+            <div className="calendar-container">
               <Calendar
                 calendarDatas={calendarDatas}
                 loadDashboardDatas={loadDashboardDatas}
@@ -88,7 +85,7 @@ export default function MainPage() {
                 setActiveTab={setActiveTab}
               />
             </div>
-            <div className="w-[30%] h-full min-w-[300px] dashboard-container">
+            <div className="dashboard-container">
               <Dashboard
                 activeTab={activeTab}
                 dashboardDatas={dashboardDatas}

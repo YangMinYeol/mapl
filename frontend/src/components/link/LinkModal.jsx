@@ -1,12 +1,8 @@
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import Modal from "react-modal";
+import ModalLayout from "../common/modal/ModalLayout";
 import { fetchLinkedMemos, unlinkMemo } from "../../api/memo";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
-import { baseModalStyle } from "../../styles/modalStyle";
 import { sortMemos } from "../../util/memoUtil";
-import Loading from "../common/Loading";
 import LinkMemoItem from "./LinkMemoItem";
 
 export default function LinkModal({
@@ -18,34 +14,19 @@ export default function LinkModal({
 }) {
   const [linkedMemos, setLinkedMemos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const handleError = useErrorHandler(closeModal);
+  const handleError = useErrorHandler(onClose);
 
+  const linkId = selectedLinkMemo?.link;
   useEffect(() => {
-    Modal.setAppElement("#root");
-  }, []);
-
-  useEffect(() => {
-    if (isOpen && selectedLinkMemo) {
-      fetchLinkedMemo();
-    }
-  }, [isOpen]);
-
-  function closeModal() {
-    onClose();
-  }
-
-  async function fetchLinkedMemo() {
-    try {
-      setIsLoading(true);
-      const linkedMemos = await fetchLinkedMemos(selectedLinkMemo.link);
-      const sortedLinkedMemos = sortMemos(linkedMemos, false);
-      setLinkedMemos(sortedLinkedMemos);
-    } catch (error) {
-      handleError(error, { closeCurrentModal: true });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    if (!isOpen || linkId == null) return;
+    let current = true;
+    setIsLoading(true);
+    fetchLinkedMemos(linkId)
+      .then((items) => { if (current) setLinkedMemos(sortMemos(items, false)); })
+      .catch((error) => { if (current) handleError(error, { closeCurrentModal: true }); })
+      .finally(() => { if (current) setIsLoading(false); });
+    return () => { current = false; };
+  }, [isOpen, linkId]);
 
   // 링크 해제
   async function handleUnlinkMemo() {
@@ -53,9 +34,8 @@ export default function LinkModal({
       const { id, link } = selectedLinkMemo;
       setIsLoading(true);
       await unlinkMemo(id, link);
-      loadDashboardDatas();
-      loadCalendarDatas();
-      closeModal();
+      await Promise.all([loadDashboardDatas(), loadCalendarDatas()]);
+      onClose();
     } catch (error) {
       handleError(error, { closeCurrentModal: true });
     } finally {
@@ -64,73 +44,20 @@ export default function LinkModal({
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      shouldCloseOnOverlayClick={false}
-      style={baseModalStyle}
-    >
-      <div className="w-[350px]">
-        {/* Header */}
-        <div className="h-[46px] border-b modal-header border-mapl-slate flex justify-between items-center px-3">
-          <div className="text-base">
-            <span>링크 연결된 메모 목록</span>
-          </div>
-          <div>
-            <button
-              className="w-7 h-7 hover:cursor-pointer group"
-              onClick={closeModal}
-            >
-              <FontAwesomeIcon
-                icon={faXmark}
-                size="lg"
-                className="group-hover:text-green-900"
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="px-3 modal-content">
-          <div className="p-1 my-2 border rounded border-mapl-slate">
-            {selectedLinkMemo && selectedLinkMemo.content}
-          </div>
-          <div className="flex-col h-48 overflow-auto border rounded border-mapl-slate ">
-            <ul>
-              {linkedMemos.map((memo) => {
-                return (
-                  <li key={memo.id}>
-                    <LinkMemoItem memo={memo} />
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-between px-3 mt-4 mb-2">
-          <div>
-            {selectedLinkMemo &&
-              selectedLinkMemo.id !== selectedLinkMemo.link && (
-                <button
-                  className="h-8 px-3 font-semibold text-white border rounded cursor-pointer bg-deep-green"
-                  onClick={handleUnlinkMemo}
-                >
-                  현재 메모 링크 해제
-                </button>
-              )}
-          </div>
-          <div>
-            <button
-              className="h-8 px-3 font-semibold border rounded cursor-pointer"
-              onClick={closeModal}
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      </div>
-      {isLoading && <Loading />}
-    </Modal>
+    <ModalLayout
+      record title="링크 연결된 메모 목록" isOpen={isOpen} onClose={onClose} isLoading={isLoading}
+      content={<>
+        <p className="mb-3">{selectedLinkMemo?.content}</p>
+        <ul className="max-h-48 overflow-auto">
+          {linkedMemos.map((memo) => <li key={memo.id}><LinkMemoItem memo={memo} /></li>)}
+        </ul>
+      </>}
+      footer={<div className="record-actions">
+        {selectedLinkMemo && selectedLinkMemo.id !== selectedLinkMemo.link && (
+          <button className="record-delete" disabled={isLoading} onClick={handleUnlinkMemo}>현재 메모 링크 해제</button>
+        )}
+        <button className="record-cancel" onClick={onClose}>닫기</button>
+      </div>}
+    />
   );
 }

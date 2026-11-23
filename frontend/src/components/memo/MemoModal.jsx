@@ -1,21 +1,14 @@
-import { faSquare, faSquareCheck } from "@fortawesome/free-regular-svg-icons";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useEffect, useState } from "react";
-import Modal from "react-modal";
-import { addMemo, deleteLinkedMemos, updateMemo } from "../../api/memo";
+import { useContext, useState } from "react";
+import { addMemo, deleteMemo, deleteLinkedMemos, updateMemo } from "../../api/memo";
 import { UserContext } from "../../context/UserContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { useMemoModalForm } from "../../hooks/useMemoModalForm";
-import { baseModalStyle } from "../../styles/modalStyle";
+import ModalLayout from "../common/modal/ModalLayout";
+import RecordActions from "../common/modal/RecordActions";
 import { formatDateYYYYMMDD } from "../../util/dateUtil";
 import { MEMO_MODAL_MODE } from "../../util/memoUtil";
-import Loading from "../common/Loading";
 import Palette from "../common/Palette";
 import DateTimeInput from "./DateTimeInput";
-
-const footerButtonClass =
-  "h-8 px-3 font-semibold border rounded cursor-pointer";
 
 export default function MemoModal({
   isOpen,
@@ -40,10 +33,6 @@ export default function MemoModal({
     setShowEndDateSelect,
     startTime,
     setStartTime,
-    showStartTimeSelect,
-    setShowStartTimeSelect,
-    showEndTimeSelect,
-    setShowEndTimeSelect,
     endTime,
     setEndTime,
     content,
@@ -52,26 +41,13 @@ export default function MemoModal({
     setContentError,
     dateTimeError,
     setDateTimeError,
-    isPaletteOpen,
-    setIsPaletteOpen,
     selectedColorId,
     setSelectedColorId,
-    selectedColor,
-    setSelectedColor,
   } = useMemoModalForm({ mode, memo, selectedDate, isOpen, selectedPeriod });
 
-  const handleError = useErrorHandler(closeModal);
+  const handleError = useErrorHandler(onClose);
   const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    Modal.setAppElement("#root");
-  }, []);
-
-  // AllDay
-  function handleAllDay() {
-    setAllDay(!allDay);
-  }
 
   // 메모 추가
   async function addDetailMemo() {
@@ -140,12 +116,16 @@ export default function MemoModal({
   }
 
   // 메모 삭제
-  async function deleteMemo() {
+  async function removeMemo() {
     try {
-      await deleteLinkedMemos(memo.link);
+      setIsLoading(true);
+      if (memo.isLinked) await deleteLinkedMemos(memo.link);
+      else await deleteMemo(memo.id);
       await reloadAndClose();
     } catch (error) {
       handleError(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -164,15 +144,17 @@ export default function MemoModal({
   async function reloadAndClose() {
     await loadDashboardDatas();
     await loadCalendarDatas();
-    closeModal();
+    onClose();
   }
 
   // 시작,끝 날짜 시간 유효성 검사
   function validateDateTime() {
-    let start = new Date(startDate);
-    let end = new Date(endDate);
+    if (selectedPeriod.name === "Other") return true;
+    const start = new Date(formatDateYYYYMMDD(startDate) + "T00:00");
+    const end = new Date(formatDateYYYYMMDD(endDate) + "T00:00");
 
     if (!allDay) {
+      if (!startTime || !endTime) return false;
       const [startHour, startMin] = startTime.split(":").map(Number);
       const [endHour, endMin] = endTime.split(":").map(Number);
       start.setHours(startHour, startMin, 0, 0);
@@ -182,199 +164,89 @@ export default function MemoModal({
     return start <= end;
   }
 
-  // 모달 영역 클릭
-  function handleModalClick() {
-    if (isPaletteOpen) setIsPaletteOpen(false);
-    if (showStartDateSelect) setShowStartDateSelect(false);
-    if (showEndDateSelect) setShowEndDateSelect(false);
-    if (showStartTimeSelect) setShowStartTimeSelect(false);
-    if (showEndTimeSelect) setShowEndTimeSelect(false);
-  }
-
-  // 모달 닫기
-  function closeModal() {
-    setStartDate(selectedDate);
-    setEndDate(selectedDate);
-    setStartTime("12:00");
-    setEndTime("12:30");
-    setDateTimeError(false);
-    setAllDay(true);
-    setContent("");
-    setContentError(false);
-    onClose();
-  }
-
-  // 높이 설정
-  const showDateInputs = selectedPeriod.name !== "Other";
-  const showAllDay = selectedPeriod.name === "Day";
-  const showColor = selectedPeriod.name === "Day";
-  let modalHeight = "h-[345px]";
-  let contentHeight = "h-[250px]";
-  if (!showDateInputs) {
-    modalHeight = "h-[190px]";
-    contentHeight = "h-[95px]";
-  } else if (!showAllDay && !showColor) {
-    modalHeight = "h-[270px]";
-    contentHeight = "h-[175px]";
-  }
+  const isEdit = mode === MEMO_MODAL_MODE.EDIT;
+  const isDay = selectedPeriod.name === "Day";
 
   return (
-    <Modal
+    <ModalLayout
+      record
+      title="메모"
       isOpen={isOpen}
-      shouldCloseOnOverlayClick={false}
-      style={baseModalStyle}
-    >
-      <div className={`w-[550px] ${modalHeight}`} onClick={handleModalClick}>
-        {/* Header */}
-        <div className="h-[46px] border-b modal-header border-mapl-slate flex justify-between items-center px-3">
-          <div className="text-base">
-            <span>메모</span>
-          </div>
-          <div>
-            <button
-              className="w-7 h-7 hover:cursor-pointer group"
-              onClick={closeModal}
-            >
-              <FontAwesomeIcon
-                icon={faXmark}
-                size="lg"
-                className="group-hover:text-green-900"
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className={`${contentHeight} modal-content flex-col px-3`}>
-          {/* 날짜/시간 */}
+      onClose={onClose}
+      isLoading={isLoading}
+      content={
+        <div className="record-fields">
           {selectedPeriod.name !== "Other" && (
-            <div className="flex justify-between pb-3">
-              <div className="w-[49%]">
-                <div className="py-2">
-                  <span>시작</span>
-                </div>
+            <section className="record-schedule" aria-label="일정">
+              <div className="record-field-heading">
+                <h3>일정</h3>
+                {isDay && (
+                  <label className="record-switch">
+                    하루 종일
+                    <input type="checkbox" checked={allDay} onChange={(event) => setAllDay(event.target.checked)} />
+                  </label>
+                )}
+              </div>
+              <div className="record-date-pair">
                 <DateTimeInput
+                  label="시작일"
                   showDateSelect={showStartDateSelect}
                   setShowDateSelect={setShowStartDateSelect}
                   date={startDate}
                   setDate={setStartDate}
-                  showTimeSelect={showStartTimeSelect}
-                  setShowTimeSelect={setShowStartTimeSelect}
                   time={startTime}
                   setTime={setStartTime}
                   allDay={allDay}
                   selectedPeriod={selectedPeriod}
                 />
-                <div className="px-1 text-red-500">
-                  {dateTimeError && (
-                    <span>날짜 또는 시간을 다시 확인해 주세요.</span>
-                  )}
-                </div>
-              </div>
-              <div className="w-[49%]">
-                <div className="py-2">
-                  <span>종료</span>
-                </div>
                 <DateTimeInput
+                  label="종료일"
                   showDateSelect={showEndDateSelect}
                   setShowDateSelect={setShowEndDateSelect}
                   date={endDate}
                   setDate={setEndDate}
-                  showTimeSelect={showEndTimeSelect}
-                  setShowTimeSelect={setShowEndTimeSelect}
                   time={endTime}
                   setTime={setEndTime}
                   allDay={allDay}
                   selectedPeriod={selectedPeriod}
                 />
               </div>
-            </div>
+              {dateTimeError && <p className="record-error" role="alert">날짜 또는 시간을 다시 확인해 주세요.</p>}
+            </section>
           )}
-
-          {/* 하루종일 */}
-          {selectedPeriod.name === "Day" && (
-            <div className="flex items-center h-8 pb-3">
-              <button
-                className="w-[18px] h-[18px] hover:bg-mapl-slate flex items-center justify-center cursor-pointer rounded"
-                onClick={handleAllDay}
-              >
-                <FontAwesomeIcon icon={allDay ? faSquareCheck : faSquare} />
-              </button>
-              <span>하루종일</span>
+          <div className="record-field">
+            <div className="record-field-heading">
+              <label htmlFor="memo-content">메모 내용</label>
+              <span className="record-counter">{content.length} / 100</span>
             </div>
-          )}
-
-          {/* 내용 */}
-          <div className="pb-3">
-            <div className="py-2">
-              <span>내용</span>
-            </div>
-            <div>
-              <input
-                className="w-full px-1 border rounded outline-none border-mapl-black"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                maxLength={100}
-              />
-            </div>
-            <div className="px-1 text-red-500">
-              {contentError && <span>메모 내용을 입력해주세요.</span>}
-            </div>
+            <textarea
+              id="memo-content"
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
+              maxLength={100}
+              placeholder="메모를 입력하세요"
+              aria-invalid={contentError}
+              aria-describedby={contentError ? "memo-content-error" : undefined}
+            />
+            {contentError && <p className="record-error" id="memo-content-error" role="alert">메모 내용을 입력해 주세요.</p>}
           </div>
-
-          {/* 색상 */}
-          {selectedPeriod.name === "Day" && (
-            <div className="flex items-center h-8 pb-3">
-              <span>색상</span>
-              <div className="flex items-center h-full ml-1 w-96">
-                <div
-                  className="w-4 h-4 mr-1 border rounded cursor-pointer"
-                  style={{
-                    backgroundColor: selectedColor,
-                    borderColor: selectedColor,
-                  }}
-                  onClick={() => setIsPaletteOpen(!isPaletteOpen)}
-                ></div>
-                {isPaletteOpen && (
-                  <Palette
-                    setSelectedColorId={setSelectedColorId}
-                    setSelectedColor={setSelectedColor}
-                  />
-                )}
-              </div>
-            </div>
+          {isDay && (
+            <fieldset className="record-field">
+              <legend>달력 표시 색상</legend>
+              <Palette selectedColorId={selectedColorId} setSelectedColorId={setSelectedColorId} />
+            </fieldset>
           )}
+
         </div>
-
-        {/* Footer */}
-        <div className="h-[46px] modal-footer border-mapl-slate px-3 flex items-center">
-          <div className="flex-1">
-            {mode === MEMO_MODAL_MODE.EDIT && (
-              <button
-                className={`${footerButtonClass} bg-red-500 text-white`}
-                onClick={deleteMemo}
-              >
-                삭제
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              className={`${footerButtonClass} bg-deep-green text-white`}
-              onClick={
-                mode === MEMO_MODAL_MODE.CREATE ? addDetailMemo : editMemo
-              }
-            >
-              {mode === MEMO_MODAL_MODE.CREATE ? "추가" : "수정"}
-            </button>
-            <button className={footerButtonClass} onClick={closeModal}>
-              닫기
-            </button>
-          </div>
-        </div>
-      </div>
-      {isLoading && <Loading />}
-    </Modal>
+      }
+      footer={
+        <RecordActions
+          onDelete={isEdit ? removeMemo : undefined}
+          onClose={onClose}
+          onSave={isEdit ? editMemo : addDetailMemo}
+          disabled={isLoading}
+        />
+      }
+    />
   );
 }

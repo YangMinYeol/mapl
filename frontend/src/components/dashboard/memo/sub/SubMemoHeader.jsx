@@ -1,4 +1,5 @@
 import { getPeriodDisplayName } from "../../../../util/periodUtil";
+import Dropdown from "../../../common/Dropdown";
 
 export default function SubMemoHeader({
   filterPeriods,
@@ -10,8 +11,9 @@ export default function SubMemoHeader({
   return (
     <div className="flex p-2 border-b header border-mapl-slate h-[40px]">
       <div className="w-14/16">
-        <select
-          className="h-full border rounded outline-none border-mapl-black"
+        <Dropdown
+          compact
+          aria-label="상위 메모 기간"
           value={selectedValue}
           onChange={handleChange}
         >
@@ -20,15 +22,16 @@ export default function SubMemoHeader({
               {getPeriodDisplayName(period.name, "memo")}
             </option>
           ))}
-        </select>
+        </Dropdown>
       </div>
       <div className="text-right w-2/16">
         {!isBucketList && (
           <button
-            className="px-2 font-semibold bg-white border rounded cursor-pointer border-deep-green text-deep-green hover:text-white hover:bg-deep-green"
+            type="button"
+            className="planner-action"
             onClick={handleAddMemo}
           >
-            추가
+            가져오기
           </button>
         )}
       </div>

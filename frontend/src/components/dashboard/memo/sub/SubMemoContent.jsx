@@ -1,3 +1,4 @@
+import { useState } from "react";
 import SubMemoItem from "./SubMemoItem";
 import { bucketQuotes } from "../../../../constants/bucketQuotes";
 
@@ -13,12 +14,13 @@ export default function SubMemoContent({
   handleToggle,
   isBucketList,
   openLinkModal,
+  onEdit,
 }) {
-  const randomQuote = getRandomQuote();
+  const [randomQuote] = useState(getRandomQuote);
   return (
-    <div className="h-[300px] overflow-auto dashboard-sub-content">
+    <div className={`h-[300px] overflow-auto dashboard-sub-content${isBucketList ? " bucket-quote-content" : ""}`}>
       {isBucketList ? (
-        <div className="px-2 py-6 text-center">
+        <div className="bucket-quote px-4 py-6 text-center">
           <p className="mb-2 text-xl font-semibold text-gray-700">
             “{randomQuote.quoteKr}”
           </p>
@@ -38,6 +40,7 @@ export default function SubMemoContent({
                   checked={checkedIds.includes(memo.id)}
                   onToggle={() => handleToggle(memo.id)}
                   openLinkModal={openLinkModal}
+                  onEdit={() => onEdit(memo)}
                 />
               </li>
             ))}

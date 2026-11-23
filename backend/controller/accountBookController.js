@@ -2,12 +2,13 @@ const accountBookModel = require("../model/accountBookModel");
 
 // 대시보드용 가계부 목록 불러오기
 async function getDashboardAccountBooks(req, res) {
-  const { userId, startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query;
   try {
     const result = await accountBookModel.getDashboardAccountBooks(
-      userId,
+      req.user.id,
       startDate,
-      endDate
+      endDate,
+      req.query.timeZone
     );
 
     return res.status(200).json(result);
@@ -21,11 +22,12 @@ async function getDashboardAccountBooks(req, res) {
 
 // 달력용 가계부 목록 불러오기
 async function getCalendarAccountBooks(req, res) {
-  const { userId, currentDate } = req.query;
+  const { currentDate } = req.query;
   try {
     const result = await accountBookModel.getCalendarAccountBooks(
-      userId,
-      currentDate
+      req.user.id,
+      currentDate,
+      req.query.timeZone
     );
 
     return res.status(200).json(result);
@@ -39,17 +41,18 @@ async function getCalendarAccountBooks(req, res) {
 
 // 가계부 항목 추가
 async function addAccountBookItem(req, res) {
-  const { userId, type, occurredAt, categoryId, assetId, content, amount } =
+  const { type, occurredAt, categoryId, assetId, content, amount, hasTime = true } =
     req.body;
   try {
     await accountBookModel.addAccountBookItem(
-      userId,
+      req.user.id,
       assetId,
       type,
       occurredAt,
       categoryId,
       content,
-      amount
+      amount,
+      hasTime
     );
 
     return res.status(200).json({ message: "가계부 항목이 추가되었습니다." });
@@ -63,7 +66,7 @@ async function addAccountBookItem(req, res) {
 
 // 가계부 항목 수정
 async function updateAccountBookItem(req, res) {
-  const { itemId, type, occurredAt, categoryId, content, amount } = req.body;
+  const { itemId, type, occurredAt, categoryId, content, amount, hasTime = true } = req.body;
   try {
     await accountBookModel.updateAccountBookItem(
       itemId,
@@ -71,7 +74,9 @@ async function updateAccountBookItem(req, res) {
       occurredAt,
       categoryId,
       content,
-      amount
+      amount,
+      hasTime,
+      req.user.id
     );
 
     return res.status(200).json({ message: "가계부 항목이 수정되었습니다." });
@@ -88,7 +93,7 @@ async function deleteAccountBookItem(req, res) {
   const { itemId } = req.body;
 
   try {
-    await accountBookModel.deleteAccountBookItem(itemId);
+    await accountBookModel.deleteAccountBookItem(itemId, req.user.id);
     return res.status(200).json({ message: "가계부 항목이 삭제되었습니다." });
   } catch (error) {
     console.error("가계부 항목 삭제 오류", error);

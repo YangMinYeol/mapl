@@ -2,7 +2,6 @@ import { useState } from "react";
 import { LINKED_MEMO } from "../../constants/messages";
 import { TAG_TYPE } from "../../constants/tag";
 import { useModal } from "../../context/ModalContext";
-import useHolidayData from "../../hooks/useHolidayData";
 import {
   getTagMaxCount,
   getWeekDates,
@@ -10,12 +9,12 @@ import {
 } from "../../util/calendarUtil";
 import { buildMemoLevelMap } from "../../util/memoTagUtil";
 import { MEMO_MODAL_MODE } from "../../util/memoUtil";
-import Loading from "../common/Loading";
 import MemoModal from "../memo/MemoModal";
 import CalendarDate from "./CalendarDate";
 import MemoTag from "./MemoTag";
 
 export default function MemoCalendarDate({
+  holidays,
   currentDate,
   selectedDate,
   setSelectedDate,
@@ -31,7 +30,6 @@ export default function MemoCalendarDate({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { openConfirm } = useModal();
 
-  const { holidays, isLoading } = useHolidayData(currentDate);
   const tagMap = buildMemoLevelMap(weeks, calendarDatas, tagMaxCount, holidays);
 
   function handleTagClick(memo) {
@@ -47,8 +45,6 @@ export default function MemoCalendarDate({
       setIsModalOpen(true);
     }
   }
-
-  if (isLoading) return <Loading />;
 
   return (
     <CalendarDate

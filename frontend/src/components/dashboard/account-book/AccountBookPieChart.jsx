@@ -7,11 +7,11 @@ export function AccountBookPieChart({ dashboardDatas }) {
   const incomeChartData = groupByCategory(incomeItems);
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-1/2 h-[220px]">
+    <div className="ledger-charts">
+      <div>
         <PieChartSection title={"수입"} data={incomeChartData} />
       </div>
-      <div className="w-1/2 h-[220px]">
+      <div>
         <PieChartSection title={"지출"} data={expenseChartData} />
       </div>
     </div>
@@ -24,18 +24,18 @@ function PieChartSection({ title, data }) {
 
   return (
     <>
-      <div className="flex items-center justify-center pt-2 font-semibold text-gray-700">
+      <div className="ledger-chart-label">
         {title}
       </div>
 
       {isEmpty ? (
-        <div className="flex items-center justify-center h-[190px] text-gray-400">
+        <div className="ledger-chart-slot grid place-items-center text-gray-500">
           <div className="text-center">
             <div className="text-sm">{title} 데이터가 없습니다</div>
           </div>
         </div>
       ) : (
-        <div className="relative group h-[190px]">
+        <div className="ledger-chart-slot relative group">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -43,19 +43,19 @@ function PieChartSection({ title, data }) {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                outerRadius={80}
+                outerRadius="92%"
+                innerRadius="46%"
+                stroke="#ffffff"
                 fill="#8884d8"
                 dataKey="value"
               >
                 {data.map((item) => (
                   <Cell key={item.name} fill={item.colorHex} />
                 ))}
-                <Tooltip
-                  content={(props) => (
-                    <PieTooltip {...props} totalValue={totalValue} />
-                  )}
-                />
               </Pie>
+              <Tooltip isAnimationActive={false} content={(props) => (
+                <PieTooltip {...props} totalValue={totalValue} />
+              )} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -65,31 +65,16 @@ function PieChartSection({ title, data }) {
 }
 
 function PieTooltip({ active, payload, totalValue }) {
-  if (active && payload && payload.length) {
-    const { name, value } = payload[0].payload;
-    const percent = ((value / totalValue) * 100).toFixed(2);
-
-    return (
-      <div
-        style={{
-          backgroundColor: "white",
-          border: "1px solid #ccc",
-          padding: "8px",
-          borderRadius: "4px",
-          fontSize: "14px",
-          color: "#333",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-        }}
-      >
-        <div>
-          <strong>{name}</strong>
-        </div>
-        <div>{`금액: ${value.toLocaleString()}원`}</div>
-        <div>{`퍼센트: ${percent}%`}</div>
-      </div>
-    );
-  }
-  return null;
+  if (!active || !payload?.length) return null;
+  const { name, value, colorHex } = payload[0].payload;
+  const percent = totalValue ? (value / totalValue * 100).toLocaleString("ko-KR", { maximumFractionDigits: 2 }) : 0;
+  return (
+    <div className="planner-tooltip">
+      <strong><i style={{ backgroundColor: colorHex }} />{name}</strong>
+      <div>금액 · {value.toLocaleString()}원</div>
+      <div>비중 · {percent}%</div>
+    </div>
+  );
 }
 
 // 타입에 따른 데이터 분리

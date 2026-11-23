@@ -1,0 +1,120 @@
+.mapl-dropdown {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.mapl-dropdown select {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 4px 29px 4px 10px;
+  border: 1px solid #d2dfd7;
+  border-radius: var(--mapl-control-radius);
+  background: #f8faf9;
+  color: var(--mapl-ink);
+  font: inherit;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+.mapl-dropdown::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid #48685c;
+  border-bottom: 1.5px solid #48685c;
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}
+
+.mapl-dropdown--compact select {
+  min-height: 28px;
+  padding: 2px 22px 2px 8px;
+  font-size: 12px;
+}
+
+.mapl-dropdown--compact::after {
+  right: 9px;
+  width: 5px;
+  height: 5px;
+}
+
+.mapl-dropdown select:focus-visible {
+  outline: 2px solid var(--mapl-focus);
+  outline-offset: 2px;
+}
+
+.mapl-dropdown select:disabled {
+  background: #eff3f0;
+  color: #586e64;
+  cursor: default;
+}
+
+@supports (appearance: base-select) and selector(select::picker(select)) {
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) select,
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) select::picker(select) {
+    appearance: base-select;
+  }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) select::picker-icon {
+    display: none;
+  }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) select {
+    align-items: center;
+    line-height: 1.25;
+  }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) select::picker(select) {
+    position-area: block-end span-inline-end;
+    align-self: start;
+    justify-self: start;
+    min-inline-size: max(124px, anchor-size(width));
+    min-block-size: 0;
+    max-block-size: min(180px, 65dvh);
+    overflow-y: auto;
+    margin: 4px 0 0;
+    padding: 4px;
+    border: 1px solid #dce5e0;
+    border-radius: var(--mapl-menu-radius);
+    background: #fff;
+    box-shadow: 0 6px 18px #17383619;
+    color: var(--mapl-ink);
+    font: inherit;
+    font-size: 12px;
+  }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) select::picker(select) { position-try-fallbacks: flip-block; }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) option {
+    display: flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 6px 9px;
+    border-radius: var(--mapl-control-radius);
+    line-height: 1.25;
+    cursor: pointer;
+  }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) option:is(:hover, :focus-visible) {
+    background: #f1f6f3;
+  }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) option:checked {
+    background: var(--mapl-hover);
+    font-weight: 650;
+  }
+
+  :is(.mapl-dropdown--compact, .mapl-dropdown--form) option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+    color: #346550;
+  }
+}

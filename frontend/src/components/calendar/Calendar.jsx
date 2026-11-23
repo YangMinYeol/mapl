@@ -1,6 +1,7 @@
 import { addMonths, setMonth, setYear } from "date-fns";
-import { useMemo } from "react";
 import { TABS } from "../../constants/tab";
+import useHolidayData from "../../hooks/useHolidayData";
+import Loading from "../common/Loading";
 import AccountBookCalendarDate from "./AccountBookCalendarDate";
 import CalendarDays from "./CalendarDays";
 import CalendarHeader from "./CalendarHeader";
@@ -19,7 +20,7 @@ export default function Calendar({
   setActiveTab,
   activeTab,
 }) {
-  const today = useMemo(() => new Date(), []);
+  const { holidays, isLoading } = useHolidayData(currentDate);
 
   // 한달씩 이동
   function handleChangeMonth(month) {
@@ -37,6 +38,7 @@ export default function Calendar({
 
   // Today로 이동
   function goToToday() {
+    const today = new Date();
     setCurrentDate(today);
     setSelectedDate(today);
   }
@@ -52,8 +54,11 @@ export default function Calendar({
         activeTab={activeTab}
       />
       <CalendarDays />
-      {activeTab === TABS.MEMO ? (
+      {isLoading ? (
+        <Loading inline />
+      ) : activeTab === TABS.MEMO ? (
         <MemoCalendarDate
+          holidays={holidays}
           currentDate={currentDate}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
@@ -65,6 +70,7 @@ export default function Calendar({
         />
       ) : (
         <AccountBookCalendarDate
+          holidays={holidays}
           currentDate={currentDate}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}

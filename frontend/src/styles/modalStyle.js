@@ -1,5 +1,6 @@
 export const baseModalStyle = {
   overlay: {
+    zIndex: 100,
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   content: {
@@ -9,7 +10,7 @@ export const baseModalStyle = {
     right: "auto",
     bottom: "auto",
     transform: "translate(-50%, -50%)",
-    borderRadius: "10px",
+    borderRadius: "var(--mapl-panel-radius)",
     minWidth: "150px",
   },
 };

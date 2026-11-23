@@ -1,5 +1,4 @@
 import { useState } from "react";
-import useHolidayData from "../../hooks/useHolidayData";
 import { generateAccountBookTagMap } from "../../util/accountBookTagUtil";
 import {
   ACCOUNTBOOK_MODAL_MODE,
@@ -11,11 +10,11 @@ import {
   handleDateClick,
 } from "../../util/calendarUtil";
 import AccountBookModal from "../account-book/AccountBookModal";
-import Loading from "../common/Loading";
 import AccountBookTag from "./AccountBookTag";
 import CalendarDate from "./CalendarDate";
 
 export default function AccountBookCalendarDate({
+  holidays,
   currentDate,
   selectedDate,
   setSelectedDate,
@@ -30,7 +29,6 @@ export default function AccountBookCalendarDate({
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { holidays, isLoading } = useHolidayData(currentDate);
   const tagMap = generateAccountBookTagMap(
     weeks,
     calendarDatas,
@@ -44,8 +42,6 @@ export default function AccountBookCalendarDate({
     setSelectedItem(tag);
     setIsModalOpen(true);
   }
-
-  if (isLoading) return <Loading />;
 
   return (
     <CalendarDate

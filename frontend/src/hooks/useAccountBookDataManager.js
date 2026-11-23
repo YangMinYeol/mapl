@@ -1,66 +1,18 @@
-import { useEffect, useState } from "react";
-import {
-  fetchCalendarAccountBooks,
-  fetchDashboardAccountBooks,
-} from "../api/account-book";
+import { useCallback } from "react";
+import { fetchCalendarAccountBooks, fetchDashboardAccountBooks } from "../api/account-book";
 import { formatDateYYYYMMDD, setDateByPeriod } from "../util/dateUtil";
-import { useErrorHandler } from "./useErrorHandler";
+import { usePlannerList } from "./usePlannerList";
 
-export function useAccountBookDataManager(
-  user,
-  selectedDate,
-  currentDate,
-  selectedPeriod
-) {
-  const [dashboardDatas, setDashboardDatas] = useState([]);
-  const [calendarDatas, setCalendarDatas] = useState([]);
-  const handleError = useErrorHandler();
+export function useAccountBookDataManager(user, selectedDate, currentDate, selectedPeriod) {
+  const userId = user?.id;
+  const month = formatDateYYYYMMDD(currentDate);
+  const dashboardQuery = useCallback(() => {
+    const { startDate, endDate } = setDateByPeriod(selectedPeriod, selectedDate);
+    return fetchDashboardAccountBooks(userId, startDate, endDate);
+  }, [userId, selectedDate, selectedPeriod]);
+  const calendarQuery = useCallback(() => fetchCalendarAccountBooks(userId, month), [userId, month]);
+  const [dashboardDatas, loadDashboardDatas] = usePlannerList(userId && selectedPeriod?.name ? dashboardQuery : null);
+  const [calendarDatas, loadCalendarDatas] = usePlannerList(userId ? calendarQuery : null);
 
-  // 대시보드 데이터 로드
-  useEffect(() => {
-    if (!user || !selectedDate || !selectedPeriod) return;
-    loadDashboardDatas();
-  }, [user, selectedDate, selectedPeriod]);
-
-  // 달력 데이터 로드
-  useEffect(() => {
-    if (!user || !currentDate) return;
-    loadCalendarDatas();
-  }, [user, currentDate]);
-
-  async function loadDashboardDatas() {
-    try {
-      const { startDate, endDate } = setDateByPeriod(
-        selectedPeriod,
-        selectedDate
-      );
-      const data = await fetchDashboardAccountBooks(
-        user.id,
-        startDate,
-        endDate
-      );
-      setDashboardDatas(data);
-    } catch (error) {
-      handleError(error);
-    }
-  }
-
-  async function loadCalendarDatas() {
-    try {
-      const data = await fetchCalendarAccountBooks(
-        user.id,
-        formatDateYYYYMMDD(currentDate)
-      );
-      setCalendarDatas(data);
-    } catch (error) {
-      handleError(error);
-    }
-  }
-
-  return {
-    dashboardDatas,
-    calendarDatas,
-    loadDashboardDatas,
-    loadCalendarDatas,
-  };
+  return { dashboardDatas, calendarDatas, loadDashboardDatas, loadCalendarDatas };
 }

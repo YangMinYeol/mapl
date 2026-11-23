@@ -1,10 +1,9 @@
 const assetModel = require("../model/assetModel");
 
 async function getAsset(req, res) {
-  const { userId } = req.query;
 
   try {
-    const result = await assetModel.getAsset(userId);
+    const result = await assetModel.getAsset(req.user.id);
 
     return res.status(200).json(result);
   } catch (error) {

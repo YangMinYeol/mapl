@@ -18,7 +18,7 @@ export default function CalendarDate({
 }) {
   return (
     <div
-      className={`grid flex-1 grid-rows-${weeks.length} gap-[1px] bg-gray-200 h-[820px]`}
+      className="grid flex-1 gap-[1px] bg-gray-200"
     >
       {weeks.map((week, weekIndex) => (
         <div key={weekIndex} className="grid grid-cols-7">
@@ -29,6 +29,7 @@ export default function CalendarDate({
             return (
               <div
                 key={dateIndex}
+                data-selected={isSameDay(date, selectedDate) || undefined}
                 className={`date-cell flex flex-col h-full ${
                   isSameDay(date, selectedDate)
                     ? "bg-gray-100"
@@ -36,15 +37,18 @@ export default function CalendarDate({
                 }`}
                 onClick={() => onDateClick(date)}
               >
-                <div
+                <button type="button"
+                  aria-label={format(date, "yyyy년 M월 d일")}
+                  aria-pressed={isSameDay(date, selectedDate)}
+                  aria-current={isToday(date) ? "date" : undefined}
                   className={`flex items-center justify-center rounded-full w-[24px] h-[24px] date-label hover:cursor-default ${getDateTextColor(
                     date,
                     currentDate,
                     holidays
-                  )} ${isToday(date) && "text-white bg-deep-green"}`}
+                  )}`}
                 >
                   {format(date, "d")}
-                </div>
+                </button>
 
                 <div className="flex flex-col gap-[1px]">
                   {tags.map((tag, i) =>

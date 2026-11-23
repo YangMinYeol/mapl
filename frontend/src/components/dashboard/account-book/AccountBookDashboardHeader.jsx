@@ -1,6 +1,5 @@
 import { ACCOUNT_TYPE_FILTER } from "../../../util/accountBookUtil";
 import { formatDateByPeriod } from "../../../util/dateUtil";
-import Tab from "../../common/Tab";
 
 export default function AccountBookDashboardHeader({
   filterType,
@@ -11,12 +10,14 @@ export default function AccountBookDashboardHeader({
   const date = formatDateByPeriod(selectedDate, selectedPeriod.name, true);
 
   return (
-    <div className="flex justify-between px-2 py-2 font-medium border-b border-mapl-slate h-[40px]">
-      <Tab
-        options={ACCOUNT_TYPE_FILTER}
-        selected={filterType}
-        onSelect={setFilterType}
-      />
+    <div className="ledger-header">
+      <div className="ledger-filters" role="group" aria-label="가계부 내역 필터">
+        {ACCOUNT_TYPE_FILTER.map(({ label, value }) => (
+          <button key={value} type="button" aria-pressed={filterType === value} onClick={() => setFilterType(value)}>
+            {label}
+          </button>
+        ))}
+      </div>
       <div className="dashboard-header-right">{date}</div>
     </div>
   );

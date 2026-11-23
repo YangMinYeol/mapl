@@ -1,9 +1,8 @@
 const accountBookCategoryModel = require("../model/accountBookCategoryModel");
 
 async function getCategoriesByUser(req, res) {
-  const { userId } = req.query;
   try {
-    const result = await accountBookCategoryModel.getCategoriesByUser(userId);
+    const result = await accountBookCategoryModel.getCategoriesByUser(req.user.id);
 
     return res.status(200).json(result);
   } catch (error) {
@@ -16,10 +15,10 @@ async function getCategoriesByUser(req, res) {
 
 // 가계부 항목 추가
 async function addAccountBookCategory(req, res) {
-  const { userId, name, type, colorId } = req.body;
+  const { name, type, colorId } = req.body;
   try {
     await accountBookCategoryModel.addAccountBookCategory(
-      userId,
+      req.user.id,
       name,
       type,
       colorId
@@ -39,7 +38,7 @@ async function addAccountBookCategory(req, res) {
 async function updateAccountBookCategory(req, res) {
   const { id, name, colorId } = req.body;
   try {
-    await accountBookCategoryModel.updateAccountBookCategory(id, name, colorId);
+    await accountBookCategoryModel.updateAccountBookCategory(id, name, colorId, req.user.id);
     return res
       .status(200)
       .json({ message: "가계부 카테고리가 수정되었습니다." });
@@ -54,9 +53,9 @@ async function updateAccountBookCategory(req, res) {
 // 가계부 카테고리 삭제
 async function deleteAccountBookCategory(req, res) {
   const { categoryId } = req.params;
-  const {userId, type} = req.query;
+  const { type } = req.query;
   try {
-    await accountBookCategoryModel.deleteAccountBookCategory(userId, type, categoryId);
+    await accountBookCategoryModel.deleteAccountBookCategory(req.user.id, type, categoryId);
     return res
       .status(200)
       .json({ message: "가계부 카테고리가 삭제되었습니다." });
@@ -72,7 +71,7 @@ async function deleteAccountBookCategory(req, res) {
 async function reorderAccountBookCategory(req, res) {
   const reorderList = req.body;
   try {
-    await accountBookCategoryModel.reorderAccountBookCategory(reorderList);
+    await accountBookCategoryModel.reorderAccountBookCategory(reorderList, req.user.id);
     return res
       .status(200)
       .json({ message: "가계부 카테고리가 재정렬되었습니다." });

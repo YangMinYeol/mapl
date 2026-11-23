@@ -1,4 +1,5 @@
 import { fetchWithAuth } from "../api/auth";
+import { DEFAULT_COLOR_ID } from "../util/util";
 const API_URL = import.meta.env.VITE_API_URL;
 
 // 메모 목록 불러오기
@@ -32,7 +33,9 @@ export async function fetchCalendarMemos(userId, currentDate) {
       },
     }
   );
-  return await response.json();
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message);
+  return data;
 }
 
 // 메모 추가
@@ -42,7 +45,10 @@ export async function addMemo(memoArray) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(memoArray),
+    body: JSON.stringify(memoArray.map((memo) => ({
+      colorId: DEFAULT_COLOR_ID,
+      ...memo,
+    }))),
   });
 
   const data = await response.json();

@@ -2,9 +2,9 @@ const memoModel = require("../model/memoModel");
 
 // 메모 목록 불러오기
 async function getMemos(req, res) {
-  const { userId, selectedDate } = req.query;
+  const { selectedDate } = req.query;
   try {
-    const result = await memoModel.getMemos(userId, selectedDate);
+    const result = await memoModel.getMemos(req.user.id, selectedDate);
 
     return res.status(200).json(result);
   } catch (error) {
@@ -17,9 +17,9 @@ async function getMemos(req, res) {
 
 // 달력 메모 불러오기
 async function getCalendarMemos(req, res) {
-  const { userId, currentDate } = req.query;
+  const { currentDate } = req.query;
   try {
-    const result = await memoModel.getCalendarMemos(userId, currentDate);
+    const result = await memoModel.getCalendarMemos(req.user.id, currentDate);
 
     return res.status(200).json(result);
   } catch (error) {
@@ -35,7 +35,7 @@ async function addMemo(req, res) {
   const memos = req.body;
 
   try {
-    await memoModel.addMemo(memos);
+    await memoModel.addMemo(memos, req.user.id);
 
     return res.status(200).json({ message: "메모가 추가되었습니다." });
   } catch (error) {
@@ -51,7 +51,7 @@ async function updateMemo(req, res) {
   const memo = req.body;
 
   try {
-    await memoModel.updateMemo(memo);
+    await memoModel.updateMemo(memo, req.user.id);
 
     return res.status(200).json({ message: "메모가 수정되었습니다." });
   } catch (error) {
@@ -67,7 +67,7 @@ async function deleteMemo(req, res) {
   const { memoId } = req.body;
 
   try {
-    await memoModel.deleteMemo(memoId);
+    await memoModel.deleteMemo(memoId, req.user.id);
     return res.status(200).json({ message: "메모가 삭제되었습니다." });
   } catch (error) {
     console.error("메모 삭제 오류", error);
@@ -81,7 +81,7 @@ async function deleteMemo(req, res) {
 async function deleteLinkedMemos(req, res) {
   const { linkId } = req.params;
   try {
-    await memoModel.deleteLinkedMemos(linkId);
+    await memoModel.deleteLinkedMemos(linkId, req.user.id);
     return res.status(200).json({ message: "메모가 삭제되었습니다." });
   } catch (error) {
     console.error("메모 삭제 오류", error);
@@ -95,7 +95,7 @@ async function deleteLinkedMemos(req, res) {
 async function toggleMemoCompletion(req, res) {
   const { memoId } = req.body;
   try {
-    await memoModel.toggleMemoCompletion(memoId);
+    await memoModel.toggleMemoCompletion(memoId, req.user.id);
     return res.status(200).json({ message: "메모 상태가 변경되었습니다." });
   } catch (error) {
     console.error("메모 상태 변경 오류", error);
@@ -109,7 +109,7 @@ async function toggleMemoCompletion(req, res) {
 async function toggleLinkedMemosCompletion(req, res) {
   const { linkId } = req.body;
   try {
-    await memoModel.toggleLinkedMemosCompletion(linkId);
+    await memoModel.toggleLinkedMemosCompletion(linkId, req.user.id);
     return res.status(200).json({ message: "메모 상태가 변경되었습니다." });
   } catch (error) {
     console.error("메모 상태 변경 오류", error);
@@ -123,7 +123,7 @@ async function toggleLinkedMemosCompletion(req, res) {
 async function postponeMemo(req, res) {
   const { memoId, startDate, endDate } = req.body;
   try {
-    await memoModel.postponeMemo(memoId, startDate, endDate);
+    await memoModel.postponeMemo(memoId, startDate, endDate, req.user.id);
     return res.status(200).json({ message: "메모가 미루어졌습니다." });
   } catch (error) {
     console.error("메모 미루기 오류", error);
@@ -137,7 +137,7 @@ async function postponeMemo(req, res) {
 async function getLinkedMemos(req, res) {
   const { linkId } = req.params;
   try {
-    const result = await memoModel.getLinkedMemos(linkId);
+    const result = await memoModel.getLinkedMemos(linkId, req.user.id);
     return res.status(200).json(result);
   } catch (error) {
     console.error("링크 연결된 메모 목록 오류", error);
@@ -152,7 +152,7 @@ async function getLinkedMemos(req, res) {
 async function unlinkMemo(req, res) {
   const { memoId, linkId } = req.body;
   try {
-    await memoModel.unlinkMemo(memoId, linkId);
+    await memoModel.unlinkMemo(memoId, linkId, req.user.id);
     return res.status(200).json({ message: "메모 링크가 해제되었습니다." });
   } catch (error) {
     console.error("메모 링크 해제 오류", error);

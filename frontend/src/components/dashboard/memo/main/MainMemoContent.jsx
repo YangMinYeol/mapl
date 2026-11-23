@@ -1,7 +1,4 @@
-import { faCircleCheck as faCircleCheckRegular } from "@fortawesome/free-regular-svg-icons";
-import { faCircleCheck, faCirclePlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useRef, useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   addMemo,
@@ -26,7 +23,6 @@ import {
   separateDailyAndRangeMemos,
   sortMemos,
 } from "../../../../util/memoUtil";
-import { DEFAULT_COLOR } from "../../../../util/util";
 import MemoModal from "../../../memo/MemoModal";
 import MainMemoItem from "./MainMemoItem";
 
@@ -37,16 +33,13 @@ export default function MainMemoContent({
   loadDashboardDatas,
   loadCalendarDatas,
   openLinkModal,
+  onEdit,
 }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const memoInputRef = useRef(null);
   const navigate = useNavigate();
   const [memoText, setMemoText] = useState("");
   const { openModal, openConfirm } = useModal();
   const { user } = useContext(UserContext);
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
-  const [memoModalMode, setMemoModalMode] = useState(MEMO_MODAL_MODE.CREATE);
-  const [selectedMemo, setSelectedMemo] = useState(null);
   const handleError = useErrorHandler();
 
   // 메모 정렬
@@ -67,7 +60,6 @@ export default function MainMemoContent({
     if (memoText.trim()) {
       addNewMemo();
     } else {
-      setMemoModalMode(MEMO_MODAL_MODE.CREATE);
       setIsMemoModalOpen(true);
     }
   }
@@ -117,21 +109,6 @@ export default function MainMemoContent({
       }
     } catch (error) {
       handleError(error);
-    }
-  }
-
-  // 메모 편집 모달
-  function openEditMemoModal(memo) {
-    if (memo.isLinked) {
-      openConfirm(LINKED_MEMO.TITLE, LINKED_MEMO.EDIT_CONFIRM, async () => {
-        setSelectedMemo(memo);
-        setMemoModalMode(MEMO_MODAL_MODE.EDIT);
-        setIsMemoModalOpen(true);
-      });
-    } else {
-      setSelectedMemo(memo);
-      setMemoModalMode(MEMO_MODAL_MODE.EDIT);
-      setIsMemoModalOpen(true);
     }
   }
 
@@ -197,20 +174,6 @@ export default function MainMemoContent({
     setMemoText(e.target.value);
   }
 
-  // 마우스가 버튼 위에 있을 때 아이콘 변경
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
-
-  // 아이콘 상태에 따른 동적 변경
-  const getIcon = () => {
-    const isFilled = memoText.trim().length > 0;
-    return isFilled
-      ? isHovered
-        ? faCircleCheck
-        : faCircleCheckRegular
-      : faCirclePlus;
-  };
-
   return (
     <div className="h-[480px] border-b border-mapl-slate">
       <div className="overflow-auto h-11/12 dashboard-main-content">
@@ -226,7 +189,7 @@ export default function MainMemoContent({
                     memo={memo}
                     onComplete={handleToggleMemoCompletion}
                     onDelete={handleDeleteMemo}
-                    onEdit={openEditMemoModal}
+                    onEdit={onEdit}
                     onPostpone={handlePostponeMemo}
                     openLinkModal={openLinkModal}
                     selectedPeriod={selectedPeriod}
@@ -240,30 +203,26 @@ export default function MainMemoContent({
       <div className="flex items-center p-2 h-1/12 dashboard-content-add">
         <input
           className="px-1 border rounded outline-none border-mapl-black w-15/16"
-          ref={memoInputRef}
+          aria-label="빠른 메모"
+          placeholder="메모 입력"
           value={memoText}
           onChange={handleMemoChange}
           onKeyUp={handleKeyPress}
           maxLength={100}
         />
         <button
-          className="cursor-pointer w-1/16"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          type="button"
+          className="planner-action"
           onClick={handleAddMemo}
         >
-          <FontAwesomeIcon color={DEFAULT_COLOR} icon={getIcon()} size="xl" />
+          {memoText.trim() ? "저장" : "추가"}
         </button>
       </div>
       <MemoModal
         isOpen={isMemoModalOpen}
-        onClose={() => {
-          setIsMemoModalOpen(false);
-          setSelectedMemo(null);
-        }}
+        onClose={() => setIsMemoModalOpen(false)}
         selectedDate={selectedDate}
-        mode={memoModalMode}
-        memo={selectedMemo}
+        mode={MEMO_MODAL_MODE.CREATE}
         loadDashboardDatas={loadDashboardDatas}
         loadCalendarDatas={loadCalendarDatas}
         selectedPeriod={selectedPeriod}
