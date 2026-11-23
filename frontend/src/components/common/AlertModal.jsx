@@ -1,8 +1,7 @@
-import Modal from "react-modal";
-import { useEffect } from "react";
+import { faCheck, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../../context/ModalContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
-import { baseModalStyle } from "../../styles/modalStyle";
+import ModalLayout from "./modal/ModalLayout";
 
 export default function AlertModal() {
   const {
@@ -13,9 +12,12 @@ export default function AlertModal() {
     closeModal,
     onYes,
     onNo,
+    confirmLabels,
   } = useModal();
 
   const handleError = useErrorHandler();
+  const isConfirm = modalType === "confirm";
+  const showChoices = isConfirm && confirmLabels;
   async function confirm(callback) {
     closeModal();
     try {
@@ -25,52 +27,38 @@ export default function AlertModal() {
     }
   }
 
-  useEffect(() => {
-    Modal.setAppElement("#root");
-  }, []);
-
   return (
-    <Modal
+    <ModalLayout
+      notice
       isOpen={modalOpen}
-      onRequestClose={closeModal}
-      style={{ ...baseModalStyle, overlay: { ...baseModalStyle.overlay, zIndex: 110 } }}
-      shouldCloseOnOverlayClick={false}
-    >
-      <div className="p-6 text-mapl-black">
-        <div className="text-base font-semibold">
-          <span>{modalMessage}</span>
+      onClose={closeModal}
+      title={isConfirm ? "확인" : "알림"}
+      headingIcon={isConfirm ? faCheck : faCircleInfo}
+      content={
+        <div className="planner-notice-message">
+          <p>{modalMessage}</p>
+          {subMessage && <p className="planner-notice-description">{subMessage}</p>}
         </div>
-        {subMessage && (
-          <div className="pt-3 text-sm">
-            <span>{subMessage}</span>
-          </div>
-        )}
-      </div>
-      <div>
-        {modalType === "alert" ? (
-          <button
-            onClick={closeModal}
-            className="w-full p-3 font-semibold text-center border-t cursor-pointer border-mapl-slate text-deep-green"
-          >
-            확인
-          </button>
-        ) : (
+      }
+      footer={<div className="record-actions planner-notice-actions">
+        {showChoices && (
           <>
-            <button
-              onClick={() => confirm(onYes)}
-              className="w-1/2 p-3 font-semibold text-center border-t border-r cursor-pointer border-mapl-slate text-deep-green"
-            >
-              예
-            </button>
-            <button
-              onClick={() => confirm(onNo)}
-              className="w-1/2 p-3 font-semibold text-center border-t cursor-pointer border-mapl-slate text-deep-green"
-            >
-              아니오
-            </button>
+            <button type="button" className="mapl-button mapl-button-outline" onClick={closeModal}>취소</button>
+            <button type="button" className="mapl-button mapl-button-outline" onClick={() => confirm(onNo)}>{confirmLabels.no}</button>
           </>
         )}
+        <button
+          type="button"
+          className="mapl-button"
+          onClick={isConfirm ? () => confirm(onYes) : closeModal}
+        >
+          {showChoices ? confirmLabels.yes : isConfirm ? "예" : "확인"}
+        </button>
+        {isConfirm && !showChoices && (
+          <button type="button" className="mapl-button mapl-button-outline" onClick={() => confirm(onNo)}>아니오</button>
+        )}
       </div>
-    </Modal>
+      }
+    />
   );
 }

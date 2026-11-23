@@ -72,10 +72,11 @@ export default function SubMemo({
       return;
     }
     openConfirm(
-      "선택한 메모를 링크를 연결하여 추가하시겠습니까?",
-      "링크는 서로 동기화되어 수정, 삭제, 완료 동작이 함께 적용됩니다.",
+      "선택한 메모를 가져올까요?",
+      "복사하면 원본과 별도로 관리돼요.\n연결하면 원본과 수정·완료·삭제가 함께 반영돼요.",
       addLinkedSubMemoToMain,
-      addSubMemoToMain
+      addSubMemoToMain,
+      { yes: "연결", no: "복사" }
     );
   }
 

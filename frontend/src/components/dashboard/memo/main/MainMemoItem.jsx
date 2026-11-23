@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-regular-svg-icons";
 import { faLink } from "@fortawesome/free-solid-svg-icons";
 import IconButton from "../../../common/IconButton";
+import { canPostponeMemo } from "../../../../util/memoUtil";
 
 export default function MainMemoItem({
   memo,
@@ -46,8 +47,7 @@ export default function MainMemoItem({
             title="링크"
           />
         )}
-        {/* 미루기 아이콘: 버킷리스트가 아닐 경우만 표시 */}
-        {selectedPeriod.name !== "Other" && (
+        {canPostponeMemo(memo, selectedPeriod.name) && (
           <IconButton
             icon={faClock}
             onClick={() => onPostpone(memo)}

@@ -1,5 +1,12 @@
 import { TAG_TYPE } from "../constants/tag";
 import { getDateKey } from "./calendarUtil";
+import { formatDateYYYYMMDD } from "./dateUtil";
+
+export function canPostponeMemo(memo, periodName) {
+  if (!memo.startDate || !memo.endDate || periodName === "Other") return false;
+  return periodName !== "Day" ||
+    formatDateYYYYMMDD(memo.startDate) === formatDateYYYYMMDD(memo.endDate);
+}
 
 export const MEMO_MODAL_MODE = {
   CREATE: "create",

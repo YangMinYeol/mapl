@@ -169,7 +169,6 @@ export default function MemoModal({
 
   return (
     <ModalLayout
-      record
       title="메모"
       isOpen={isOpen}
       onClose={onClose}

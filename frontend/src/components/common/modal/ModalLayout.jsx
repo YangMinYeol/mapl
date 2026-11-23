@@ -1,61 +1,49 @@
-import { faRectangleList } from "@fortawesome/free-regular-svg-icons";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useId } from "react";
 import Modal from "react-modal";
-import { baseModalStyle } from "../../../styles/modalStyle";
 import Loading from "../Loading";
 
 export default function ModalLayout({
   title,
-  record = false,
+  notice = false,
+  headingIcon,
+  className = "",
   onClose,
   isOpen,
-  handleModalClick = () => {},
   content,
   footer,
-  isLoading,
+  isLoading = false,
+  loadingLabel = "처리 중",
 }) {
+  const titleId = useId();
+  const descriptionId = useId();
+
   return (
     <Modal
       isOpen={isOpen}
       shouldCloseOnOverlayClick={false}
-      contentLabel={title}
       appElement={document.getElementById("root")}
-      onRequestClose={isLoading ? undefined : onClose}
-      style={record ? undefined : baseModalStyle}
-      overlayClassName={record ? "planner-record-overlay" : undefined}
-      className={record ? "planner-dialog planner-record-dialog" : "planner-dialog"}
+      onRequestClose={onClose}
+      shouldCloseOnEsc={!isLoading}
+      aria={{ labelledby: titleId, describedby: notice && content ? descriptionId : undefined }}
+      overlayClassName={notice ? "planner-record-overlay planner-notice-overlay" : "planner-record-overlay"}
+      className={`planner-dialog planner-record-dialog${notice ? " planner-notice" : ""} ${className}`}
     >
-      <div className="planner-dialog-frame" inert={isLoading ? "" : undefined} aria-busy={isLoading} onClick={handleModalClick}>
-        {/* Header */}
-        <div className="h-[46px] border-b modal-header border-mapl-slate flex justify-between items-center px-3">
-          <div className="text-base">
-            <h2 className="planner-dialog-title">{!record && <FontAwesomeIcon icon={faRectangleList} />}{title}</h2>
-          </div>
-          <div>
-            <button
-              className="planner-dialog-close" aria-label="닫기"
-              onClick={onClose}
-            >
-              <FontAwesomeIcon
-                icon={faXmark}
-                className="group-hover:text-green-900"
-              />
-            </button>
-          </div>
+      <div className="planner-dialog-frame" inert={isLoading ? "" : undefined} aria-busy={isLoading}>
+        <div className="modal-header">
+          <h2 className="planner-dialog-title" id={titleId}>
+            {headingIcon && <span className="planner-heading-icon" aria-hidden="true"><FontAwesomeIcon icon={headingIcon} /></span>}
+            {title}
+          </h2>
+          <button type="button" className="planner-dialog-close" aria-label="닫기" onClick={onClose}>
+            <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
+          </button>
         </div>
-
-        {/* Content */}
-        <div className="modal-content flex-col px-3">
-          {content}
-        </div>
-
-        {/* Footer */}
-        <div className="modal-footer border-mapl-slate px-3 flex items-center">
-          {footer}
-        </div>
+        {content && <div className="modal-content" id={notice ? descriptionId : undefined}>{content}</div>}
+        {footer && <div className="modal-footer">{footer}</div>}
       </div>
-      {isLoading && <Loading />}
+      {isLoading && <Loading placement="surface" label={loadingLabel} />}
     </Modal>
   );
 }
