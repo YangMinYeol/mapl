@@ -6,6 +6,7 @@ export default function SubMemoHeader({
   selectedValue,
   handleChange,
   handleAddMemo,
+  isImporting,
   isBucketList,
 }) {
   return (
@@ -30,6 +31,8 @@ export default function SubMemoHeader({
             type="button"
             className="planner-action"
             onClick={handleAddMemo}
+            disabled={isImporting}
+            aria-busy={isImporting}
           >
             가져오기
           </button>

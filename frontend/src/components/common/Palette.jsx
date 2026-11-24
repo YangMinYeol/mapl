@@ -12,7 +12,7 @@ export default function Palette({ selectedColorId, setSelectedColorId, setSelect
   }
 
   return (
-    <div className={selectedColorId == null ? "flex flex-wrap gap-1 p-1 border rounded" : "planner-record-colors"} aria-label="색상">
+    <div className={selectedColorId == null ? "flex flex-wrap gap-1 p-1 border rounded" : "planner-record-colors"} role="group" aria-label="색상">
       {choices.map(({ id, hex }) => {
         return (
           <button type="button"

@@ -258,6 +258,8 @@ button.record-date-value:hover, .record-date-value[aria-expanded=true] { border-
   .planner-record-dialog .modal-header, .planner-record-dialog .modal-content, .planner-record-dialog .modal-footer { padding-inline: 12px; }
   .planner-record-dialog :is(input:not([type=checkbox]), select, textarea) { font-size: 16px; }
   .planner-record-dialog .record-amount input { font-size: 25px; }
+  .record-date-popup:has(.record-time-picker) { width: min(236px, calc(100vw - 16px)); }
+  .planner-record-colors button { width: 30px; height: 30px; }
 }
 @media (max-width: 359px) {
   .record-date-pair { grid-template-columns: 1fr; }

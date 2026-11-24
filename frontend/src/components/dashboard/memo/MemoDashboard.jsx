@@ -1,6 +1,7 @@
 import { useState } from "react";
 import LinkModal from "../../link/LinkModal";
 import MemoModal from "../../memo/MemoModal";
+import { bucketQuotes } from "../../../constants/bucketQuotes";
 import { LINKED_MEMO } from "../../../constants/messages";
 import { useModal } from "../../../context/ModalContext";
 import { MEMO_MODAL_MODE } from "../../../util/memoUtil";
@@ -25,7 +26,17 @@ export default function MemoDashboard({
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [selectedLinkMemo, setSelectedLinkMemo] = useState(null);
   const [editingMemo, setEditingMemo] = useState(null);
+  const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * bucketQuotes.length));
   const { openConfirm } = useModal();
+
+  function selectPeriod(period) {
+    if (period.name === "Other" && bucketQuotes.length > 1) {
+      setQuoteIndex((index) => (
+        (index + 1 + Math.floor(Math.random() * (bucketQuotes.length - 1))) % bucketQuotes.length
+      ));
+    }
+    setSelectedPeriod(period);
+  }
 
   function openEditMemo(memo) {
     if (memo.isLinked) {
@@ -48,10 +59,10 @@ export default function MemoDashboard({
       <PeriodSelector
         periods={periods}
         selectedPeriod={selectedPeriod}
-        setSelectedPeriod={setSelectedPeriod}
+        setSelectedPeriod={selectPeriod}
       />
       <MainMemo
-        dashboardDatas={dashboardDatas}
+        dashboardDatas={periodMemos}
         periods={periods}
         selectedPeriod={selectedPeriod}
         selectedDate={selectedDate}
@@ -63,6 +74,7 @@ export default function MemoDashboard({
         onEdit={openEditMemo}
       />
       <SubMemo
+        quote={bucketQuotes[quoteIndex]}
         dashboardDatas={dashboardDatas}
         periods={periods}
         selectedPeriod={selectedPeriod}
