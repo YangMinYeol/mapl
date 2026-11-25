@@ -1,73 +1,63 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { verifyPassword } from "../../api/user";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
-import ColorButton from "../common/ColorButton";
 
 export function PasswordCheck() {
   const { user } = useContext(UserContext);
   const [password, setPassword] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
+  const checking = useRef(false);
   const { openModal } = useModal();
   const handleError = useErrorHandler();
   const navigate = useNavigate();
 
-  const handlePasswordCheck = async () => {
+  const handlePasswordCheck = async (event) => {
+    event.preventDefault();
+    if (checking.current) return;
     if (!password) {
-      openModal("비밀번호를 확인해주세요.");
+      openModal("비밀번호를 입력해 주세요.");
       return;
     }
+    checking.current = true;
+    setIsChecking(true);
     try {
       await verifyPassword(password);
       navigate("/user/profile/edit");
     } catch (error) {
       handleError(error);
+    } finally {
+      checking.current = false;
+      setIsChecking(false);
     }
   };
 
   return (
-    <div>
-      <div className="mb-10 text-[#666]">
-        회원님의 정보를 안전하게 보호하기 위해 비밀번호를 다시 한번
-        확인해주세요.
-      </div>
-      <div>
-        <div className="flex items-center mb-5">
-          <div className="w-24">
-            <label>아이디</label>
-          </div>
-          <div className="ml-14">
-            <input
-              type="text"
-              value={user.userId}
-              className="w-64 h-12 px-2 ml-2 border rounded border-mapl-slate focus:outline-none"
-              readOnly={true}
-            />
-          </div>
-        </div>
-        <div className="flex items-center pb-10">
-          <div className="w-24">
-            <label>비밀번호*</label>
-          </div>
-          <div className="ml-14">
-            <input
-              type="password"
-              className="w-64 h-12 px-2 ml-2 border rounded border-mapl-slate focus:outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="border-t border-mapl-slate"></div>
-        <div className="flex justify-center pt-5 pb-3">
-          <ColorButton
-            text="확인"
-            color="green"
-            onClick={handlePasswordCheck}
+    <form className="profile-form profile-check" onSubmit={handlePasswordCheck} aria-busy={isChecking}>
+      <section className="profile-check-card">
+        <h2>계정 확인</h2>
+        <div className="profile-check-fields">
+          <label htmlFor="check-id">아이디</label>
+          <input id="check-id" className="mapl-input" value={user.userId} readOnly />
+          <label htmlFor="current-password">현재 비밀번호</label>
+          <input
+            id="current-password"
+            className="mapl-input"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            readOnly={isChecking}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+      </section>
+      <div className="profile-actions">
+        <button className="mapl-button" type="submit" disabled={isChecking}>
+          {isChecking ? "확인 중" : "확인"}
+        </button>
       </div>
-    </div>
+    </form>
   );
 }

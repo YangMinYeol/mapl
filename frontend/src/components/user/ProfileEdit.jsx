@@ -1,40 +1,43 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import { useNavigate } from "react-router-dom";
 import { checkDuplicate, deleteAccount, updateProfile } from "../../api/user";
+import { POSTCODE_SCRIPT_URL } from "../../constants/postcode";
 import { useModal } from "../../context/ModalContext";
 import { UserContext } from "../../context/UserContext";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { EMAIL_REGEX, PASSWORD_REGEX } from "../../util/userUtil";
-import ColorButton from "../common/ColorButton";
 
 export function ProfileEdit() {
   const { user, logout } = useContext(UserContext);
   const navigate = useNavigate();
-  const open = useDaumPostcodePopup();
+  const open = useDaumPostcodePopup(POSTCODE_SCRIPT_URL);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [email, setEmail] = useState(user.email);
   const [zipcode, setZipcode] = useState(user.zipcode);
   const [address, setAddress] = useState(user.address);
   const [detailAddress, setDetailAddress] = useState(user.detailAddress);
+  const [isSaving, setIsSaving] = useState(false);
+  const saving = useRef(false);
   const { openModal, openConfirm } = useModal();
   const handleError = useErrorHandler();
 
   // 로그아웃
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   // 우편번호 찾기
   const handleAddressSearch = () => {
     open({
       onComplete: (data) => {
+        if (saving.current) return;
         setZipcode(data.zonecode);
         setAddress(data.address);
       },
-      onError: (error) => console.error("Daum Postcode API Error:", error),
+      onError: () => openModal("주소 검색을 열 수 없어요. 다시 시도해 주세요."),
     });
   };
 
@@ -42,66 +45,78 @@ export function ProfileEdit() {
     const errors = {};
 
     if (!password) {
-      errors.password = "비밀번호를 입력해주세요.";
+      errors.password = "변경할 비밀번호를 입력해 주세요.";
     } else if (!PASSWORD_REGEX.test(password)) {
       errors.password =
         "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~15자여야 합니다.";
     }
 
     if (!passwordConfirm) {
-      errors.passwordConfirm = "비밀번호 확인을 입력해주세요.";
+      errors.passwordConfirm = "변경할 비밀번호를 한 번 더 입력해 주세요.";
     } else if (password !== passwordConfirm) {
       errors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
     }
 
     if (!email) {
-      errors.email = "이메일을 입력해주세요.";
+      errors.email = "이메일을 입력해 주세요.";
     } else if (!EMAIL_REGEX.test(email)) {
       errors.email = "올바른 이메일 형식이 아닙니다.";
     }
 
     if (!zipcode) {
-      errors.zipcode = "우편번호를 입력해주세요.";
+      errors.zipcode = "우편번호를 입력해 주세요.";
     }
 
     if (!address) {
-      errors.address = "주소를 입력해주세요.";
+      errors.address = "주소를 입력해 주세요.";
     }
 
     return errors;
   };
 
   // 회원정보수정
-  const handleProfileUpdate = async () => {
+  const handleProfileUpdate = async (event) => {
+    event.preventDefault();
+    if (saving.current) return;
+
+    const firstError = Object.values(validateProfileFields())[0];
+    if (firstError) {
+      openModal(firstError);
+      return;
+    }
+
+    saving.current = true;
+    setIsSaving(true);
+    let completed = false;
     try {
-      const errors = validateProfileFields();
+      if (email !== user.email) {
+        const { isDuplicate, error } = await checkDuplicate("email", email);
+        if (error) {
+          openModal("이메일 중복 확인을 완료하지 못했어요. 다시 시도해 주세요.");
+          return;
+        }
 
-      if (Object.keys(errors).length > 0) {
-        const firstKey = Object.keys(errors)[0];
-        openModal(errors[firstKey]);
-        return;
-      }
-
-      const { isDuplicate, error } = await checkDuplicate("email", email);
-      if (error) {
-        openModal(error);
-        return;
-      }
-
-      if (isDuplicate) {
-        openModal("이미 사용 중인 이메일입니다.");
-        return;
+        if (isDuplicate) {
+          openModal("이미 사용 중인 이메일이에요.");
+          return;
+        }
       }
 
       await updateProfile({ password, email, zipcode, address, detailAddress });
+      completed = true;
 
       openModal(
-        "회원정보 수정이 완료되었습니다!",
+        "회원정보를 저장했어요.",
         handleLogout,
-        "다시 로그인 해주세요."
+        "다시 로그인해 주세요."
       );
     } catch (error) {
       handleError(error);
+    } finally {
+      if (!completed) {
+        saving.current = false;
+        setIsSaving(false);
+      }
     }
   };
 
@@ -122,131 +137,117 @@ export function ProfileEdit() {
   };
 
   return (
-    <div>
-      <LabeledInput
-        id="name"
-        label="이름"
-        type="text"
-        value={user.name}
-        maxLength={15}
-        readOnly={true}
-      />
-
-      <LabeledInput
-        id="userId"
-        label="아이디"
-        type="text"
-        value={user.userId}
-        maxLength={15}
-        readOnly={true}
-      />
-
-      <LabeledInput
-        id="password"
-        label="비밀번호"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        maxLength={15}
-      />
-
-      <LabeledInput
-        id="passwordConfirm"
-        label="비밀번호 확인"
-        type="password"
-        value={passwordConfirm}
-        onChange={(e) => setPasswordConfirm(e.target.value)}
-        maxLength={15}
-      />
-
-      <LabeledInput
-        id="email"
-        label="이메일"
-        type="text"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        maxLength={120}
-      />
-
-      <div className="flex items-center mb-5">
-        <div className="w-24">
-          <label>우편번호</label>
-        </div>
-        <div className="ml-14">
+    <form className="profile-form profile-register" onSubmit={handleProfileUpdate} aria-busy={isSaving}>
+      <section className="profile-section">
+        <h2>기본 정보</h2>
+        <div className="profile-field">
+          <label htmlFor="name">이름</label>
           <input
-            type="text"
-            value={zipcode}
-            onChange={(e) => setZipcode(e.target.value)}
-            className="h-12 px-2 ml-2 border rounded outline-none w-72 border-mapl-slate focus:outline-none"
+            id="name"
+            className="mapl-input"
+            value={user.name}
+            readOnly
+          />
+        </div>
+        <div className="profile-field">
+          <label htmlFor="userId">아이디</label>
+          <input
+            id="userId"
+            className="mapl-input"
+            value={user.userId}
+            readOnly
+          />
+        </div>
+        <div className="profile-field">
+          <label htmlFor="email">이메일</label>
+          <input
+            id="email"
+            className="mapl-input"
+            value={email ?? ""}
+            readOnly={isSaving}
+            onChange={(event) => setEmail(event.target.value)}
+            maxLength={120}
+          />
+        </div>
+      </section>
+      <section className="profile-section">
+        <h2>비밀번호</h2>
+        <div className="profile-field">
+          <label htmlFor="password">비밀번호</label>
+          <input
+            id="password"
+            className="mapl-input"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            readOnly={isSaving}
+            onChange={(event) => setPassword(event.target.value)}
+            maxLength={15}
+          />
+        </div>
+        <div className="profile-field">
+          <label htmlFor="passwordConfirm">비밀번호 확인</label>
+          <input
+            id="passwordConfirm"
+            className="mapl-input"
+            type="password"
+            autoComplete="new-password"
+            value={passwordConfirm}
+            readOnly={isSaving}
+            onChange={(event) => setPasswordConfirm(event.target.value)}
+            maxLength={15}
+          />
+        </div>
+      </section>
+      <section className="profile-section">
+        <h2>주소</h2>
+        <div className="profile-field">
+          <label htmlFor="zipcode">우편번호</label>
+          <div className="profile-address">
+          <input
+            id="zipcode"
+            className="mapl-input"
+            value={zipcode ?? ""}
+            readOnly={isSaving}
+            onChange={(event) => setZipcode(event.target.value)}
             maxLength={5}
-          ></input>
+          />
+            <button className="mapl-button mapl-button-outline" type="button" onClick={handleAddressSearch} disabled={isSaving}>
+              주소 검색
+            </button>
+          </div>
         </div>
-        <div>
-          <button
-            className="h-12 px-2 ml-2 font-semibold text-white rounded bg-deep-green hover:cursor-pointer"
-            onClick={handleAddressSearch}
-          >
-            우편번호 찾기
+        <div className="profile-field">
+          <label htmlFor="address">주소</label>
+          <input
+            id="address"
+            className="mapl-input"
+            value={address ?? ""}
+            readOnly={isSaving}
+            onChange={(event) => setAddress(event.target.value)}
+            maxLength={120}
+          />
+        </div>
+        <div className="profile-field">
+          <label htmlFor="detailAddress">상세주소 (선택)</label>
+          <input
+            id="detailAddress"
+            className="mapl-input"
+            value={detailAddress ?? ""}
+            readOnly={isSaving}
+            onChange={(event) => setDetailAddress(event.target.value)}
+            maxLength={120}
+          />
+        </div>
+      </section>
+      <div className="profile-actions">
+        {user.role !== "admin" && (
+          <button className="mapl-button mapl-button-outline profile-withdraw" type="button" onClick={handleDeleteAccount} disabled={isSaving}>
+            회원 탈퇴
           </button>
-        </div>
+        )}
+        <button className="mapl-button" type="submit" disabled={isSaving}>{isSaving ? "저장 중" : "저장"}</button>
       </div>
-
-      <LabeledInput
-        id="address"
-        label="주소"
-        type="text"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        maxLength={120}
-      />
-
-      <LabeledInput
-        id="detailAddress"
-        label="상세주소"
-        type="text"
-        value={detailAddress}
-        onChange={(e) => setDetailAddress(e.target.value)}
-        maxLength={120}
-      />
-
-      <div className="border-t border-mapl-slate"></div>
-      <div className="flex justify-center pt-5 pb-3">
-        <ColorButton text="탈퇴하기" onClick={handleDeleteAccount} />
-        <ColorButton
-          text="회원정보수정"
-          color="green"
-          onClick={handleProfileUpdate}
-        />
-      </div>
-    </div>
-  );
-}
-
-function LabeledInput({
-  id,
-  label,
-  type,
-  value,
-  onChange,
-  maxLength,
-  readOnly = false,
-}) {
-  return (
-    <div className="flex items-center mb-5">
-      <div className="w-24">
-        <label htmlFor={id}>{label}</label>
-      </div>
-      <div className="ml-14">
-        <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={onChange}
-          className="h-12 px-2 ml-2 border rounded outline-none w-72 border-mapl-slate focus:outline-none"
-          maxLength={maxLength}
-          readOnly={readOnly}
-        />
-      </div>
-    </div>
+    </form>
   );
 }
