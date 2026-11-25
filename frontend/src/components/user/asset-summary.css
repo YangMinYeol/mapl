@@ -1,0 +1,39 @@
+.asset-visibility {
+  cursor: pointer;
+  border: 1px solid #dce4df;
+  border-radius: 4px;
+  padding: 3px 8px;
+  color: #174737;
+  font-size: 12px;
+}
+.asset-visibility:hover { background: #eef5f1; }
+.asset-visibility:focus-visible { outline: 2px solid #174737; }
+
+@media (max-width: 767px) {
+  .account-identity {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr);
+    align-items: center;
+    padding: 12px 14px;
+  }
+  .asset-summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    row-gap: 2px;
+    max-width: 16rem;
+    justify-self: end;
+    background: #f7faf8;
+  }
+  .asset-caption { display: contents; }
+  .asset-summary .asset-value { grid-area: 2 / 1; }
+  .asset-summary .asset-visibility { grid-area: 1 / 2 / span 2; min-block-size: 32px; }
+  .account-menu { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 12px 14px; }
+  .account-menu-group h2 { margin: 0 0 4px; padding: 0 10px; }
+  .account-menu-group > div { display: grid; gap: 2px; }
+  .account-menu-group button { width: 100%; min-height: 40px; text-align: left; }
+}
+
+@media (max-width: 359px) {
+  .asset-summary .asset-value { grid-column: 1 / -1; }
+  .asset-summary .asset-visibility { grid-row: 1; }
+}

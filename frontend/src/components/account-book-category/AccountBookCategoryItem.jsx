@@ -1,115 +1,26 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { faGripVertical } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext } from "react";
-import { deleteAccountBookCategory } from "../../api/account-book-category";
-import { useModal } from "../../context/ModalContext";
-import { UserContext } from "../../context/UserContext";
-import { useErrorHandler } from "../../hooks/useErrorHandler";
-import { ACCOUNTBOOK_MODAL_MODE } from "../../util/accountBookUtil";
 
-export function AccountBookCategoryItem({
-  category,
-  reload,
-  setIsModalOpen,
-  setMode,
-  setSelectedItem,
-  dragOverlay = false,
-}) {
-  const { id, name, colorHex, type, isDefault } = category;
-  const { openConfirm } = useModal();
-  const { user } = useContext(UserContext);
-  const handleError = useErrorHandler();
-
-  // 드래그 중 오버레이 아이템일 때는 useSortable 훅 사용하지 않음
-  if (dragOverlay) {
-    return (
-      <div
-        className="flex items-center justify-between flex-shrink-0 px-4 py-3 bg-white border rounded shadow-lg border-mapl-slate cursor-grabbing"
-        style={{ userSelect: "none" }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-5 h-5 rounded"
-            style={{ backgroundColor: colorHex }}
-          />
-          <span className="text-base whitespace-nowrap">{name}</span>
-        </div>
-      </div>
-    );
-  }
-
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-
-  const style = {
-    transform: transform ? CSS.Transform.toString(transform) : undefined,
-    transition: transition ?? undefined,
-  };
-
-  const deleteCategory = () => {
-    openConfirm(
-      "정말로 삭제하시겠습니까?",
-      "삭제 시 해당 카테고리에 속한 모든 항목은 '기타' 카테고리로 이동됩니다.",
-      async () => {
-        try {
-          await deleteAccountBookCategory(user.id, type, id);
-          reload();
-        } catch (error) {
-          handleError(error);
-        }
-      }
-    );
-  };
-
-  // 가계부 카테고리 수정
-  const openEditModal = () => {
-    setSelectedItem(category);
-    setMode(ACCOUNTBOOK_MODAL_MODE.EDIT);
-    setIsModalOpen(true);
-  };
-
+export function CategoryOrderRow({ category, amount, share, color, onEdit }) {
+  const roundedShare = Math.round(share);
+  const shareLabel = share > 0 && roundedShare === 0 ? "<1%" : `${roundedShare}%`;
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: category.id });
   return (
-    <div
-      className="flex items-center justify-between flex-shrink-0 px-3 py-3 transition border rounded border-mapl-slate hover:bg-gray-50"
-      ref={setNodeRef}
-      style={style}
-    >
-      <div
-        {...attributes}
-        {...listeners}
-        className="flex items-center justify-center w-5 h-5 cursor-grab"
-      >
-        <FontAwesomeIcon icon={faGripVertical} />
-      </div>
-      <div className="flex items-center w-full gap-3 ml-3">
-        <div
-          className="w-5 h-5 rounded"
-          style={{ backgroundColor: colorHex }}
-        />
-        <span className="text-base whitespace-nowrap">{name}</span>
-      </div>
-
-      <div className="flex gap-3 text-sm text-gray-500 whitespace-nowrap">
-        {!isDefault && (
-          <>
-            <button
-              className="cursor-pointer hover:text-green-900"
-              onClick={deleteCategory}
-            >
-              삭제
-            </button>
-            <span>|</span>
-          </>
+    <li ref={setNodeRef} className="category-order-row" data-dragging={isDragging} style={{ transform: isDragging ? undefined : CSS.Transform.toString(transform), transition }}>
+      <button type="button" className="category-grip" ref={setActivatorNodeRef} {...attributes} {...listeners} aria-label={`${category.name} 끌어서 이동`}>
+        <span className="category-grip-dots" aria-hidden="true" />
+      </button>
+      <button type="button" className="report-edit" onClick={onEdit} aria-label={`${category.name} 편집`}>
+        <i className="report-chip" style={{ backgroundColor: color }} aria-hidden="true" />
+        <b className="report-label">{category.name}</b>
+        {amount === null ? <small className="report-values">—</small> : (
+          <span className="report-values">
+            <strong>{amount.toLocaleString("ko-KR")}원</strong>
+            <small>({shareLabel})</small>
+          </span>
         )}
-        <button
-          className="cursor-pointer hover:text-green-900"
-          onClick={openEditModal}
-        >
-          수정
-        </button>
-      </div>
-    </div>
+        <span className="report-bar" aria-hidden="true"><i style={{ width: `${share}%`, backgroundColor: color }} /></span>
+      </button>
+    </li>
   );
 }

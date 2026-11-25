@@ -42,38 +42,26 @@ async function getCategoriesByUser(userId) {
 
 // 카테고리 추가
 async function addAccountBookCategory(userId, name, type, colorId) {
-  const nextOrder = await getNextSortOrder(userId, type);
-
-  const query = `
-    INSERT INTO account_book_category
-      (user_id, name, type, color_id, sort_order)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING *;
-  `;
-
-  const result = await db.query(query, [
-    userId,
-    name,
-    type,
-    colorId,
-    nextOrder,
-  ]);
-
-  return result.rows[0];
-}
-
-// 다음 sort_order를 취득
-async function getNextSortOrder(userId, type) {
-  const query = `
-    SELECT MAX(sort_order) AS max_sort_order
-    FROM account_book_category
-    WHERE user_id = $1 AND type = $2
-  `;
-
-  const result = await db.query(query, [userId, type]);
-  const maxSortOrder = result.rows[0].max_sort_order;
-
-  return (maxSortOrder !== null ? maxSortOrder : 0) + 1;
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    // 같은 계정에 동시에 추가할 때도 표시 순서가 겹치지 않도록 처리한다.
+    await client.query("SELECT id FROM users WHERE id = $1 FOR UPDATE", [userId]);
+    const result = await client.query(`
+      INSERT INTO account_book_category(user_id, name, type, color_id, sort_order)
+      SELECT $1, $2, $3, $4, COALESCE(MAX(sort_order) FILTER (WHERE type = $3), 0) + 1
+      FROM account_book_category WHERE user_id = $1 AND type = $3
+      HAVING COUNT(*) < 20
+      RETURNING *
+    `, [userId, name, type, colorId]);
+    await client.query("COMMIT");
+    return result.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 // 가계부 카테고리 수정

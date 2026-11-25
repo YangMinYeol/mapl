@@ -72,6 +72,11 @@ export default function AccountBookDashboardContent({
       : dashboardDatas.filter((data) => data.type === filterType);
 
   const accountSummary = calcIncomeExpense(filteredDatas);
+  const emptyMessage = {
+    [ALL]: "선택한 기간에 거래 내역이 없어요.",
+    [INCOME]: "선택한 기간에 수입 내역이 없어요.",
+    [EXPENSE]: "선택한 기간에 지출 내역이 없어요.",
+  }[filterType];
 
   const sortedDatas = [...filteredDatas].sort((a, b) => getAccountBookDate(a) - getAccountBookDate(b));
 
@@ -122,9 +127,7 @@ export default function AccountBookDashboardContent({
         "삭제한 항목은 다시 되돌릴 수 없습니다.",
         async () => {
           await deleteAccountBookItem(item.id);
-          await updateAsset(user.id);
-          await loadDashboardDatas();
-          await loadCalendarDatas();
+          await Promise.all([updateAsset(user.id), loadDashboardDatas(), loadCalendarDatas()]);
         }
       );
     } catch (error) {
@@ -146,7 +149,7 @@ export default function AccountBookDashboardContent({
         <span>분류</span><span>내용</span><span>금액</span>
       </div>
       <div className="dashboard-main-content ledger-list">
-        {sortedDatas.length === 0 && <p className="ledger-empty">표시할 내역이 없어요.</p>}
+        {sortedDatas.length === 0 && <p className="ledger-empty">{emptyMessage}</p>}
         {selectedPeriod.name === "Day"
           ? sortedDatas.map((item) => (
               <AccountBookDashboardItem

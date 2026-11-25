@@ -19,6 +19,7 @@ require.cache[dbPath] = {
 };
 const memos = require("../model/memoModel");
 const ledger = require("../model/accountBookModel");
+const categories = require("../model/accountBookCategoryModel");
 const day = "2026-11-19";
 
 before(async () => {
@@ -87,4 +88,64 @@ test("기존 자정 거래와 시간 미지정 거래를 서울의 같은 날짜
   assert.equal(await balance(), 97900);
   await ledger.deleteAccountBookItem(untimed.id, 1);
   assert.equal(await balance(), 100000);
+});
+
+test("월 경계에서 실제 자정 거래만 조회 시간대를 따라 이동한다", async () => {
+  await ledger.addAccountBookItem(2, 2, "income", "2026-12-01T00:00:00+09:00", 2, "실제 자정", 1000, true);
+  await ledger.addAccountBookItem(2, 2, "income", "2026-12-01", 2, "시간 미지정", 2000, false);
+
+  const decemberInSeoul = await ledger.getDashboardAccountBooks(2, "2026-12-01", "2026-12-31", "Asia/Seoul");
+  assert.deepEqual(decemberInSeoul.map((item) => item.hasTime).sort(), [false, true]);
+  const novemberInUtc = await ledger.getDashboardAccountBooks(2, "2026-11-01", "2026-11-30", "UTC");
+  assert.deepEqual(novemberInUtc.map((item) => item.hasTime), [true]);
+  const decemberInUtc = await ledger.getDashboardAccountBooks(2, "2026-12-01", "2026-12-31", "UTC");
+  assert.deepEqual(decemberInUtc.map((item) => item.occurredDate), ["2026-12-01"]);
+});
+
+test("수입을 지출로 바꾸고 삭제하면 잔액과 두 조회 목록에 반영된다", async () => {
+  const tradeDate = "2027-02-03";
+  const timeZone = "Asia/Seoul";
+  await query("INSERT INTO account_book_category VALUES (3, 1, 'income', '급여', 5)");
+  const balance = async () => (await query("SELECT balance FROM asset WHERE id = 1")).rows[0].balance;
+  const readDashboard = () => ledger.getDashboardAccountBooks(1, tradeDate, tradeDate, timeZone);
+  const readCalendar = async () => (await ledger.getCalendarAccountBooks(1, tradeDate, timeZone))
+    .filter((item) => item.occurredDate === tradeDate);
+  const initialBalance = await balance();
+
+  await ledger.addAccountBookItem(1, 1, "income", tradeDate, 3, "수입", 5000, false);
+  const [transaction] = await readDashboard();
+  assert.equal(transaction.type, "income");
+  assert.equal((await readCalendar())[0].id, transaction.id);
+  assert.equal(await balance(), initialBalance + 5000);
+
+  await ledger.updateAccountBookItem(transaction.id, "expense", tradeDate, 1, "지출", 1200, false, 1);
+  for (const [item] of await Promise.all([readDashboard(), readCalendar()])) {
+    assert.equal(item.id, transaction.id);
+    assert.equal(item.type, "expense");
+    assert.equal(item.amount, 1200);
+  }
+  assert.equal(await balance(), initialBalance - 1200);
+
+  await ledger.deleteAccountBookItem(transaction.id, 1);
+  assert.deepEqual(await readDashboard(), []);
+  assert.deepEqual(await readCalendar(), []);
+  assert.equal(await balance(), initialBalance);
+});
+
+test("카테고리를 삭제해도 거래는 같은 유형의 기본 카테고리에 남는다", async () => {
+  await pg.exec(`
+    ALTER TABLE account_book_category ADD COLUMN is_default boolean NOT NULL DEFAULT false;
+    INSERT INTO account_book_category(id, user_id, type, name, color_id, is_default)
+    VALUES (4, 1, 'expense', '기타', 5, true), (5, 1, 'income', '기타', 5, true);
+  `);
+  const balance = async () => (await query("SELECT balance FROM asset WHERE id = 1")).rows[0].balance;
+  const before = await balance();
+
+  await categories.deleteAccountBookCategory(1, "expense", 1);
+
+  const [transaction] = await ledger.getDashboardAccountBooks(1, day, day, "Asia/Seoul");
+  assert.equal(transaction.categoryId, 4);
+  assert.equal(transaction.amount, 200);
+  assert.equal(await balance(), before);
+  assert.deepEqual((await query("SELECT id FROM account_book_category WHERE id = 1")).rows, []);
 });
