@@ -11,9 +11,12 @@ const FloatingLabelInput = forwardRef(
       isPassword = false,
       width = "w-96",
       onChange,
+      onBlur,
       onKeyUp,
       value,
       error,
+      required,
+      readOnly,
     },
     ref
   ) => {
@@ -24,7 +27,7 @@ const FloatingLabelInput = forwardRef(
     }
 
     return (
-      <div className="mb-3">
+      <div className="mapl-floating-input mb-3">
         <div className={`relative h-12 ${width}`}>
           <input
             type={isPassword && show ? "text" : type}
@@ -32,15 +35,18 @@ const FloatingLabelInput = forwardRef(
             className={`mapl-input block w-full h-full px-2 py-2 text-sm peer ${isPassword ? "pr-10" : ""}`}
             placeholder=" "
             onChange={onChange}
+            onBlur={onBlur}
             onKeyUp={onKeyUp}
             value={value}
+            readOnly={readOnly}
             aria-invalid={error ? true : undefined}
+            aria-required={required || undefined}
             aria-describedby={error ? `${id}-error` : undefined}
             ref={ref}
           />
           <label
             htmlFor={id}
-            className="absolute px-1 mx-1 text-sm duration-300 scale-75 -translate-y-4 bg-white text-mapl-black top-1 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-1/2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            className="mapl-floating-label"
           >
             {text}
           </label>
@@ -60,7 +66,7 @@ const FloatingLabelInput = forwardRef(
             </button>
           )}
         </div>
-        {error && <p id={`${id}-error`} className="text-xs text-red-500">{error}</p>}
+        {error && <p id={`${id}-error`} className="mapl-field-error">{error}</p>}
       </div>
     );
   }
