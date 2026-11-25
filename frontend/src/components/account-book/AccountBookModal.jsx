@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import {
   addAccountBookItem,
   deleteAccountBookItem,
@@ -59,7 +59,11 @@ export default function AccountBookModal({
 
   const asset = useAssetStore((state) => state.asset);
   const updateAsset = useAssetStore((state) => state.updateAsset);
-  const handleError = useErrorHandler(onClose);
+  const handleError = useErrorHandler();
+  const mutationPending = useRef(false);
+  const isEdit = mode === ACCOUNTBOOK_MODAL_MODE.EDIT;
+  const isExpense = type === ACCOUNT_TYPE.EXPENSE;
+  const canSave = Boolean(category && !isAmountError && (!hasTime || time) && (isEdit ? item?.id : asset?.id));
 
   // 저장된 거래와 자산을 함께 갱신한다.
   async function reloadAndClose() {
@@ -80,68 +84,35 @@ export default function AccountBookModal({
     setIsAmountError(amountNumber > MAX_AMOUNT);
   };
 
-  // 가계부 항목 추가
-  async function addAccountBook() {
-    if (isAmountError || (hasTime && !time)) return;
-
-    setIsLoading(true);
-    try {
-      await addAccountBookItem({
-        userId: user.id,
-        assetId: asset.id,
-        type,
-        occurredAt: hasTime ? combineDateAndTime(date, time) : formatDateYYYYMMDD(date),
-        hasTime,
-        categoryId: category.id,
-        content,
-        amount,
-      });
-      await reloadAndClose();
-    } catch (error) {
-      handleError(error, { closeCurrentModal: true });
-    } finally {
-      setIsLoading(false);
-    }
+  function saveAccountBook() {
+    if (!canSave) return;
+    const data = {
+      type,
+      occurredAt: hasTime ? combineDateAndTime(date, time) : formatDateYYYYMMDD(date),
+      hasTime,
+      categoryId: category.id,
+      content,
+      amount,
+    };
+    return updateRecord(() => isEdit
+      ? editAccountBookItem({ ...data, itemId: item.id })
+      : addAccountBookItem({ ...data, userId: user.id, assetId: asset.id }));
   }
 
-  // 가계부 항목 수정
-  async function editAccountBook() {
-    if (isAmountError || (hasTime && !time)) return;
-
+  async function updateRecord(request) {
+    if (mutationPending.current) return;
+    mutationPending.current = true;
     setIsLoading(true);
     try {
-      await editAccountBookItem({
-        itemId: item.id,
-        type,
-        occurredAt: hasTime ? combineDateAndTime(date, time) : formatDateYYYYMMDD(date),
-        hasTime,
-        categoryId: category.id,
-        content,
-        amount,
-      });
-      await reloadAndClose();
-    } catch (error) {
-      handleError(error, { closeCurrentModal: true });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  // 가계부 항목 삭제
-  async function deleteAccountBook() {
-    setIsLoading(true);
-    try {
-      await deleteAccountBookItem(item.id);
+      await request();
       await reloadAndClose();
     } catch (error) {
       handleError(error);
     } finally {
+      mutationPending.current = false;
       setIsLoading(false);
     }
   }
-
-  const isEdit = mode === ACCOUNTBOOK_MODAL_MODE.EDIT;
-  const isExpense = type === ACCOUNT_TYPE.EXPENSE;
 
   return (
     <ModalLayout
@@ -223,8 +194,8 @@ export default function AccountBookModal({
         </div>
       }
       footer={
-        <RecordActions onDelete={isEdit ? deleteAccountBook : undefined} onClose={onClose}
-          onSave={isEdit ? editAccountBook : addAccountBook} disabled={isLoading || (!isEdit && !asset?.id) || isAmountError || !category || (hasTime && !time)} />
+        <RecordActions onDelete={isEdit ? () => updateRecord(() => deleteAccountBookItem(item.id)) : undefined} onClose={onClose}
+          onSave={saveAccountBook} disabled={isLoading || !canSave} />
       }
     />
   );

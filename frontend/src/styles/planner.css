@@ -83,7 +83,6 @@
   --dashboard-text: #000;
   --dashboard-muted: #000;
   --dashboard-row-line: #e9efeb;
-  --dashboard-row-hover: #f4f8f5;
   display: grid;
   gap: 12px;
   color: var(--dashboard-text);
@@ -182,7 +181,7 @@
 .dashboard-content-add { margin-top: auto; height: auto; padding: 12px; gap: 6px; }
 .dashboard-content-add input { flex: 1; min-width: 0; }
 .ledger-header { justify-content: space-between; gap: 8px; }
-.ledger-header .dashboard-header-right { text-align: right; }
+.ledger-header .dashboard-header-right { min-width: 0; text-align: right; overflow-wrap: anywhere; }
 .ledger-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); flex-shrink: 0; gap: 6px; margin: 10px 12px; }
 .ledger-summary > div { border-radius: var(--mapl-menu-radius); padding: 8px; background: #f1f5f2; }
 .ledger-summary dt { color: var(--dashboard-muted); font-size: 11px; font-weight: 650; }
@@ -202,7 +201,7 @@
 .ledger-row { row-gap: 2px; min-height: 42px; border-bottom: 1px solid var(--dashboard-row-line); font-size: 12px; }
 .ledger-row:hover, .dashboard-main-content li > div:hover, .dashboard-sub-content li > div:hover { background: var(--dashboard-row-hover); }
 .ledger-description, .ledger-category, .ledger-amount { overflow-wrap: anywhere; }
-.ledger-description { display: grid; gap: 3px; }
+.ledger-description { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3px; }
 .ledger-memo, .ledger-description > :first-child { font-size: 14px; font-weight: 600; line-height: 1.4; }
 .ledger-date, .ledger-description .text-xs {
   display: flex;
@@ -213,21 +212,31 @@
   line-height: 1.35;
 }
 .ledger-date > * { white-space: nowrap; }
-.bucket-quote :is(.text-gray-400, .text-gray-500, .text-gray-700),
-.ledger-chart-label { padding: 4px 0 2px 2px; color: #314139; font-size: 13px; font-weight: 600; }
+.bucket-quote :is(.text-gray-400, .text-gray-500, .text-gray-700) { padding: 4px 0 2px 2px; color: #314139; font-size: 13px; font-weight: 600; }
 .ledger-category { display: inline-block; max-width: 100%; padding: 3px 6px; border-radius: var(--mapl-control-radius); color: #203c33; font-size: 11px; }
 .ledger-amount { font-weight: 700; }
 .planner-row-actions { display: flex; justify-content: flex-end; gap: 4px; color: #52685e; }
 .planner-row-actions button { width: 24px; height: 24px; color: inherit; }
 .ledger-group, .ledger-empty { padding: 7px 12px; color: var(--dashboard-muted); font-size: 12px; }
 .ledger-group { background: #f5f8f6; }
-.ledger-empty { text-align: center; margin: 12px 0; }
+.ledger-list:has(> .ledger-empty) { display: grid; place-content: center; }
+.ledger-empty { text-align: center; }
+.planner-workspace[aria-busy=true] .ledger-empty { visibility: hidden; }
 .ledger-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--mapl-line); padding: 6px 12px; min-height: 38px; font-size: 12px; }
 .ledger-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 4px 10px 8px; }
 .ledger-chart-slot { height: clamp(138px, 17vw, 168px); }
-.ledger-chart-slot.text-gray-500 { color: var(--dashboard-muted); }
+.ledger-chart-empty { display: grid; place-content: center; text-align: center; color: var(--dashboard-muted); font-size: 12px; }
+.ledger-chart-categories > .ledger-chart-empty { height: 100%; }
 .ledger-chart-slot .recharts-surface { max-width: 100%; }
 .ledger-chart-panel { align-self: start; }
+.ledger-chart-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 12px 0; }
+.ledger-chart-scope { color: var(--dashboard-muted); font-size: 11px; }
+.ledger-chart-toolbar .ledger-filters { flex: none; }
+.ledger-chart-categories { overflow-y: auto; overscroll-behavior-y: contain; padding: 2px 4px; font-size: 12px; }
+.ledger-chart-categories:focus-visible { outline: 2px solid var(--mapl-focus); outline-offset: -2px; }
+.ledger-chart-categories li { display: grid; gap: 2px; padding: 5px 0; border-bottom: 1px solid var(--mapl-line); overflow-wrap: anywhere; }
+.ledger-chart-categories li > :last-child { color: var(--dashboard-muted); }
+.ledger-chart-categories i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; }
 .secondary-body:has(.bucket-quote-content) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .bucket-quote-content { display: flex; flex: 1; flex-direction: column; }
 .bucket-quote { margin-block: auto; }

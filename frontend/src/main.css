@@ -7,6 +7,7 @@
 }
 
 body {
+  --dashboard-row-hover: #f4f8f5;
   font-family: "Pretendard", "Noto Sans KR", sans-serif;
   font-weight: normal;
   font-size: 14px;

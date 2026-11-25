@@ -1,5 +1,7 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import AccountBookCategory from "../components/account-book-category/AccountBookCategory";
+import { UserContext } from "../context/UserContext";
 import { PasswordCheck } from "../components/user/PasswordCheck";
 import UserSidebar from "../components/user/UserSidebar";
 import { getSelectedItemByPath } from "../util/userUtil";
@@ -8,29 +10,25 @@ import { ProfileEdit } from "../components/user/ProfileEdit";
 export default function UserPage() {
   const pathName = useLocation().pathname;
   const selectedItem = getSelectedItemByPath(pathName);
+  const { user } = useContext(UserContext);
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="flex min-[900px] h-[900px] justify-center py-10 gap-5">
+    <div className="account-page mx-auto grid w-full max-w-[1200px] items-start gap-3 px-3 py-4 md:grid-cols-[190px_minmax(0,1fr)] md:gap-5 md:px-5 md:py-8 lg:grid-cols-[280px_minmax(0,1fr)]">
       <UserSidebar selectedItem={selectedItem} />
-      <div
-        className="w-[620px] h-fit px-5 rounded-xl"
-        style={{
-          boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <div className="pt-5 pb-3 text-2xl border-b border-mapl-slate">
-          {selectedItem.label}
-        </div>
-        <div className="py-3">
-          <Routes>
+      <div className="account-content min-w-0">
+        <Routes>
+          <Route path="accountbook/category" element={<AccountBookCategory />} />
+          <Route element={
+            <div className="account-profile account-surface w-full overflow-y-auto px-5 text-[#192123]">
+              <div className="border-b border-mapl-slate pt-5 pb-3 text-2xl">{selectedItem.label}</div>
+              <div className="py-3"><Outlet /></div>
+            </div>
+          }>
             <Route path="profile" element={<PasswordCheck />} />
             <Route path="profile/edit" element={<ProfileEdit />} />
-            <Route
-              path="accountbook/category"
-              element={<AccountBookCategory />}
-            />
-          </Routes>
-        </div>
+          </Route>
+        </Routes>
       </div>
     </div>
   );

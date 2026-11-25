@@ -17,12 +17,13 @@ async function getCategoriesByUser(req, res) {
 async function addAccountBookCategory(req, res) {
   const { name, type, colorId } = req.body;
   try {
-    await accountBookCategoryModel.addAccountBookCategory(
+    const category = await accountBookCategoryModel.addAccountBookCategory(
       req.user.id,
       name,
       type,
       colorId
     );
+    if (!category) return res.status(409).json({ message: "카테고리는 수입과 지출 각각 20개까지 추가할 수 있습니다." });
     return res
       .status(200)
       .json({ message: "가계부 카테고리가 추가되었습니다." });
