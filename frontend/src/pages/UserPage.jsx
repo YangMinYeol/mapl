@@ -7,6 +7,8 @@ import UserSidebar from "../components/user/UserSidebar";
 import { getSelectedItemByPath } from "../util/userUtil";
 import { ProfileEdit } from "../components/user/ProfileEdit";
 
+import "../styles/account-profile.css";
+
 export default function UserPage() {
   const pathName = useLocation().pathname;
   const selectedItem = getSelectedItemByPath(pathName);
@@ -20,9 +22,14 @@ export default function UserPage() {
         <Routes>
           <Route path="accountbook/category" element={<AccountBookCategory />} />
           <Route element={
-            <div className="account-profile account-surface w-full overflow-y-auto px-5 text-[#192123]">
-              <div className="border-b border-mapl-slate pt-5 pb-3 text-2xl">{selectedItem.label}</div>
-              <div className="py-3"><Outlet /></div>
+            <div className="account-profile account-main account-surface category-report">
+              <header className="category-report-heading">
+                <div className="category-heading-copy">
+                  <h1>회원정보</h1>
+                  <p>{pathName.endsWith("/edit") ? "계정 정보와 주소를 확인하고 수정할 수 있어요." : "회원정보를 수정하려면 현재 비밀번호를 입력해 주세요."}</p>
+                </div>
+              </header>
+              <Outlet />
             </div>
           }>
             <Route path="profile" element={<PasswordCheck />} />

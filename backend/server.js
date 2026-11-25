@@ -16,7 +16,20 @@ const path = require("path");
 const app = express();
 const port = 5000;
 
-app.use(cors());
+const authOrigins = new Set([
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://mapl.vercel.app",
+  ...(process.env.FRONTEND_ORIGINS || "").split(",").map((origin) => origin.trim()).filter(Boolean),
+]);
+const cookieRoutes = new Set(["/api/user/login", "/api/user/refresh", "/api/user/logout"]);
+app.use(cors((req, callback) => {
+  const origin = req.get("Origin");
+  const usesAuthCookie = cookieRoutes.has(req.path.replace(/\/$/, ""));
+  callback(null, usesAuthCookie
+    ? { origin: authOrigins.has(origin) ? origin : false, credentials: true }
+    : {});
+}));
 app.use(express.json());
 app.use(cookieParser());
 

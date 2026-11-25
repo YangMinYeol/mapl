@@ -1,0 +1,54 @@
+.login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 440px) minmax(0, 352px);
+  justify-content: center;
+  align-items: center;
+  gap: clamp(48px, calc(5vw + 20px), 68px);
+  min-height: 100dvh;
+  padding: 36px 20px;
+  background: var(--color-deep-green);
+}
+.login-book { display: grid; gap: 18px; color: #e1ece4; }
+@media (min-width: 768px) {
+  .login-book {
+    align-self: center;
+    gap: 16px;
+    min-width: 0;
+  }
+  .login-page { align-content: center; }
+}
+.login-book .mapl-logo { justify-self: start; }
+.login-book .mapl-logo .mapl-logo-name { font-size: 96px; }
+.login-index-month { padding-bottom: 8px; border-bottom: 1px solid #769087; font: italic 34px Georgia, serif; }
+.login-index-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; text-align: center; font-size: 14px; }
+.login-index-days span { padding: 5px 0; }
+.login-index-today { box-shadow: inset 0 0 0 1px #769087; border-radius: 4px; }
+.login-sheet { min-width: 0; padding: 26px 30px; border-radius: 8px; color: #163e34; background: #fff; box-shadow: 0 10px 35px #061e1b18; }
+.login-sheet h1 { margin: 0 0 18px; font-size: 19px; font-weight: 550; }
+.login-submit, .login-join, .login-social button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 40px;
+  font-size: 13px;
+}
+.login-join { margin-top: 7px; }
+.login-social { display: grid; gap: 7px; margin-top: 13px; padding-top: 14px; border-top: 1px solid #dfe5e0; }
+.login-social button { cursor: pointer; border-radius: var(--mapl-control-radius); }
+.login-social button:hover { filter: brightness(.97); }
+.login-kakao { color: #211e18; background: #fee500; }
+.login-kakao-icon { position: relative; width: 15px; height: 11px; border-radius: 50%; background: #201d18; }
+.login-kakao-icon::after { content: ""; position: absolute; left: 3px; bottom: -2px; width: 4px; height: 4px; background: inherit; transform: skew(-20deg); }
+.login-google { color: #303633; background: white; border: 1px solid #d5dad7; }
+.login-social button:focus-visible { outline: 2px solid var(--mapl-focus); outline-offset: 3px; }
+@media (max-width: 767px) {
+  .login-page { grid-template-columns: minmax(0, 352px); align-content: center; gap: 19px; padding: 26px 16px; }
+  .login-book { gap: 12px; }
+  .login-book .mapl-logo { justify-self: center; }
+  .login-book .mapl-logo .mapl-logo-name { font-size: 54px; }
+  .login-index-month { text-align: center; font-size: 18px; }
+  .login-index-days { display: none; }
+  .login-sheet { padding: 23px 20px; }
+}

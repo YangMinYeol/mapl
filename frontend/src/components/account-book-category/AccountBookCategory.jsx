@@ -116,7 +116,7 @@ export default function AccountBookCategory() {
   };
 
   return (
-    <main className="category-report account-surface"><div className="category-report-page">
+    <main className="category-report account-main account-surface"><div className="category-report-page">
       <header className="category-report-heading">
         <div className="category-heading-copy">
           <h1>카테고리</h1>

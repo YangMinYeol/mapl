@@ -60,6 +60,7 @@ export default function UserDropDown({ user, handleLogout }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  replace={Boolean(item.onClick)}
                   onClick={() => {
                     setOpen(false);
                     item.onClick?.();

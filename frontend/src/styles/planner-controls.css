@@ -61,6 +61,29 @@
   color: var(--mapl-ink);
 }
 .mapl-input[aria-invalid=true] { border-color: #b45858; }
+.mapl-field-error { color: #9b4043; font-size: 12px; word-break: keep-all; overflow-wrap: anywhere; }
+.mapl-floating-input > .mapl-field-error { margin-top: 5px; }
+.mapl-floating-label {
+  position: absolute;
+  top: 12px;
+  left: 9px;
+  transform: translateY(-50%);
+  color: var(--mapl-ink);
+  font-size: 11px;
+  line-height: 1.2;
+  transition: top 160ms ease, font-size 160ms ease;
+}
+.mapl-input:has(+ .mapl-floating-label):is(:focus, :not(:placeholder-shown)) {
+  padding-top: 18px;
+  padding-bottom: 3px;
+}
+.mapl-input:placeholder-shown:not(:focus) + .mapl-floating-label {
+  top: 50%;
+  font-size: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mapl-floating-label { transition: none; }
+}
 
 .mapl-tabs {
   display: inline-flex;

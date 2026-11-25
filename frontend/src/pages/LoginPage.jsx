@@ -1,33 +1,49 @@
-import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { waitForLogout } from "../api/auth";
 import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Logo from "../components/common/Logo";
 import { useModal } from "../context/ModalContext";
 import { UserContext } from "../context/UserContext";
-import { PrimaryButton } from "../components/common/PrimaryButton";
 import { useErrorHandler } from "../hooks/useErrorHandler";
+import "./login.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
+const monthFormatter = new Intl.DateTimeFormat("en", { month: "long", year: "numeric" });
+
+function MonthlyIndex() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const offset = new Date(year, month, 1).getDay();
+  const days = new Date(year, month + 1, 0).getDate();
+
+  return (
+    <div className="login-index" aria-hidden="true">
+      <div className="login-index-month">{monthFormatter.format(today)}</div>
+      <div className="login-index-days">
+        {Array.from("일월화수목금토", day => <span key={day}>{day}</span>)}
+        {Array.from({ length: offset }, (_, index) => <span key={`blank-${index}`} />)}
+        {Array.from({ length: days }, (_, index) => {
+          const day = index + 1;
+          return <span key={day} className={day === today.getDate() ? "login-index-today" : undefined}>{day}</span>;
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const { openModal } = useModal();
   const navigate = useNavigate();
-  const { setUser } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const handleError = useErrorHandler();
 
-  // 로그인 상태 확인
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    const storedUser = localStorage.getItem("user");
-
-    if (token && storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      openModal("이미 로그인 상태입니다.", () => navigate("/"));
-    }
-  }, [setUser, navigate]);
+  if (user && localStorage.getItem("accessToken")) {
+    return <Navigate to="/" replace />;
+  }
 
   // 유효성 검사 함수
   const validateInputs = (userId, password) => {
@@ -51,8 +67,10 @@ export default function LoginPage() {
     }
 
     try {
+      await waitForLogout();
       const response = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -68,37 +86,28 @@ export default function LoginPage() {
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (error) {
       handleError(error);
     }
   }
 
-  // Enter 키 이벤트 처리
-  function handleEnterKey(e) {
-    if (e.keyCode === 13) {
-      handleLogin();
-    }
-  }
-
-  // 회원가입 이동
-  function handleSignup() {
-    navigate("/signup");
-  }
-
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-deep-green py-6">
-      <div className="flex justify-center mb-6">
+    <main className="login-page">
+      <div className="login-book">
         <Logo withSubtitle />
+        <MonthlyIndex />
       </div>
-      <section className="p-10 bg-white border rounded-lg">
+      <section className="login-sheet" aria-labelledby="login-title">
+        <h1 id="login-title">로그인</h1>
+        <form onSubmit={(event) => { event.preventDefault(); handleLogin(); }}>
         <FloatingLabelInput
           id="userId"
           type="text"
           text="아이디"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          onKeyUp={handleEnterKey}
+          width="w-full"
         />
         <FloatingLabelInput
           id="password"
@@ -107,22 +116,21 @@ export default function LoginPage() {
           value={password}
           isPassword={true}
           onChange={(e) => setPassword(e.target.value)}
-          onKeyUp={handleEnterKey}
+          width="w-full"
         />
-        <div className="flex justify-end my-3">
-          {/* <Link to="/test">아이디 찾기</Link>
-          <span className="mx-2"> | </span>
-          <Link to="/test">비밀번호 찾기</Link> */}
-        </div>
-        <div className="flex flex-col">
-          <PrimaryButton text="로그인" onClick={handleLogin} />
-          <PrimaryButton
-            text="회원가입"
-            onClick={handleSignup}
-            isOutline={true}
-          />
+          <button className="mapl-button login-submit" type="submit">로그인</button>
+          <Link className="mapl-button mapl-button-outline login-join" to="/signup">회원가입</Link>
+        </form>
+        <div className="login-social" role="group" aria-label="소셜 로그인">
+          <button className="login-kakao" type="button" onClick={() => openModal("카카오 로그인은 준비 중이에요.")}>
+            <span className="login-kakao-icon" aria-hidden="true" />카카오 로그인
+          </button>
+          <button className="login-google" type="button" onClick={() => openModal("Google 로그인은 준비 중이에요.")}>
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_48dp.png" width="18" height="18" alt="" />
+            Google로 계속하기
+          </button>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

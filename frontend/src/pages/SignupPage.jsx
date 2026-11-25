@@ -1,12 +1,12 @@
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useState } from "react";
 import { useDaumPostcodePopup } from "react-daum-postcode";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { checkDuplicate } from "../api/user";
 import FloatingLabelInput from "../components/common/FloatingLabelInput";
 import Logo from "../components/common/Logo";
 import { PrimaryButton } from "../components/common/PrimaryButton";
+import { POSTCODE_SCRIPT_URL } from "../constants/postcode";
 import { useModal } from "../context/ModalContext";
-import { useErrorHandler } from "../hooks/useErrorHandler";
 import {
   EMAIL_REGEX,
   NAME_REGEX,
@@ -33,12 +33,33 @@ const initialState = Object.keys(fieldLabels).reduce(
 );
 
 const errorMessages = {
-  name: "이름은 2~5자이며 한글만 입력 가능합니다.",
-  userId: "영문자로 시작하는 숫자 포함 8~16자여야 합니다.",
-  password: "영문, 숫자, 특수문자를 포함하여 8~15자여야 합니다.",
-  passwordConfirm: "비밀번호가 일치하지 않습니다.",
-  email: "올바른 이메일 형식이 아닙니다.",
+  name: "한글 이름을 2~5자로 입력해 주세요.",
+  userId: "영문자로 시작하는 영문·숫자 8~16자를 입력해 주세요.",
+  password: "영문, 숫자, 특수문자를 포함해 8~15자로 입력해 주세요.",
+  passwordConfirm: "비밀번호가 일치하지 않아요.",
+  email: "name@example.com 형식으로 입력해 주세요.",
+  zipcode: "주소를 다시 검색해 선택해 주세요.",
 };
+
+const addressRequired = "우편번호 찾기에서 주소를 선택해 주세요.";
+const requiredMessages = {
+  name: "이름을 입력해 주세요.",
+  userId: "아이디를 입력해 주세요.",
+  password: "비밀번호를 입력해 주세요.",
+  passwordConfirm: "비밀번호를 한 번 더 입력해 주세요.",
+  email: "이메일을 입력해 주세요.",
+  zipcode: addressRequired,
+  address: addressRequired,
+};
+
+const formats = { name: NAME_REGEX, userId: USERID_REGEX, password: PASSWORD_REGEX, email: EMAIL_REGEX, zipcode: /^\d{5}$/ };
+
+function getFieldError(field, state, checkRequired = false) {
+  const value = state[field];
+  if (!value.trim()) return checkRequired ? requiredMessages[field] ?? "" : "";
+  if (field === "passwordConfirm") return value === state.password ? "" : errorMessages[field];
+  return formats[field] && !formats[field].test(value) ? errorMessages[field] : "";
+}
 
 function reducer(state, action) {
   switch (action.type) {
@@ -46,13 +67,19 @@ function reducer(state, action) {
       return {
         ...state,
         [action.field]: action.value,
-        errors: { ...state.errors, [action.field]: action.error || "" },
+        errors: {
+          ...state.errors,
+          [action.field]: "",
+          ...(action.field === "password" ? { passwordConfirm: "" } : {}),
+        },
       };
     case "SET_ERROR":
       return {
         ...state,
         errors: { ...state.errors, [action.field]: action.error },
       };
+    case "SET_ERRORS":
+      return { ...state, errors: action.errors };
     default:
       return state;
   }
@@ -60,107 +87,66 @@ function reducer(state, action) {
 
 export default function SignupPage() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitting = useRef(false);
   const { openModal } = useModal();
   const inputRefs = useRef({});
-  const open = useDaumPostcodePopup();
+  const open = useDaumPostcodePopup(POSTCODE_SCRIPT_URL);
   const navigate = useNavigate();
-  const handleError = useErrorHandler();
+  function handleChange({ target: { id, value } }) {
+    dispatch({ type: "SET_VALUE", field: id, value });
+    setFormError("");
+  }
 
-  function handleChange(e) {
-    const { id, value } = e.target;
-    let error = validateField(id, value);
-
-    if (id === "password") {
-      dispatch({ type: "SET_VALUE", field: id, value, error });
-      // 비밀번호 입력 시 비밀번호 확인과 비교하여 에러 처리
-      if (state.passwordConfirm) {
-        const confirmError =
-          value === state.passwordConfirm ? "" : errorMessages.passwordConfirm;
-        dispatch({
-          type: "SET_ERROR",
-          field: "passwordConfirm",
-          error: confirmError,
-        });
-      }
-    } else if (id === "passwordConfirm") {
-      // 비밀번호 확인이 비어있지 않을 때만 검증
-      const confirmError = value
-        ? value === state.password
-          ? ""
-          : errorMessages.passwordConfirm
-        : "";
-      dispatch({ type: "SET_VALUE", field: id, value, error: confirmError });
-    } else {
-      dispatch({ type: "SET_VALUE", field: id, value, error });
+  function handleBlur({ target: { id } }) {
+    const error = getFieldError(id, state);
+    if (error && !state.errors[id]) {
+      dispatch({ type: "SET_ERROR", field: id, error });
     }
   }
 
-  // 유효성 검사
-  function validateField(key, value) {
-    switch (key) {
-      case "name":
-        return NAME_REGEX.test(value) ? "" : errorMessages.name;
-      case "userId":
-        return USERID_REGEX.test(value) ? "" : errorMessages.userId;
-      case "password":
-        return PASSWORD_REGEX.test(value) ? "" : errorMessages.password;
-      case "passwordConfirm":
-        return value === state.password ? "" : errorMessages.passwordConfirm;
-      case "email":
-        return EMAIL_REGEX.test(value) ? "" : errorMessages.email;
-      default:
-        return "";
-    }
+  function showFieldErrors(errors) {
+    dispatch({ type: "SET_ERRORS", errors });
+    const firstError = Object.keys(fieldLabels).find(field => errors[field]);
+    inputRefs.current[firstError]?.focus();
   }
 
-  // 회원가입
-  async function handleSubmit() {
-    for (const key of Object.keys(fieldLabels)) {
-      if (key === "errors") continue;
-      const value = state[key];
-      const error = state.errors[key];
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (submitting.current) return;
+    setFormError("");
 
-      if ((!value || error) && key !== "detailAddress") {
-        openModal(`${fieldLabels[key].label}을(를) 다시 입력해주세요.`);
-        inputRefs.current[key].focus();
+    const errors = Object.fromEntries(
+      Object.keys(fieldLabels).map(field => [field, getFieldError(field, state, true)])
+    );
+    if (errors.zipcode) delete errors.address;
+    if (Object.values(errors).some(Boolean)) {
+      showFieldErrors(errors);
+      return;
+    }
+
+    dispatch({ type: "SET_ERRORS", errors: {} });
+    submitting.current = true;
+    setIsSubmitting(true);
+    let completed = false;
+    try {
+      const [idCheck, emailCheck] = await Promise.all([
+        checkDuplicate("userId", state.userId),
+        checkDuplicate("email", state.email),
+      ]);
+      const duplicateErrors = {};
+      if (idCheck.isDuplicate) duplicateErrors.userId = "이미 사용 중인 아이디예요.";
+      if (emailCheck.isDuplicate) duplicateErrors.email = "이미 사용 중인 이메일이에요.";
+      if (Object.keys(duplicateErrors).length) {
+        showFieldErrors(duplicateErrors);
         return;
       }
-    }
+      if (idCheck.error || emailCheck.error) {
+        setFormError("중복 확인을 완료하지 못했어요. 다시 시도해 주세요.");
+        return;
+      }
 
-    // 아이디와 이메일 중복 검사 동시 실행
-    const [
-      { isDuplicate: isUserIdDuplicate, error: userIdError },
-      { isDuplicate: isEmailDuplicate, error: emailError },
-    ] = await Promise.all([
-      checkDuplicate("userId", state.userId),
-      checkDuplicate("email", state.email),
-    ]);
-
-    // 중복된 경우 에러 메시지 표시 및 포커스 이동
-    if (isUserIdDuplicate) {
-      openModal("이미 사용 중인 아이디입니다.");
-      inputRefs.current.userId.focus();
-      return;
-    }
-    if (isEmailDuplicate) {
-      openModal("이미 사용 중인 이메일입니다.");
-      inputRefs.current.email.focus();
-      return;
-    }
-
-    // 중복 확인 중 에러 발생 시 처리
-    if (userIdError || emailError) {
-      openModal(userIdError || emailError);
-      return;
-    }
-
-    // 회원가입 요청
-    sendSignupData();
-  }
-
-  // 회원가입 요청
-  async function sendSignupData() {
-    try {
       const response = await fetch(`${API_URL}/api/user/signup`, {
         method: "POST",
         headers: {
@@ -176,58 +162,64 @@ export default function SignupPage() {
           detailAddress: state.detailAddress,
         }),
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
-      }
+      if (!response.ok) throw new Error("Signup failed");
+      completed = true;
       openModal("회원가입이 완료되었습니다!");
       setTimeout(() => {
         navigate("/login");
       }, 1000);
-    } catch (error) {
-      handleError(error);
+    } catch {
+      setFormError("회원가입을 완료하지 못했어요. 다시 시도해 주세요.");
+    } finally {
+      if (!completed) {
+        submitting.current = false;
+        setIsSubmitting(false);
+      }
     }
   }
 
   // 우편번호 찾기
   function handleAddressSearch() {
+    setFormError("");
     open({
       onComplete: (data) => {
+        if (submitting.current) return;
         dispatch({ type: "SET_VALUE", field: "zipcode", value: data.zonecode });
         dispatch({ type: "SET_VALUE", field: "address", value: data.address });
       },
-      onError: (error) => console.error("Daum Postcode API Error:", error),
+      onError: () => setFormError("주소 검색을 열 수 없어요. 다시 시도해 주세요."),
     });
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-deep-green py-6">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-deep-green px-4 py-6">
       <div className="flex justify-center mb-6">
         <Logo withSubtitle />
       </div>
-      <section className="p-10 bg-white border rounded-lg">
-        <div className="text-right">
-          <span>*필수입력사항</span>
-        </div>
+      <form className="w-full max-w-[466px] rounded-lg border bg-white p-5 sm:p-10" aria-label="회원가입" onSubmit={handleSubmit}>
         {Object.keys(fieldLabels).map((key) => {
           const { label, hasButton, required } = fieldLabels[key];
           if (hasButton) {
             return (
-              <div className={"flex justify-between"} key={key}>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3" key={key}>
                 <FloatingLabelInput
                   id={key}
                   type="text"
-                  text={`${label}*`}
+                  text={label}
+                  required={required}
                   value={state[key]}
                   onChange={handleChange}
+                  onBlur={handleBlur}
+                  readOnly={isSubmitting}
                   error={state.errors[key]}
-                  width="w-64"
+                  width="w-full"
                   ref={(el) => (inputRefs.current[key] = el)}
                 />
                 <PrimaryButton
                   text="우편번호 찾기"
-                  width="w-32"
+                  width="px-3 whitespace-nowrap sm:w-32"
                   onClick={handleAddressSearch}
+                  disabled={isSubmitting}
                 />
               </div>
             );
@@ -237,9 +229,13 @@ export default function SignupPage() {
                 <FloatingLabelInput
                   id={key}
                   type={key.includes("password") ? "password" : "text"}
-                  text={required ? `${label}*` : label}
+                  text={required ? label : `${label} (선택)`}
+                  required={required}
+                  width="w-full"
                   value={state[key]}
                   onChange={handleChange}
+                  onBlur={handleBlur}
+                  readOnly={isSubmitting}
                   error={state.errors[key]}
                   ref={(el) => (inputRefs.current[key] = el)}
                   isPassword={key.includes("password")}
@@ -248,8 +244,12 @@ export default function SignupPage() {
             );
           }
         })}
-        <PrimaryButton text="회원가입" onClick={handleSubmit} />
-      </section>
+        {formError && <p role="alert" className="mapl-field-error mb-3">{formError}</p>}
+        <PrimaryButton text={isSubmitting ? "가입 처리 중" : "회원가입"} width="w-full" type="submit" disabled={isSubmitting} />
+        <Link to="/login" className="mapl-button mapl-button-outline flex h-12 w-full items-center justify-center">
+          로그인으로 돌아가기
+        </Link>
+      </form>
     </div>
   );
 }
