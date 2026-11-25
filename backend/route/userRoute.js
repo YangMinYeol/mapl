@@ -15,6 +15,11 @@ router.post("/check-duplicate", userController.checkUserIdOrEmail);
 // 리프레시 토큰 갱신
 router.post("/refresh", userController.refreshToken);
 
+router.post("/logout", (_req, res) => {
+  res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None", path: "/" });
+  res.sendStatus(204);
+});
+
 // 비밀번호 검증
 router.post("/verify-password", verifyToken, userController.verifyPassword);
 

@@ -2,26 +2,67 @@ import { LoginExpiredError } from "../util/error";
 import { ERROR_TYPE } from "../util/errorType";
 
 const API_URL = import.meta.env.VITE_API_URL;
+export const SESSION_EXPIRED_EVENT = "mapl:session-expired";
+let session = new AbortController();
+let pendingRefresh;
+let pendingLogout;
+
+export function resetAuthRequests() {
+  session.abort();
+  session = new AbortController();
+  pendingRefresh = undefined;
+}
+
+export function clearRefreshCookie() {
+  pendingLogout = fetch(`${API_URL}/api/user/logout`, { method: "POST", credentials: "include" })
+    .catch((error) => console.warn("로그아웃 요청 실패", error));
+}
+
+export async function waitForLogout() {
+  await pendingLogout;
+}
 
 // 인증 토큰을 포함하여 API 요청을 보내고, 필요 시 토큰을 갱신하여 재요청합니다.
 export async function fetchWithAuth(url, options = {}) {
+  const sessionSignal = session.signal;
+  const signal = options.signal ? AbortSignal.any([options.signal, sessionSignal]) : sessionSignal;
   const accessToken = localStorage.getItem("accessToken");
-  let response = await fetchWithToken(url, options, accessToken);
+  let response = await fetchWithToken(url, { ...options, signal }, accessToken);
 
   if (response.status !== 401) return response;
 
   const data = await parseJsonSafely(response);
+  sessionSignal.throwIfAborted();
 
   if (!isRetryableError(response, data)) return response;
 
-  try {
-    const newAccessToken = await refreshAccessToken();
-    response = await fetchWithToken(url, options, newAccessToken);
-  } catch {
-    throw new LoginExpiredError();
+  let newAccessToken = localStorage.getItem("accessToken");
+  if (!newAccessToken || newAccessToken === accessToken) {
+    pendingRefresh ??= refreshAccessToken(sessionSignal).finally(() => {
+      if (!sessionSignal.aborted) pendingRefresh = undefined;
+    });
+    try {
+      newAccessToken = await pendingRefresh;
+    } catch (error) {
+      sessionSignal.throwIfAborted();
+      if (error instanceof LoginExpiredError) expireSession();
+      throw error;
+    }
   }
 
+  response = await fetchWithToken(url, { ...options, signal }, newAccessToken);
+  if (response.status === 401 && isRetryableError(response, await parseJsonSafely(response))) {
+    sessionSignal.throwIfAborted();
+    expireSession();
+    throw new LoginExpiredError();
+  }
   return response;
+}
+
+function expireSession() {
+  if (session.signal.aborted) return;
+  session.abort();
+  window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
 }
 
 // 주어진 토큰을 Authorization 헤더에 포함하여 fetch 요청을 보냅니다.
@@ -30,7 +71,7 @@ function fetchWithToken(url, options, token) {
     ...options,
     headers: {
       ...options.headers,
-      Authorization: `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 }
@@ -50,22 +91,18 @@ async function parseJsonSafely(response) {
 }
 
 // 리프레시 토큰을 사용해 새로운 액세스 토큰을 발급받고 로컬스토리지에 저장합니다.
-async function refreshAccessToken() {
-  try {
-    const response = await fetch(`${API_URL}/api/user/refresh`, {
-      method: "POST",
-      credentials: "include",
-    });
+async function refreshAccessToken(signal) {
+  const response = await fetch(`${API_URL}/api/user/refresh`, {
+    method: "POST",
+    credentials: "include",
+    signal,
+  });
 
-    if (!response.ok) {
-      throw new Error("리프레시 토큰이 유효하지 않습니다.");
-    }
+  if (response.status === 401 || response.status === 403) throw new LoginExpiredError();
+  if (!response.ok) throw new Error("로그인 상태를 확인하지 못했어요. 다시 시도해 주세요.");
 
-    const { accessToken } = await response.json();
-    localStorage.setItem("accessToken", accessToken);
-    return accessToken;
-  } catch (error) {
-    console.error("리프레시 토큰 갱신 실패:", error);
-    throw new LoginExpiredError();
-  }
+  const { accessToken } = await response.json();
+  signal.throwIfAborted();
+  localStorage.setItem("accessToken", accessToken);
+  return accessToken;
 }
